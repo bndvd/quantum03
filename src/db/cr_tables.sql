@@ -1,24 +1,25 @@
-CREATE TABLE `quantum`.`transaction` (
-  `tranId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `secId` INT UNSIGNED NOT NULL,
-  `userId` INT UNSIGNED NOT NULL,
-  `tranDate` DATE NOT NULL,
+CREATE DATABASE IF NOT EXISTS `quantum`;
+
+CREATE TABLE IF NOT EXISTS `quantum`.`transaction` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `sec_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `tran_date` DATE NOT NULL,
   `type` VARCHAR(3) NOT NULL,
   `shares` DOUBLE NOT NULL,
   `price` DOUBLE NOT NULL,
-  PRIMARY KEY (`tranId`),
-  UNIQUE INDEX `tranId_UNIQUE` (`tranId` ASC));
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
 
-CREATE TABLE `quantum`.`security` (
-  `secId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `basketId` INT UNSIGNED NOT NULL,
+CREATE TABLE IF NOT EXISTS `quantum`.`security` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `basket_id` INT UNSIGNED NOT NULL,
   `symbol` VARCHAR(64) NOT NULL,
-  PRIMARY KEY (`secId`),
-  UNIQUE INDEX `secId_UNIQUE` (`secId` ASC));
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
 
-CREATE TABLE `quantum`.`basket` (
-  `basketId` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `quantum`.`basket` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(64) NOT NULL,
-  PRIMARY KEY (`basketId`),
-  UNIQUE INDEX `basketId_UNIQUE` (`basketId` ASC));
-
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));

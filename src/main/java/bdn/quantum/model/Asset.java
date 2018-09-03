@@ -2,13 +2,10 @@ package bdn.quantum.model;
 
 import java.util.List;
 
-import javax.persistence.Entity;
-
 //
 // Asset is a rough representation of a Basket, and is a grouping of one or more Positions that 
 // represent the same underlying asset (e.g., an index fund and an ETF of the same asset)
 //
-@Entity
 public class Asset {
 
 	private Integer basketId;

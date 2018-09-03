@@ -64,7 +64,7 @@ public class AssetServiceImpl implements AssetService {
 
 		List<BasketEntity> baskets = basketRepository.getBaskets();
 		for (BasketEntity b : baskets) {
-			Integer basketId = b.getBasketId();
+			Integer basketId = b.getId();
 			String basketName = b.getName();
 			Double principal = 0.0;
 			Double value = 0.0;
@@ -93,7 +93,7 @@ public class AssetServiceImpl implements AssetService {
 
 		List<SecurityEntity> securities = securityRepository.getSecurities(basketId);
 		for (SecurityEntity s : securities) {
-			Integer secId = s.getSecId();
+			Integer secId = s.getId();
 			String symbol = s.getSymbol();
 			Double principal = 0.0;
 			Double shares = 0.0;

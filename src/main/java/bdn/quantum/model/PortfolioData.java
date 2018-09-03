@@ -3,9 +3,6 @@ package bdn.quantum.model;
 import java.sql.Date;
 import java.util.List;
 
-import javax.persistence.Entity;
-
-@Entity
 public class PortfolioData {
 
 	private String version = "1.0";

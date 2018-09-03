@@ -1,31 +1,35 @@
 package bdn.quantum.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="basket")
 public class BasketEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer basketId;
+	private Integer id;
+	@Column(name = "name")
 	private String name;
 
 	public BasketEntity() {}
 	
-	public BasketEntity(Integer basketId, String name) {
-		this.basketId = basketId;
+	public BasketEntity(Integer id, String name) {
+		this.id = id;
 		this.name = name;
 	}
 	
-	public Integer getBasketId() {
-		return basketId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setBasketId(Integer basketId) {
-		this.basketId = basketId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -39,7 +43,7 @@ public class BasketEntity {
 	@Override
 	public String toString() {
 		StringBuffer strBuf = new StringBuffer();
-		strBuf.append("BasketId:").append(basketId);
+		strBuf.append("Id:").append(id);
 		strBuf.append(" Name:").append(name);
 		return strBuf.toString();
 	}

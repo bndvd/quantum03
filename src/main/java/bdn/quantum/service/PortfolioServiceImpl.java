@@ -26,7 +26,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 		List<TranEntity> tranEntities = new ArrayList<TranEntity>();
 		
 		for (SecurityEntity s : securityEntities) {
-			List<TranEntity> tList = transactionService.getTransactions(s.getSecId());
+			List<TranEntity> tList = transactionService.getTransactions(s.getId());
 			tranEntities.addAll(tList);
 		}
 		

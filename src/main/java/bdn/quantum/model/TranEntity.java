@@ -2,28 +2,37 @@ package bdn.quantum.model;
 
 import java.sql.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="transaction")
 public class TranEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer tranId;
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Integer id;
+	@Column(name = "secId")
 	private Integer secId;
+	@Column(name = "userId")
 	private Integer userId;
+	@Column(name = "tranDate")
 	private Date tranDate;
+	@Column(name = "type")
 	private String type;
+	@Column(name = "shares")
 	private Double shares;
+	@Column(name = "price")
 	private Double price;
 
 	public TranEntity() {
 	}
 
-	public TranEntity(Integer tranId, Integer secId, Integer userId, Date tranDate, String type, Double shares, Double price) {
-		this.tranId = tranId;
+	public TranEntity(Integer id, Integer secId, Integer userId, Date tranDate, String type, Double shares, Double price) {
+		this.id = id;
 		this.secId = secId;
 		this.userId = userId;
 		this.tranDate = tranDate;
@@ -32,12 +41,12 @@ public class TranEntity {
 		this.price = price;
 	}
 
-	public Integer getTranId() {
-		return tranId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setTranId(Integer tranId) {
-		this.tranId = tranId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public Integer getSecId() {
@@ -91,8 +100,8 @@ public class TranEntity {
 	@Override
 	public String toString() {
 		StringBuffer strBuf = new StringBuffer();
-		strBuf.append("TranId:");
-		strBuf.append(tranId);
+		strBuf.append("Id:");
+		strBuf.append(id);
 		strBuf.append(", SecId:");
 		strBuf.append(secId);
 		strBuf.append(", Type:");

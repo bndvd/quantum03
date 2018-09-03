@@ -1,33 +1,38 @@
 package bdn.quantum.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="security")
 public class SecurityEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer secId;
+	private Integer id;
+	@Column(name = "basketId")
 	private Integer basketId;
+	@Column(name = "symbol")
 	private String symbol;
 	
 	public SecurityEntity() {}
 	
-	public SecurityEntity(Integer secId, Integer basketId, String symbol) {
-		this.secId = secId;
+	public SecurityEntity(Integer id, Integer basketId, String symbol) {
+		this.id = id;
 		this.basketId = basketId;
 		this.symbol = symbol;
 	}
 
-	public Integer getSecId() {
-		return secId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setSecId(Integer secId) {
-		this.secId = secId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public Integer getBasketId() {
@@ -49,7 +54,7 @@ public class SecurityEntity {
 	@Override
 	public String toString() {
 		StringBuffer strBuf = new StringBuffer();
-		strBuf.append("SecId:").append(secId);
+		strBuf.append("Id:").append(id);
 		strBuf.append(" BasketId:").append(basketId);
 		strBuf.append(" Symbol:").append(symbol);
 		return strBuf.toString();
