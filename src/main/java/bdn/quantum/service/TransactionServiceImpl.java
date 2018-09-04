@@ -1,6 +1,6 @@
 package bdn.quantum.service;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,18 +15,21 @@ public class TransactionServiceImpl implements TransactionService {
 	private TransactionRepository transactionRepository;
 	
 	@Override
-	public List<TranEntity> getTransactions(Integer secId) {
-		return transactionRepository.getTransactions(secId);
+	public Iterable<TranEntity> getTransactionsForSecurity(Integer secId) {
+		return transactionRepository.findBySecId(secId);
 	}
 
 	@Override
-	public TranEntity getTransaction(Integer tranId) {
-		return transactionRepository.getTransaction(tranId);
+	public TranEntity getTransaction(Integer id) {
+		Optional<TranEntity> t = transactionRepository.findById(id);
+		
+		TranEntity result = t.get();
+		return result;
 	}
 
 	@Override
 	public TranEntity createTransaction(TranEntity transaction) {
-		return transactionRepository.createTransaction(transaction);
+		return transactionRepository.save(transaction);
 	}
 
 }

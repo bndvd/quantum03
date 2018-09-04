@@ -7,14 +7,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import bdn.quantum.QuantumConstants;
+
 @Entity
-@Table(name="basket")
+@Table(name=QuantumConstants.TABLE_BASKET)
 public class BasketEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
-	@Column(name = "name")
+	@Column(name = QuantumConstants.BASKET_NAME)
 	private String name;
 
 	public BasketEntity() {}

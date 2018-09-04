@@ -1,13 +1,11 @@
 package bdn.quantum.repository;
 
-import java.util.List;
+import org.springframework.data.repository.CrudRepository;
 
 import bdn.quantum.model.TranEntity;
 
-public interface TransactionRepository {
+public interface TransactionRepository extends CrudRepository<TranEntity, Integer> {
 
-	List<TranEntity> getTransactions(Integer secId);
-	TranEntity createTransaction(TranEntity transaction);
-	TranEntity getTransaction(Integer tranId);
+	Iterable<TranEntity> findBySecId(Integer secId);
 	
 }

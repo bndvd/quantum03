@@ -1,13 +1,9 @@
 package bdn.quantum.repository;
 
-import java.util.List;
+import org.springframework.data.repository.CrudRepository;
 
 import bdn.quantum.model.BasketEntity;
 
-public interface BasketRepository {
-
-	List<BasketEntity> getBaskets();
-	BasketEntity createBasket(BasketEntity basket);
-	void deleteBasket(Integer basketId);
+public interface BasketRepository extends CrudRepository<BasketEntity, Integer> {
 	
 }

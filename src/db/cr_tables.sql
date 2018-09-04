@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `quantum`.`transaction` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `sec_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
-  `tran_date` DATE NOT NULL,
+  `tran_date` DATETIME NOT NULL,
   `type` VARCHAR(3) NOT NULL,
   `shares` DOUBLE NOT NULL,
   `price` DOUBLE NOT NULL,

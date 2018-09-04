@@ -1,14 +1,11 @@
 package bdn.quantum.repository;
 
-import java.util.List;
+import org.springframework.data.repository.CrudRepository;
 
 import bdn.quantum.model.SecurityEntity;
 
-public interface SecurityRepository {
+public interface SecurityRepository extends CrudRepository<SecurityEntity, Integer> {
 
-	List<SecurityEntity> getSecurities();
-	List<SecurityEntity> getSecurities(Integer basketId);
-	SecurityEntity createSecurity(SecurityEntity security);
-	void deleteSecurity(Integer secId);
+	Iterable<SecurityEntity> findByBasketId(Integer basketId);
 	
 }

@@ -1,6 +1,6 @@
 package bdn.quantum.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,24 +8,29 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import bdn.quantum.QuantumConstants;
 
 @Entity
-@Table(name="transaction")
+@Table(name=QuantumConstants.TABLE_TRANSACTION)
 public class TranEntity {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
-	@Column(name = "secId")
+	@Column(name = QuantumConstants.TRANSACTION_SEC_ID)
 	private Integer secId;
-	@Column(name = "userId")
+	@Column(name = QuantumConstants.TRANSACTION_USER_ID)
 	private Integer userId;
-	@Column(name = "tranDate")
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date tranDate;
-	@Column(name = "type")
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_TYPE)
 	private String type;
-	@Column(name = "shares")
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_SHARES)
 	private Double shares;
-	@Column(name = "price")
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_PRICE)
 	private Double price;
 
 	public TranEntity() {

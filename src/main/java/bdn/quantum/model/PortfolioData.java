@@ -1,19 +1,18 @@
 package bdn.quantum.model;
 
-import java.sql.Date;
-import java.util.List;
+import java.util.Date;
 
 public class PortfolioData {
 
 	private String version = "1.0";
 	private Date lastDate = new Date(0);
-	private List<BasketEntity> basketEntities;
-	private List<SecurityEntity> securityEntities;
-	private List<TranEntity> tranEntities;
+	private Iterable<BasketEntity> basketEntities;
+	private Iterable<SecurityEntity> securityEntities;
+	private Iterable<TranEntity> tranEntities;
 	
 	public PortfolioData() {}
 	
-	public PortfolioData(List<BasketEntity> basketEntities, List<SecurityEntity> securityEntities, List<TranEntity> tranEntities) {
+	public PortfolioData(Iterable<BasketEntity> basketEntities, Iterable<SecurityEntity> securityEntities, Iterable<TranEntity> tranEntities) {
 		setBasketEntities(basketEntities);
 		setSecurityEntities(securityEntities);
 		setTranEntities(tranEntities);
@@ -35,27 +34,27 @@ public class PortfolioData {
 		this.lastDate = lastDate;
 	}
 
-	public List<BasketEntity> getBasketEntities() {
+	public Iterable<BasketEntity> getBasketEntities() {
 		return basketEntities;
 	}
 
-	public void setBasketEntities(List<BasketEntity> basketEntities) {
+	public void setBasketEntities(Iterable<BasketEntity> basketEntities) {
 		this.basketEntities = basketEntities;
 	}
 
-	public List<SecurityEntity> getSecurityEntities() {
+	public Iterable<SecurityEntity> getSecurityEntities() {
 		return securityEntities;
 	}
 
-	public void setSecurityEntities(List<SecurityEntity> securityEntities) {
+	public void setSecurityEntities(Iterable<SecurityEntity> securityEntities) {
 		this.securityEntities = securityEntities;
 	}
 
-	public List<TranEntity> getTranEntities() {
+	public Iterable<TranEntity> getTranEntities() {
 		return tranEntities;
 	}
 
-	public void setTranEntities(List<TranEntity> tranEntities) {
+	public void setTranEntities(Iterable<TranEntity> tranEntities) {
 		this.tranEntities = tranEntities;
 		computeLastDate();
 	}

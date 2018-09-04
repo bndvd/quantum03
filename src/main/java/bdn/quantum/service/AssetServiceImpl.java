@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
@@ -16,7 +17,6 @@ import bdn.quantum.model.util.TranEntryComparator;
 import bdn.quantum.repository.BasketRepository;
 import bdn.quantum.repository.SecurityRepository;
 import bdn.quantum.repository.TransactionRepository;
-import bdn.quantum.util.PortfolioConstants;
 
 @Service("assetService")
 public class AssetServiceImpl implements AssetService {
@@ -34,35 +34,35 @@ public class AssetServiceImpl implements AssetService {
 	PositionComparator positionComparator;
 
 	@Override
-	public List<BasketEntity> getBaskets() {
-		return basketRepository.getBaskets();
+	public Iterable<BasketEntity> getBaskets() {
+		return basketRepository.findAll();
 	}
 
 	@Override
 	public BasketEntity createBasket(BasketEntity basket) {
-		return basketRepository.createBasket(basket);
+		return basketRepository.save(basket);
 	}
 
 	@Override
-	public List<SecurityEntity> getSecurities() {
-		return securityRepository.getSecurities();
+	public Iterable<SecurityEntity> getSecurities() {
+		return securityRepository.findAll();
 	}
 
 	@Override
-	public List<SecurityEntity> getSecurities(Integer basketId) {
-		return securityRepository.getSecurities(basketId);
+	public Iterable<SecurityEntity> getSecuritiesInBasket(Integer basketId) {
+		return securityRepository.findByBasketId(basketId);
 	}
 
 	@Override
 	public SecurityEntity createSecurity(SecurityEntity security) {
-		return securityRepository.createSecurity(security);
+		return securityRepository.save(security);
 	}
 
 	@Override
-	public List<Asset> getAssets() {
+	public Iterable<Asset> getAssets() {
 		List<Asset> result = new ArrayList<>();
 
-		List<BasketEntity> baskets = basketRepository.getBaskets();
+		Iterable<BasketEntity> baskets = basketRepository.findAll();
 		for (BasketEntity b : baskets) {
 			Integer basketId = b.getId();
 			String basketName = b.getName();
@@ -70,7 +70,9 @@ public class AssetServiceImpl implements AssetService {
 			Double value = 0.0;
 			Double realizedProfit = 0.0;
 
-			List<Position> positions = getPositions(basketId);
+			Iterable<Position> positionIter = getPositions(basketId);
+			List<Position> positions = new ArrayList<>();
+			positionIter.forEach(positions::add);
 			positions.sort(positionComparator);
 
 			for (Position p : positions) {
@@ -88,10 +90,10 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public List<Position> getPositions(Integer basketId) {
+	public Iterable<Position> getPositions(Integer basketId) {
 		List<Position> result = new ArrayList<>();
 
-		List<SecurityEntity> securities = securityRepository.getSecurities(basketId);
+		Iterable<SecurityEntity> securities = securityRepository.findByBasketId(basketId);
 		for (SecurityEntity s : securities) {
 			Integer secId = s.getId();
 			String symbol = s.getSymbol();
@@ -101,16 +103,18 @@ public class AssetServiceImpl implements AssetService {
 			// TODO get price from public service
 			Double price = -1.0;
 
-			List<TranEntity> transactions = transactionRepository.getTransactions(secId);
+			Iterable<TranEntity> tranIter = transactionRepository.findBySecId(secId);
+			List<TranEntity> transactions = new ArrayList<>();
+			tranIter.forEach(transactions::add);
 			transactions.sort(transactionComparator);
 			for (TranEntity t : transactions) {
-				if (t.getType().equals(PortfolioConstants.TYPE_BUY)) {
+				if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
 					principal += (t.getPrice() * t.getShares());
 					shares += t.getShares();
 				}
 				// using Average Cost Basis for computing cost/profit and deducting from
 				// principal
-				else if (t.getType().equals(PortfolioConstants.TYPE_SELL)) {
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
 					Double averageCostPerShare = principal / shares;
 					Double costOfSharesSold = t.getShares() * averageCostPerShare;
 					realizedProfit += (t.getPrice() * t.getShares()) - costOfSharesSold;
@@ -118,7 +122,7 @@ public class AssetServiceImpl implements AssetService {
 					principal -= costOfSharesSold;
 					shares -= t.getShares();
 				}
-				else if (t.getType().equals(PortfolioConstants.TYPE_DIVIDEND)) {
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
 					realizedProfit += t.getPrice() * t.getShares();
 				}
 			}

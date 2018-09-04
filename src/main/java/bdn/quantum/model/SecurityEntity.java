@@ -7,16 +7,18 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import bdn.quantum.QuantumConstants;
+
 @Entity
-@Table(name="security")
+@Table(name=QuantumConstants.TABLE_SECURITY)
 public class SecurityEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
-	@Column(name = "basketId")
+	@Column(name = QuantumConstants.SECURITY_BASKET_ID)
 	private Integer basketId;
-	@Column(name = "symbol")
+	@Column(name = QuantumConstants.SECURITY_SYMBOL)
 	private String symbol;
 	
 	public SecurityEntity() {}

@@ -21,16 +21,18 @@ public class PortfolioServiceImpl implements PortfolioService {
 	
 	@Override
 	public PortfolioData getPortfolioData() {
-		List<BasketEntity> basketEntities = assetService.getBaskets();
-		List<SecurityEntity> securityEntities = assetService.getSecurities();
+		Iterable<BasketEntity> basketIter = assetService.getBaskets();
+		Iterable<SecurityEntity> securityIter = assetService.getSecurities();
 		List<TranEntity> tranEntities = new ArrayList<TranEntity>();
 		
-		for (SecurityEntity s : securityEntities) {
-			List<TranEntity> tList = transactionService.getTransactions(s.getId());
-			tranEntities.addAll(tList);
+		for (SecurityEntity s : securityIter) {
+			Iterable<TranEntity> tIter = transactionService.getTransactionsForSecurity(s.getId());
+			for (TranEntity t : tIter) {
+				tranEntities.add(t);
+			}
 		}
 		
-		PortfolioData result = new PortfolioData(basketEntities, securityEntities, tranEntities);
+		PortfolioData result = new PortfolioData(basketIter, securityIter, tranEntities);
 		return result;
 	}
 
