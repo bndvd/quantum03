@@ -1,5 +1,6 @@
 package bdn.quantum.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 //
@@ -10,14 +11,14 @@ public class Asset {
 
 	private Integer basketId;
 	private String basketName;
-	private Double principal;
-	private Double value;
-	private Double realizedProfit;
+	private BigDecimal principal;
+	private BigDecimal value;
+	private BigDecimal realizedProfit;
 	private List<Position> positions;
 
 	public Asset() {}
 	
-	public Asset(Integer basketId, String basketName, Double principal, Double value, Double realizedProfit, List<Position> positions) {
+	public Asset(Integer basketId, String basketName, BigDecimal principal, BigDecimal value, BigDecimal realizedProfit, List<Position> positions) {
 		this.basketId = basketId;
 		this.basketName = basketName;
 		this.principal = principal;
@@ -42,27 +43,27 @@ public class Asset {
 		this.basketName = basketName;
 	}
 
-	public Double getPrincipal() {
+	public BigDecimal getPrincipal() {
 		return principal;
 	}
 
-	public void setPrincipal(Double principal) {
+	public void setPrincipal(BigDecimal principal) {
 		this.principal = principal;
 	}
 
-	public Double getValue() {
+	public BigDecimal getValue() {
 		return value;
 	}
 
-	public void setValue(Double value) {
+	public void setValue(BigDecimal value) {
 		this.value = value;
 	}
 
-	public Double getRealizedProfit() {
+	public BigDecimal getRealizedProfit() {
 		return realizedProfit;
 	}
 
-	public void setRealizedProfit(Double realizedProfit) {
+	public void setRealizedProfit(BigDecimal realizedProfit) {
 		this.realizedProfit = realizedProfit;
 	}
 

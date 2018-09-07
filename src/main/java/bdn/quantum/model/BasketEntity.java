@@ -16,6 +16,7 @@ public class BasketEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
+	
 	@Column(name = QuantumConstants.BASKET_NAME)
 	private String name;
 

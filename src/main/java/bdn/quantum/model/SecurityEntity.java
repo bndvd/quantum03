@@ -16,10 +16,13 @@ public class SecurityEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
+	
 	@Column(name = QuantumConstants.SECURITY_BASKET_ID)
 	private Integer basketId;
+	
 	@Column(name = QuantumConstants.SECURITY_SYMBOL)
 	private String symbol;
+	
 	
 	public SecurityEntity() {}
 	

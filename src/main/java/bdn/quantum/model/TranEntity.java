@@ -1,5 +1,6 @@
 package bdn.quantum.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,29 +15,41 @@ import javax.persistence.TemporalType;
 import bdn.quantum.QuantumConstants;
 
 @Entity
-@Table(name=QuantumConstants.TABLE_TRANSACTION)
+@Table(name = QuantumConstants.TABLE_TRANSACTION)
 public class TranEntity {
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
+
 	@Column(name = QuantumConstants.TRANSACTION_SEC_ID)
 	private Integer secId;
+
 	@Column(name = QuantumConstants.TRANSACTION_USER_ID)
 	private Integer userId;
+
 	@Column(name = QuantumConstants.TRANSACTION_TRAN_DATE)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date tranDate;
+
 	@Column(name = QuantumConstants.TRANSACTION_TRAN_TYPE)
 	private String type;
+
+	// BUY/SELL: # shares transacted; DIVIDEND: # shares that earned dividend;
+	// SPLIT: # new shares for each old share
 	@Column(name = QuantumConstants.TRANSACTION_TRAN_SHARES)
-	private Double shares;
+	private BigDecimal shares;
+
+	// BUY/SELL: price per share sold/bought; DIVIDEND: dividend per share; SPLIT:
+	// undefined
 	@Column(name = QuantumConstants.TRANSACTION_TRAN_PRICE)
-	private Double price;
+	private BigDecimal price;
 
 	public TranEntity() {
 	}
 
-	public TranEntity(Integer id, Integer secId, Integer userId, Date tranDate, String type, Double shares, Double price) {
+	public TranEntity(Integer id, Integer secId, Integer userId, Date tranDate, String type, BigDecimal shares,
+			BigDecimal price) {
 		this.id = id;
 		this.secId = secId;
 		this.userId = userId;
@@ -86,22 +99,22 @@ public class TranEntity {
 		this.type = type;
 	}
 
-	public Double getShares() {
+	public BigDecimal getShares() {
 		return shares;
 	}
 
-	public void setShares(Double shares) {
+	public void setShares(BigDecimal shares) {
 		this.shares = shares;
 	}
 
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuffer strBuf = new StringBuffer();

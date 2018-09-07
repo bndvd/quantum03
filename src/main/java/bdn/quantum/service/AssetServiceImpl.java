@@ -1,5 +1,7 @@
 package bdn.quantum.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class AssetServiceImpl implements AssetService {
 	SecurityRepository securityRepository;
 	@Autowired
 	TransactionRepository transactionRepository;
+	@Autowired
+	StockPriceService stockPriceService;
 
 	@Autowired
 	TranEntryComparator transactionComparator;
@@ -66,9 +70,9 @@ public class AssetServiceImpl implements AssetService {
 		for (BasketEntity b : baskets) {
 			Integer basketId = b.getId();
 			String basketName = b.getName();
-			Double principal = 0.0;
-			Double value = 0.0;
-			Double realizedProfit = 0.0;
+			BigDecimal principal = BigDecimal.ZERO;
+			BigDecimal value = BigDecimal.ZERO;
+			BigDecimal realizedProfit = BigDecimal.ZERO;
 
 			Iterable<Position> positionIter = getPositions(basketId);
 			List<Position> positions = new ArrayList<>();
@@ -76,10 +80,12 @@ public class AssetServiceImpl implements AssetService {
 			positions.sort(positionComparator);
 
 			for (Position p : positions) {
-				principal += p.getPrincipal();
-				Double positionValue = p.getPrice() * p.getShares();
-				value += (positionValue >= 0.0) ? positionValue : 0.0;
-				realizedProfit += p.getRealizedProfit();
+				principal = principal.add(p.getPrincipal());
+				BigDecimal positionValue = p.getLastPrice().multiply(p.getShares());
+				if (positionValue.doubleValue() >= 0.0) {
+					value = value.add(positionValue);
+				}
+				realizedProfit = realizedProfit.add(p.getRealizedProfit());
 			}
 
 			Asset a = new Asset(basketId, basketName, principal, value, realizedProfit, positions);
@@ -97,11 +103,9 @@ public class AssetServiceImpl implements AssetService {
 		for (SecurityEntity s : securities) {
 			Integer secId = s.getId();
 			String symbol = s.getSymbol();
-			Double principal = 0.0;
-			Double shares = 0.0;
-			Double realizedProfit = 0.0;
-			// TODO get price from public service
-			Double price = -1.0;
+			BigDecimal principal = BigDecimal.ZERO;
+			BigDecimal shares = BigDecimal.ZERO;
+			BigDecimal realizedProfit = BigDecimal.ZERO;
 
 			Iterable<TranEntity> tranIter = transactionRepository.findBySecId(secId);
 			List<TranEntity> transactions = new ArrayList<>();
@@ -109,25 +113,37 @@ public class AssetServiceImpl implements AssetService {
 			transactions.sort(transactionComparator);
 			for (TranEntity t : transactions) {
 				if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
-					principal += (t.getPrice() * t.getShares());
-					shares += t.getShares();
+					principal = principal.add(t.getPrice().multiply(t.getShares()));
+					shares = shares.add(t.getShares());
 				}
 				// using Average Cost Basis for computing cost/profit and deducting from
 				// principal
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
-					Double averageCostPerShare = principal / shares;
-					Double costOfSharesSold = t.getShares() * averageCostPerShare;
-					realizedProfit += (t.getPrice() * t.getShares()) - costOfSharesSold;
+					BigDecimal averageCostPerShare = principal.divide(shares, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
+					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).subtract(costOfSharesSold);
+					realizedProfit = realizedProfit.add(transactionProfit);
 
-					principal -= costOfSharesSold;
-					shares -= t.getShares();
+					principal = principal.subtract(costOfSharesSold);
+					shares = shares.subtract(t.getShares());
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
-					realizedProfit += t.getPrice() * t.getShares();
+					realizedProfit = realizedProfit.add(t.getPrice().multiply(t.getShares()));
+				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
+					shares = shares.multiply(t.getShares());
 				}
 			}
 
-			Position p = new Position(secId, symbol, principal, shares, realizedProfit, price, transactions);
+			BigDecimal lastStockPrice = BigDecimal.ZERO;
+			try {
+				lastStockPrice = stockPriceService.getLastStockPrice(symbol);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			Position p = new Position(secId, symbol, principal, shares, realizedProfit, lastStockPrice, transactions);
 			result.add(p);
 		}
 

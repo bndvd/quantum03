@@ -1,5 +1,6 @@
 package bdn.quantum.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 //
@@ -9,23 +10,23 @@ public class Position {
 
 	private Integer secId;
 	private String symbol;
-	private Double principal;
-	private Double shares;
-	private Double realizedProfit;		// profit/loss realized from sales of security or dividends
-	private Double price;
+	private BigDecimal principal;
+	private BigDecimal shares;
+	private BigDecimal realizedProfit; // profit/loss realized from sales of security or dividends
+	private BigDecimal lastPrice;
 	private List<TranEntity> transactions;
 
 	public Position() {
 	}
 
-	public Position(Integer secId, String symbol, Double principal, Double shares, Double realizedProfit, Double price,
-			List<TranEntity> transactions) {
+	public Position(Integer secId, String symbol, BigDecimal principal, BigDecimal shares, BigDecimal realizedProfit,
+			BigDecimal lastPrice, List<TranEntity> transactions) {
 		this.secId = secId;
 		this.symbol = symbol;
 		this.principal = principal;
 		this.shares = shares;
 		this.realizedProfit = realizedProfit;
-		this.price = price;
+		this.lastPrice = lastPrice;
 		this.transactions = transactions;
 	}
 
@@ -45,36 +46,36 @@ public class Position {
 		this.symbol = symbol;
 	}
 
-	public Double getPrincipal() {
+	public BigDecimal getPrincipal() {
 		return principal;
 	}
 
-	public void setPrincipal(Double principal) {
+	public void setPrincipal(BigDecimal principal) {
 		this.principal = principal;
 	}
 
-	public Double getShares() {
+	public BigDecimal getShares() {
 		return shares;
 	}
 
-	public void setShares(Double shares) {
+	public void setShares(BigDecimal shares) {
 		this.shares = shares;
 	}
 
-	public Double getRealizedProfit() {
+	public BigDecimal getRealizedProfit() {
 		return realizedProfit;
 	}
 
-	public void setRealizedProfit(Double realizedProfit) {
+	public void setRealizedProfit(BigDecimal realizedProfit) {
 		this.realizedProfit = realizedProfit;
 	}
 
-	public Double getPrice() {
-		return price;
+	public BigDecimal getLastPrice() {
+		return lastPrice;
 	}
 
-	public void setPrice(Double price) {
-		this.price = price;
+	public void setLastPrice(BigDecimal price) {
+		this.lastPrice = price;
 	}
 
 	public List<TranEntity> getTransactions() {
