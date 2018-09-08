@@ -30,6 +30,8 @@ public final class QuantumConstants {
 	public static final String TRAN_TYPE_SPLIT = "SPL";
 	public static final String TRAN_TYPE_CONVERSION = "CNV";	// fund conversion
 	
-	// Calculation constants
+	// Miscellaneous calculation constants
 	public static final int NUM_DECIMAL_PLACES_PRECISION = 20;
+	public static final int MILLIS_BETWEEN_TRANSACTIONS_ON_SAME_DATE = 1000;
+	
 }

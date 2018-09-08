@@ -6,6 +6,6 @@ public interface TransactionService {
 	
 	Iterable<TranEntity> getTransactionsForSecurity(Integer secId);
 	TranEntity getTransaction(Integer id);
-	TranEntity createTransaction(TranEntity transaction);
+	TranEntity createTransaction(TranEntity tranEntry);
 	
 }

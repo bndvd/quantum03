@@ -1,10 +1,12 @@
 package bdn.quantum.service;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.TranEntity;
 import bdn.quantum.repository.TransactionRepository;
 
@@ -28,8 +30,15 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public TranEntity createTransaction(TranEntity transaction) {
-		return transactionRepository.save(transaction);
+	public TranEntity createTransaction(TranEntity tranEntry) {
+		// if another transaction exists with the exact timestamp, add 1 sec to new transaction dttm
+		Date newDate = (Date) tranEntry.getTranDate().clone();
+		while (transactionRepository.countByTranDate(newDate) > 0) {
+			newDate.setTime(newDate.getTime() + QuantumConstants.MILLIS_BETWEEN_TRANSACTIONS_ON_SAME_DATE);
+		}
+		tranEntry.setTranDate(newDate);
+		
+		return transactionRepository.save(tranEntry);
 	}
 
 }
