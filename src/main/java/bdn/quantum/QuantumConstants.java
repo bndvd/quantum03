@@ -28,6 +28,7 @@ public final class QuantumConstants {
 	public static final String TRAN_TYPE_SELL = "SEL";
 	public static final String TRAN_TYPE_DIVIDEND = "DIV";
 	public static final String TRAN_TYPE_SPLIT = "SPL";
+	public static final String TRAN_TYPE_CONVERSION = "CNV";	// fund conversion
 	
 	// Calculation constants
 	public static final int NUM_DECIMAL_PLACES_PRECISION = 20;

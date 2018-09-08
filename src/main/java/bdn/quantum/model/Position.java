@@ -1,6 +1,7 @@
 package bdn.quantum.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 //
@@ -8,6 +9,8 @@ import java.util.List;
 //
 public class Position {
 
+	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new ArrayList<TranEntity>());
+	
 	private Integer secId;
 	private String symbol;
 	private BigDecimal principal;

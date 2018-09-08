@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,14 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public BasketEntity createBasket(BasketEntity basket) {
 		return basketRepository.save(basket);
+	}
+
+	@Override
+	public SecurityEntity getSecurity(Integer id) {
+		Optional<SecurityEntity> s = securityRepository.findById(id);
+		
+		SecurityEntity result = s.get();
+		return result;
 	}
 
 	@Override
@@ -96,12 +105,11 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public Iterable<Position> getPositions(Integer basketId) {
-		List<Position> result = new ArrayList<>();
-
-		Iterable<SecurityEntity> securities = securityRepository.findByBasketId(basketId);
-		for (SecurityEntity s : securities) {
-			Integer secId = s.getId();
+	public Position getPosition(Integer secId) {
+		SecurityEntity s = getSecurity(secId);
+		Position result = Position.EMPTY_POSITION;
+		
+		if (s != null) {
 			String symbol = s.getSymbol();
 			BigDecimal principal = BigDecimal.ZERO;
 			BigDecimal shares = BigDecimal.ZERO;
@@ -133,6 +141,9 @@ public class AssetServiceImpl implements AssetService {
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
 					shares = shares.multiply(t.getShares());
 				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_CONVERSION)) {
+					shares = t.getShares();
+				}
 			}
 
 			BigDecimal lastStockPrice = BigDecimal.ZERO;
@@ -140,11 +151,26 @@ public class AssetServiceImpl implements AssetService {
 				lastStockPrice = stockPriceService.getLastStockPrice(symbol);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				System.err.println("Exception in IEXTrading packet: " + e.getMessage());
 			}
 
-			Position p = new Position(secId, symbol, principal, shares, realizedProfit, lastStockPrice, transactions);
-			result.add(p);
+			result = new Position(secId, symbol, principal, shares, realizedProfit, lastStockPrice, transactions);
+		}
+
+		return result;
+	}
+
+	@Override
+	public Iterable<Position> getPositions(Integer basketId) {
+		List<Position> result = new ArrayList<>();
+
+		Iterable<SecurityEntity> securities = securityRepository.findByBasketId(basketId);
+		for (SecurityEntity s : securities) {
+			Integer secId = s.getId();
+			Position p = getPosition(secId);
+			if (p != Position.EMPTY_POSITION) {
+				result.add(p);
+			}
 		}
 
 		result.sort(positionComparator);

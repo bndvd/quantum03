@@ -9,10 +9,12 @@ public interface AssetService {
 
 	Iterable<BasketEntity> getBaskets();
 	BasketEntity createBasket(BasketEntity basket);
+	SecurityEntity getSecurity(Integer id);
 	Iterable<SecurityEntity> getSecurities();
 	Iterable<SecurityEntity> getSecuritiesInBasket(Integer basketId);
 	SecurityEntity createSecurity(SecurityEntity security);
 	Iterable<Asset> getAssets();
+	Position getPosition(Integer secId);
 	Iterable<Position> getPositions(Integer basketId);
 
 }

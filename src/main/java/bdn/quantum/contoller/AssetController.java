@@ -55,6 +55,11 @@ public class AssetController {
 		return assetService.getAssets();
 	}
 	
+	@RequestMapping(value = "/position/{secId}", method = RequestMethod.GET)
+	public Position getPosition(@PathVariable(value="secId") Integer secId) {
+		return assetService.getPosition(secId);
+	}
+	
 	@RequestMapping(value = "/positions/{basketId}", method = RequestMethod.GET)
 	public Iterable<Position> getPositions(@PathVariable(value="basketId") Integer basketId) {
 		return assetService.getPositions(basketId);
