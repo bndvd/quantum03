@@ -33,5 +33,6 @@ public final class QuantumConstants {
 	// Miscellaneous calculation constants
 	public static final int NUM_DECIMAL_PLACES_PRECISION = 20;
 	public static final int MILLIS_BETWEEN_TRANSACTIONS_ON_SAME_DATE = 1000;
+	public static final double THRESHOLD_DECIMAL_EQUALING_ZERO = 0.000000001;
 	
 }

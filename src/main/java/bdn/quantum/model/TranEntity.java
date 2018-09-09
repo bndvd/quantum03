@@ -37,12 +37,12 @@ public class TranEntity {
 
 	// BUY/SELL: # shares transacted; DIVIDEND: # shares that earned dividend;
 	// SPLIT: # new shares for each old share
-	@Column(name = QuantumConstants.TRANSACTION_TRAN_SHARES)
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_SHARES, precision = 20, scale = 10)
 	private BigDecimal shares;
 
 	// BUY/SELL: price per share sold/bought; DIVIDEND: dividend per share; SPLIT:
 	// undefined
-	@Column(name = QuantumConstants.TRANSACTION_TRAN_PRICE)
+	@Column(name = QuantumConstants.TRANSACTION_TRAN_PRICE, precision = 20, scale = 10)
 	private BigDecimal price;
 
 	public TranEntity() {

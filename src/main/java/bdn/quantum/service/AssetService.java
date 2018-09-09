@@ -7,14 +7,16 @@ import bdn.quantum.model.SecurityEntity;
 
 public interface AssetService {
 
-	Iterable<BasketEntity> getBaskets();
-	BasketEntity createBasket(BasketEntity basket);
-	SecurityEntity getSecurity(Integer id);
-	Iterable<SecurityEntity> getSecurities();
-	Iterable<SecurityEntity> getSecuritiesInBasket(Integer basketId);
-	SecurityEntity createSecurity(SecurityEntity security);
-	Iterable<Asset> getAssets();
-	Position getPosition(Integer secId);
-	Iterable<Position> getPositions(Integer basketId);
+	public BasketEntity getBasket(Integer id);
+	public Iterable<BasketEntity> getBaskets();
+	public BasketEntity createBasket(BasketEntity basket);
+	public SecurityEntity getSecurity(Integer id);
+	public Iterable<SecurityEntity> getSecurities();
+	public Iterable<SecurityEntity> getSecuritiesInBasket(Integer basketId);
+	public SecurityEntity createSecurity(SecurityEntity security);
+	public Asset getAsset(Integer basketId);
+	public Iterable<Asset> getAssets();
+	public Position getPosition(Integer secId);
+	public Iterable<Position> getPositions(Integer basketId);
 
 }

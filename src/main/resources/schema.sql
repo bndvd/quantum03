@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS `quantum`.`transaction` (
   `user_id` INT UNSIGNED NOT NULL,
   `tran_date` DATETIME NOT NULL,
   `type` VARCHAR(3) NOT NULL,
-  `shares` DOUBLE NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `shares` DOUBLE(20,10) NOT NULL,
+  `price` DOUBLE(20,10) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC));
 

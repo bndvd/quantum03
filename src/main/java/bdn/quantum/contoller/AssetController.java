@@ -50,6 +50,11 @@ public class AssetController {
 		return assetService.createSecurity(security);
 	}
 	
+	@RequestMapping(value = "/asset/{basketId}", method = RequestMethod.GET)
+	public Asset getAsset(@PathVariable(value="basketId") Integer basketId) {
+		return assetService.getAsset(basketId);
+	}
+	
 	@RequestMapping(value = "/assets", method = RequestMethod.GET)
 	public Iterable<Asset> getAssets() {
 		return assetService.getAssets();

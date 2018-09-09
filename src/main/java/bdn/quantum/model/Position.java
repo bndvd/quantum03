@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import bdn.quantum.QuantumConstants;
+
 //
 // Position is a rough representation of SecurityEntity and underlying TranEntities
 //
@@ -24,13 +26,13 @@ public class Position {
 
 	public Position(Integer secId, String symbol, BigDecimal principal, BigDecimal shares, BigDecimal realizedProfit,
 			BigDecimal lastPrice, List<TranEntity> transactions) {
-		this.secId = secId;
-		this.symbol = symbol;
-		this.principal = principal;
-		this.shares = shares;
-		this.realizedProfit = realizedProfit;
-		this.lastPrice = lastPrice;
-		this.transactions = transactions;
+		setSecId(secId);
+		setSymbol(symbol);
+		setPrincipal(principal);
+		setShares(shares);
+		setRealizedProfit(realizedProfit);
+		setLastPrice(lastPrice);
+		setTransactions(transactions);
 	}
 
 	public Integer getSecId() {
@@ -54,7 +56,12 @@ public class Position {
 	}
 
 	public void setPrincipal(BigDecimal principal) {
-		this.principal = principal;
+		BigDecimal p = principal;
+		if (principal.abs().doubleValue() < QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+			p = BigDecimal.ZERO;
+		}
+		
+		this.principal = p;
 	}
 
 	public BigDecimal getShares() {
@@ -62,7 +69,12 @@ public class Position {
 	}
 
 	public void setShares(BigDecimal shares) {
-		this.shares = shares;
+		BigDecimal s = shares;
+		if (shares.abs().doubleValue() < QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+			s = BigDecimal.ZERO;
+		}
+		
+		this.shares = s;
 	}
 
 	public BigDecimal getRealizedProfit() {
