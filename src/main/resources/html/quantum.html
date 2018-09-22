@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8"/>
+<title>Quantum</title>
+</head>
+
+<script type="text/javascript" src="angular.min.js"></script>
+<script type="text/javascript" src="angular-route.min.js"></script>
+<script type="text/javascript" src="quantum.js"></script>
+<link rel="stylesheet" type="text/css" href="w3-4.10.css">
+
+<body ng-app="qApp">
+
+	<div class="w3-panel" name="quantum-logo">quantum</div>
+
+
+	<div class="w3-bar w3-black">
+		<a href="#!dashboard" class="w3-bar-item w3-button">DASHBOARD</a>
+		<a href="#!transactions" class="w3-bar-item w3-button">TRANSACTIONS</a>
+		<a href="#!comp" class="w3-bar-item w3-button">COMPARISONS</a>
+		<a href="#!manage" class="w3-bar-item w3-button">MANAGE</a>
+	</div>
+	
+	<div class="w3-container w3-padding-16" ng-view></div>
+
+</body>
+
+</html>
