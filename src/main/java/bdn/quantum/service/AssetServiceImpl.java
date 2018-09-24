@@ -104,7 +104,7 @@ public class AssetServiceImpl implements AssetService {
 				realizedProfit = realizedProfit.add(p.getRealizedProfit());
 			}
 	
-			result = new Asset(basketId, basketName, principal, lastValue, realizedProfit, positions);
+			result = new Asset(basketId, basketName, principal, lastValue, realizedProfit);
 		}
 		
 		return result;

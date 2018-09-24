@@ -1,1 +1,27 @@
-Dashboard page
+<table class="w3-table w3-striped">
+	<tr class="w3-grey">
+		<th>Asset</th>
+		<th>Prin</th>
+		<th>Curr Val</th>
+		<th>Cap Gain</th>
+		<th>Total Prin</th>
+		<th>Rlzd Gain</th>
+		<th>Total Gain</th>
+		<th>Target Ratio</th>
+		<th>Curr Ratio</th>
+		<th>Delta</th>
+	</tr>
+	<tr ng-repeat="a in assets">
+		<td class="w3-left-align">{{ a.basketName }}</td>
+		<td class="w3-right-align">{{ a.principal | currency }}</td>
+		<td class="w3-right-align">{{ a.lastValue | currency }}</td>
+		<td class="w3-right-align">{{ (a.lastValue - a.principal) | currency }}</td>
+		
+	</tr>
+	<tr class="w3-grey">
+		<td class="w3-left-align">TOTAL</td>
+		<td class="w3-right-align">{{ assetsTotalPrincipal | currency }}</td>
+		<td class="w3-right-align">{{ assetsTotalLastValue | currency }}</td>
+		<td class="w3-right-align">{{ assetsTotalCapGain | currency }}</td>
+	</tr>
+</table>

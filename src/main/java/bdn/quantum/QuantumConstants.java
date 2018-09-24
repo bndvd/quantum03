@@ -35,4 +35,7 @@ public final class QuantumConstants {
 	public static final int MILLIS_BETWEEN_TRANSACTIONS_ON_SAME_DATE = 1000;
 	public static final double THRESHOLD_DECIMAL_EQUALING_ZERO = 0.000000001;
 	
+	// Stock quote constants
+	public static final long QUOTE_CACHE_LIFE_MILLIS = 10000;
+	
 }

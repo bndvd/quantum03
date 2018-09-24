@@ -24,6 +24,19 @@ app.config(function($routeProvider) {
 
 
 // Dashboard Controller
-app.controller('dashboardCtrl', function($scope) {
+app.controller('dashboardCtrl', function($scope, $http) {
+	$http.get("api/v1/assets").then(function(response) {
+		$scope.assetsTotalPrincipal = 0.0;
+		$scope.assetsTotalLastValue = 0.0;
+		$scope.assets = response.data;
+		for (i = 0; i < $scope.assets.length; i++) {
+			$scope.assetsTotalPrincipal += $scope.assets[i].principal;
+			$scope.assetsTotalLastValue += $scope.assets[i].lastValue;
+		}
+		$scope.assetsTotalCapGain = $scope.assetsTotalLastValue - $scope.assetsTotalPrincipal;
+	});
 	
+
 });
+
+

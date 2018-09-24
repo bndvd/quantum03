@@ -14,19 +14,17 @@ public class Asset {
 	private BigDecimal principal;
 	private BigDecimal lastValue;
 	private BigDecimal realizedProfit;
-	private List<Position> positions;
 
 	public Asset() {
 	}
 
 	public Asset(Integer basketId, String basketName, BigDecimal principal, BigDecimal lastValue,
-			BigDecimal realizedProfit, List<Position> positions) {
+			BigDecimal realizedProfit) {
 		this.basketId = basketId;
 		this.basketName = basketName;
 		this.principal = principal;
 		this.lastValue = lastValue;
 		this.realizedProfit = realizedProfit;
-		this.positions = positions;
 	}
 
 	public Integer getBasketId() {
@@ -67,14 +65,6 @@ public class Asset {
 
 	public void setRealizedProfit(BigDecimal realizedProfit) {
 		this.realizedProfit = realizedProfit;
-	}
-
-	public List<Position> getPositions() {
-		return positions;
-	}
-
-	public void setPositions(List<Position> positions) {
-		this.positions = positions;
 	}
 
 	@Override
