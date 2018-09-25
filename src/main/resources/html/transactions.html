@@ -1,1 +1,34 @@
-Tran page
+<!-- Sidebar -->
+<div class="w3-sidebar w3-grey w3-bar-block" style="width: 200px">
+	<p ng-repeat="s in securities track by $index"
+		ng-click="loadTransactionsForSecurity($index)"
+		class="w3-bar-item w3-button">{{ s.symbol }}</p>
+</div>
+
+<!-- Page Content -->
+<div style="margin-left: 200px">
+
+	<div class="w3-container">
+		<h2>{{ securities[securitiesSelectedTransactionsIndex].symbol }}</h2>
+	</div>
+
+	<div class="w3-container">
+		<table ng-show="securitiesSelectedTransactionsIndex >= 0" class="w3-table w3-striped">
+			<tr class="w3-grey">
+				<th class="w3-left-align">Tran Date</th>
+				<th class="w3-center-align">Type</th>
+				<th class="w3-right-align">Shares</th>
+				<th class="w3-right-align">Price</th>
+
+			</tr>
+			<tr ng-repeat="t in securitiesSelectedTransactions">
+				<td class="w3-left-align">{{ t.tranDate | date:'yyyy-MM-dd' }}</td>
+				<td class="w3-center-align">{{ t.type }}</td>
+				<td class="w3-right-align">{{ t.shares }}</td>
+				<td class="w3-right-align">{{ t.price | currency }}</td>
+
+			</tr>
+		</table>
+	</div>
+
+</div>
