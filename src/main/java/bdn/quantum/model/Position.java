@@ -7,30 +7,30 @@ import java.util.List;
 import bdn.quantum.QuantumConstants;
 
 //
-// Position is a rough representation of SecurityEntity and underlying TranEntities
+// Position is a rough representation of Security and underlying Transactions
 //
 public class Position {
 
-	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new ArrayList<TranEntity>());
+	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new ArrayList<Transaction>());
 	
 	private Integer secId;
 	private String symbol;
 	private BigDecimal principal;
 	private BigDecimal shares;
-	private BigDecimal realizedProfit; // profit/loss realized from sales of security or dividends
+	private BigDecimal realizedGain; // profit/loss realized from sales of security or dividends
 	private BigDecimal lastPrice;
-	private List<TranEntity> transactions;
+	private List<Transaction> transactions;
 
 	public Position() {
 	}
 
-	public Position(Integer secId, String symbol, BigDecimal principal, BigDecimal shares, BigDecimal realizedProfit,
-			BigDecimal lastPrice, List<TranEntity> transactions) {
+	public Position(Integer secId, String symbol, BigDecimal principal, BigDecimal shares, BigDecimal realizedGain,
+			BigDecimal lastPrice, List<Transaction> transactions) {
 		setSecId(secId);
 		setSymbol(symbol);
 		setPrincipal(principal);
 		setShares(shares);
-		setRealizedProfit(realizedProfit);
+		setRealizedGain(realizedGain);
 		setLastPrice(lastPrice);
 		setTransactions(transactions);
 	}
@@ -77,12 +77,12 @@ public class Position {
 		this.shares = s;
 	}
 
-	public BigDecimal getRealizedProfit() {
-		return realizedProfit;
+	public BigDecimal getRealizedGain() {
+		return realizedGain;
 	}
 
-	public void setRealizedProfit(BigDecimal realizedProfit) {
-		this.realizedProfit = realizedProfit;
+	public void setRealizedGain(BigDecimal realizedGain) {
+		this.realizedGain = realizedGain;
 	}
 
 	public BigDecimal getLastPrice() {
@@ -93,11 +93,11 @@ public class Position {
 		this.lastPrice = price;
 	}
 
-	public List<TranEntity> getTransactions() {
+	public List<Transaction> getTransactions() {
 		return transactions;
 	}
 
-	public void setTransactions(List<TranEntity> transactions) {
+	public void setTransactions(List<Transaction> transactions) {
 		this.transactions = transactions;
 	}
 

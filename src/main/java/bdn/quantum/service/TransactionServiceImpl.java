@@ -1,6 +1,8 @@
 package bdn.quantum.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.TranEntity;
+import bdn.quantum.model.Transaction;
 import bdn.quantum.repository.TransactionRepository;
 
 @Service("transactionService")
@@ -17,28 +20,47 @@ public class TransactionServiceImpl implements TransactionService {
 	private TransactionRepository transactionRepository;
 	
 	@Override
-	public Iterable<TranEntity> getTransactionsForSecurity(Integer secId) {
-		return transactionRepository.findBySecId(secId);
-	}
-
-	@Override
-	public TranEntity getTransaction(Integer id) {
-		Optional<TranEntity> t = transactionRepository.findById(id);
+	public Iterable<Transaction> getTransactionsForSecurity(Integer secId) {
+		Iterable<TranEntity> teIter = transactionRepository.findBySecId(secId);
 		
-		TranEntity result = t.get();
+		List<Transaction> result = new ArrayList<>();
+		for (TranEntity te : teIter) {
+			Transaction t = new Transaction(te);
+			result.add(t);
+		}
 		return result;
 	}
 
 	@Override
-	public TranEntity createTransaction(TranEntity tranEntry) {
+	public Transaction getTransaction(Integer id) {
+		Optional<TranEntity> t = transactionRepository.findById(id);
+		
+		TranEntity te = t.get();
+		Transaction result = null;
+		if (te != null) {
+			result = new Transaction(te);
+		}
+		return result;
+	}
+
+	@Override
+	public Transaction createTransaction(Transaction transaction) {
 		// if another transaction exists with the exact timestamp, add 1 sec to new transaction dttm
-		Date newDate = (Date) tranEntry.getTranDate().clone();
+		Date newDate = (Date) transaction.getTranDate().clone();
 		while (transactionRepository.countByTranDate(newDate) > 0) {
 			newDate.setTime(newDate.getTime() + QuantumConstants.MILLIS_BETWEEN_TRANSACTIONS_ON_SAME_DATE);
 		}
-		tranEntry.setTranDate(newDate);
+		transaction.setTranDate(newDate);
 		
-		return transactionRepository.save(tranEntry);
+		TranEntity te = new TranEntity(transaction.getId(), transaction.getSecId(), transaction.getUserId(),
+				transaction.getTranDate(), transaction.getType(), transaction.getShares(), transaction.getPrice());
+		te = transactionRepository.save(te);
+		
+		Transaction result = null;
+		if (te != null) {
+			result = new Transaction(te);
+		}
+		return result;
 	}
 
 }

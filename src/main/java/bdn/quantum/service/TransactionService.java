@@ -1,11 +1,11 @@
 package bdn.quantum.service;
 
-import bdn.quantum.model.TranEntity;
+import bdn.quantum.model.Transaction;
 
 public interface TransactionService {
 	
-	Iterable<TranEntity> getTransactionsForSecurity(Integer secId);
-	TranEntity getTransaction(Integer id);
-	TranEntity createTransaction(TranEntity tranEntry);
+	Iterable<Transaction> getTransactionsForSecurity(Integer secId);
+	Transaction getTransaction(Integer id);
+	Transaction createTransaction(Transaction tranEntry);
 	
 }

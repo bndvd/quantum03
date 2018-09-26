@@ -13,13 +13,14 @@ import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
+import bdn.quantum.model.Security;
 import bdn.quantum.model.SecurityEntity;
 import bdn.quantum.model.TranEntity;
+import bdn.quantum.model.Transaction;
 import bdn.quantum.model.util.PositionComparator;
-import bdn.quantum.model.util.TranEntryComparator;
+import bdn.quantum.model.util.TransactionComparator;
 import bdn.quantum.repository.BasketRepository;
 import bdn.quantum.repository.SecurityRepository;
-import bdn.quantum.repository.TransactionRepository;
 
 @Service("assetService")
 public class AssetServiceImpl implements AssetService {
@@ -29,12 +30,12 @@ public class AssetServiceImpl implements AssetService {
 	@Autowired
 	SecurityRepository securityRepository;
 	@Autowired
-	TransactionRepository transactionRepository;
+	TransactionService transactionService;
 	@Autowired
 	StockPriceService stockPriceService;
 
 	@Autowired
-	TranEntryComparator transactionComparator;
+	TransactionComparator transactionComparator;
 	@Autowired
 	PositionComparator positionComparator;
 
@@ -57,26 +58,48 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public SecurityEntity getSecurity(Integer id) {
+	public Security getSecurity(Integer id) {
 		Optional<SecurityEntity> s = securityRepository.findById(id);
+		SecurityEntity se = s.get();
 		
-		SecurityEntity result = s.get();
+		Security result = new Security(se);
 		return result;
 	}
 
 	@Override
-	public Iterable<SecurityEntity> getSecurities() {
-		return securityRepository.findAll();
+	public Iterable<Security> getSecurities() {
+		Iterable<SecurityEntity> seIter = securityRepository.findAll();
+		return convertSecurityEntityIterableToSecurityIterable(seIter);
 	}
 
 	@Override
-	public Iterable<SecurityEntity> getSecuritiesInBasket(Integer basketId) {
-		return securityRepository.findByBasketId(basketId);
+	public Iterable<Security> getSecuritiesInBasket(Integer basketId) {
+		Iterable<SecurityEntity> seIter = securityRepository.findByBasketId(basketId);
+		return convertSecurityEntityIterableToSecurityIterable(seIter);
 	}
 
 	@Override
-	public SecurityEntity createSecurity(SecurityEntity security) {
-		return securityRepository.save(security);
+	public Security createSecurity(Security security) {
+		if (security == null) {
+			return null;
+		}
+		SecurityEntity se = new SecurityEntity(security.getId(), security.getBasketId(), security.getSymbol());
+		se = securityRepository.save(se);
+		
+		Security result = null;
+		if (se != null) {
+			result = new Security(se);
+		}
+		return result;
+	}
+	
+	private Iterable<Security> convertSecurityEntityIterableToSecurityIterable(Iterable<SecurityEntity> seIter) {
+		List<Security> result = new ArrayList<>();
+		for (SecurityEntity se : seIter) {
+			Security s = new Security(se);
+			result.add(s);
+		}
+		return result;
 	}
 
 	@Override
@@ -88,7 +111,7 @@ public class AssetServiceImpl implements AssetService {
 			String basketName = b.getName();
 			BigDecimal principal = BigDecimal.ZERO;
 			BigDecimal lastValue = BigDecimal.ZERO;
-			BigDecimal realizedProfit = BigDecimal.ZERO;
+			BigDecimal realizedGain = BigDecimal.ZERO;
 	
 			Iterable<Position> positionIter = getPositions(basketId);
 			List<Position> positions = new ArrayList<>();
@@ -101,10 +124,10 @@ public class AssetServiceImpl implements AssetService {
 				if (positionValue.doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
 					lastValue = lastValue.add(positionValue);
 				}
-				realizedProfit = realizedProfit.add(p.getRealizedProfit());
+				realizedGain = realizedGain.add(p.getRealizedGain());
 			}
 	
-			result = new Asset(basketId, basketName, principal, lastValue, realizedProfit);
+			result = new Asset(basketId, basketName, principal, lastValue, realizedGain);
 		}
 		
 		return result;
@@ -128,20 +151,20 @@ public class AssetServiceImpl implements AssetService {
 
 	@Override
 	public Position getPosition(Integer secId) {
-		SecurityEntity s = getSecurity(secId);
+		Security s = getSecurity(secId);
 		Position result = Position.EMPTY_POSITION;
 		
 		if (s != null) {
 			String symbol = s.getSymbol();
 			BigDecimal principal = new BigDecimal(0);
 			BigDecimal shares = BigDecimal.ZERO;
-			BigDecimal realizedProfit = BigDecimal.ZERO;
+			BigDecimal realizedGain = BigDecimal.ZERO;
 
-			Iterable<TranEntity> tranIter = transactionRepository.findBySecId(secId);
-			List<TranEntity> transactions = new ArrayList<>();
+			Iterable<Transaction> tranIter = transactionService.getTransactionsForSecurity(secId);
+			List<Transaction> transactions = new ArrayList<>();
 			tranIter.forEach(transactions::add);
 			transactions.sort(transactionComparator);
-			for (TranEntity t : transactions) {
+			for (Transaction t : transactions) {
 				if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
 					BigDecimal tPrice = t.getPrice();
 					BigDecimal tShares = t.getShares();
@@ -154,13 +177,13 @@ public class AssetServiceImpl implements AssetService {
 					BigDecimal averageCostPerShare = principal.divide(shares, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
 					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).subtract(costOfSharesSold);
-					realizedProfit = realizedProfit.add(transactionProfit);
+					realizedGain = realizedGain.add(transactionProfit);
 
 					principal = principal.subtract(costOfSharesSold);
 					shares = shares.subtract(t.getShares());
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
-					realizedProfit = realizedProfit.add(t.getPrice().multiply(t.getShares()));
+					realizedGain = realizedGain.add(t.getPrice().multiply(t.getShares()));
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
 					shares = shares.multiply(t.getShares());
@@ -178,7 +201,7 @@ public class AssetServiceImpl implements AssetService {
 				System.err.println("Exception in IEXTrading packet: " + e.getMessage());
 			}
 
-			result = new Position(secId, symbol, principal, shares, realizedProfit, lastStockPrice, transactions);
+			result = new Position(secId, symbol, principal, shares, realizedGain, lastStockPrice, transactions);
 		}
 
 		return result;

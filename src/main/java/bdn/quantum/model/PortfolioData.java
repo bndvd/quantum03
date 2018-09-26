@@ -7,15 +7,15 @@ public class PortfolioData {
 	private String version = "1.0";
 	private Date lastDate = new Date(0);
 	private Iterable<BasketEntity> basketEntities;
-	private Iterable<SecurityEntity> securityEntities;
-	private Iterable<TranEntity> tranEntities;
+	private Iterable<Security> securities;
+	private Iterable<Transaction> transactions;
 	
 	public PortfolioData() {}
 	
-	public PortfolioData(Iterable<BasketEntity> basketEntities, Iterable<SecurityEntity> securityEntities, Iterable<TranEntity> tranEntities) {
+	public PortfolioData(Iterable<BasketEntity> basketEntities, Iterable<Security> securities, Iterable<Transaction> transactions) {
 		setBasketEntities(basketEntities);
-		setSecurityEntities(securityEntities);
-		setTranEntities(tranEntities);
+		setSecurities(securities);
+		setTransactions(transactions);
 	}
 
 	public String getVersion() {
@@ -42,26 +42,26 @@ public class PortfolioData {
 		this.basketEntities = basketEntities;
 	}
 
-	public Iterable<SecurityEntity> getSecurityEntities() {
-		return securityEntities;
+	public Iterable<Security> getSecurities() {
+		return securities;
 	}
 
-	public void setSecurityEntities(Iterable<SecurityEntity> securityEntities) {
-		this.securityEntities = securityEntities;
+	public void setSecurities(Iterable<Security> securities) {
+		this.securities = securities;
 	}
 
-	public Iterable<TranEntity> getTranEntities() {
-		return tranEntities;
+	public Iterable<Transaction> getTransactions() {
+		return transactions;
 	}
 
-	public void setTranEntities(Iterable<TranEntity> tranEntities) {
-		this.tranEntities = tranEntities;
+	public void setTransactions(Iterable<Transaction> transactions) {
+		this.transactions = transactions;
 		computeLastDate();
 	}
 	
 	private void computeLastDate() {
-		if (tranEntities != null) {
-			for(TranEntity t : tranEntities) {
+		if (transactions != null) {
+			for(Transaction t : transactions) {
 				Date td = t.getTranDate();
 				if (lastDate.before(td)) {
 					lastDate = td;

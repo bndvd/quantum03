@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
-import bdn.quantum.model.TranEntity;
+import bdn.quantum.model.Transaction;
 import bdn.quantum.service.TransactionService;
 import bdn.quantum.util.ServiceError;
 
@@ -23,19 +23,19 @@ public class TransactionController {
 	TransactionService transactionService;
 
 	@RequestMapping(value = "/transactions/{secId}", method = RequestMethod.GET)
-	public Iterable<TranEntity> getTransactions(@PathVariable(value="secId") Integer secId) {
+	public Iterable<Transaction> getTransactions(@PathVariable(value="secId") Integer secId) {
 		System.out.println("TransactionController.getTransactions: secId=" + secId);
 		return transactionService.getTransactionsForSecurity(secId);
 	}
 	
 	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.GET)
-	public TranEntity getTransaction(@PathVariable(value="tranId") Integer tranId) {
+	public Transaction getTransaction(@PathVariable(value="tranId") Integer tranId) {
 		System.out.println("TransactionController.getTransaction: tranId=" + tranId);
 		return transactionService.getTransaction(tranId);
 	}
 
 	@RequestMapping(value = "/transaction", method = RequestMethod.POST)
-	public TranEntity createTransaction(@RequestBody TranEntity transaction) {
+	public Transaction createTransaction(@RequestBody Transaction transaction) {
 		System.out.println("TransactionController.createTransaction: transaction=" + transaction);
 		return transactionService.createTransaction(transaction);
 	}

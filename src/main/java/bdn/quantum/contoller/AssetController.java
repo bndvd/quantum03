@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.Asset;
-import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
+import bdn.quantum.model.Security;
 import bdn.quantum.model.SecurityEntity;
 import bdn.quantum.service.AssetService;
 import bdn.quantum.util.ServiceError;
@@ -25,28 +25,18 @@ public class AssetController {
 	@Autowired
 	private AssetService assetService;
 	
-	@RequestMapping(value = "/baskets", method = RequestMethod.GET)
-	public Iterable<BasketEntity> getBaskets() {
-		return assetService.getBaskets();
-	}
-	
-	@RequestMapping(value = "/basket", method = RequestMethod.POST)
-	public BasketEntity createBasket(@RequestBody BasketEntity basket) {
-		return assetService.createBasket(basket);
-	}
-	
 	@RequestMapping(value = "/securities", method = RequestMethod.GET)
-	public Iterable<SecurityEntity> getSecurities() {
+	public Iterable<Security> getSecurities() {
 		return assetService.getSecurities();
 	}
 	
 	@RequestMapping(value = "/securities/{basketId}", method = RequestMethod.GET)
-	public Iterable<SecurityEntity> getSecurities(@PathVariable(value="basketId") Integer basketId) {
+	public Iterable<Security> getSecurities(@PathVariable(value="basketId") Integer basketId) {
 		return assetService.getSecuritiesInBasket(basketId);
 	}
 	
 	@RequestMapping(value = "/security", method = RequestMethod.POST)
-	public SecurityEntity createSecurity(@RequestBody SecurityEntity security) {
+	public Security createSecurity(@RequestBody Security security) {
 		return assetService.createSecurity(security);
 	}
 	

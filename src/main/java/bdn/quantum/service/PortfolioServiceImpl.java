@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.PortfolioData;
-import bdn.quantum.model.SecurityEntity;
-import bdn.quantum.model.TranEntity;
+import bdn.quantum.model.Security;
+import bdn.quantum.model.Transaction;
 
 @Service("portfolioService")
 public class PortfolioServiceImpl implements PortfolioService {
@@ -22,17 +22,17 @@ public class PortfolioServiceImpl implements PortfolioService {
 	@Override
 	public PortfolioData getPortfolioData() {
 		Iterable<BasketEntity> basketIter = assetService.getBaskets();
-		Iterable<SecurityEntity> securityIter = assetService.getSecurities();
-		List<TranEntity> tranEntities = new ArrayList<TranEntity>();
+		Iterable<Security> securities = assetService.getSecurities();
+		List<Transaction> transactions = new ArrayList<Transaction>();
 		
-		for (SecurityEntity s : securityIter) {
-			Iterable<TranEntity> tIter = transactionService.getTransactionsForSecurity(s.getId());
-			for (TranEntity t : tIter) {
-				tranEntities.add(t);
+		for (Security s : securities) {
+			Iterable<Transaction> tIter = transactionService.getTransactionsForSecurity(s.getId());
+			for (Transaction t : tIter) {
+				transactions.add(t);
 			}
 		}
 		
-		PortfolioData result = new PortfolioData(basketIter, securityIter, tranEntities);
+		PortfolioData result = new PortfolioData(basketIter, securities, transactions);
 		return result;
 	}
 
@@ -41,10 +41,10 @@ public class PortfolioServiceImpl implements PortfolioService {
 		for (BasketEntity b : portfolioData.getBasketEntities()) {
 			assetService.createBasket(b);
 		}
-		for (SecurityEntity s : portfolioData.getSecurityEntities()) {
+		for (Security s : portfolioData.getSecurities()) {
 			assetService.createSecurity(s);
 		}
-		for (TranEntity t : portfolioData.getTranEntities()) {
+		for (Transaction t : portfolioData.getTransactions()) {
 			transactionService.createTransaction(t);
 		}
 		
