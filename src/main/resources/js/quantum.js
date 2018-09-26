@@ -41,23 +41,23 @@ app.controller('dashboardCtrl', function($scope, $http) {
 
 // Transaction Controller
 app.controller('transactionsCtrl', function($scope, $http) {
-	$scope.securitiesSelectedTransactionsIndex = -1;
-	$scope.securitiesSelectedTransactions = [];
+	$scope.positionSelectedIndex = -1;
+	$scope.positionSelected = [];
 	
 	$http.get("api/v1/securities").then(function(response) {
 		$scope.securities = response.data;
 	});
 	
-	$scope.loadTransactionsForSecurity = function(index) {
-		$scope.securitiesSelectedTransactionsIndex = index;
+	$scope.loadPositionForSecurityIndex = function(index) {
+		$scope.positionSelectedIndex = index;
 		if (index >= 0 && index < $scope.securities.length) {
 			var secId = index + 1;
-			$http.get("api/v1/transactions/"+secId).then(function(response) {
-				$scope.securitiesSelectedTransactions = response.data;
+			$http.get("api/v1/position/"+secId).then(function(response) {
+				$scope.positionSelected = response.data;
 			});
 		}
 		else {
-			$scope.securitiesSelectedTransactions = [];
+			$scope.positionSelected = [];
 		}
 	};
 	

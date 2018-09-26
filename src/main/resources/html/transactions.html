@@ -1,7 +1,7 @@
 <!-- Sidebar -->
 <div class="w3-sidebar w3-grey w3-bar-block" style="width: 200px">
 	<p ng-repeat="s in securities track by $index"
-		ng-click="loadTransactionsForSecurity($index)"
+		ng-click="loadPositionForSecurityIndex($index)"
 		class="w3-bar-item w3-button">{{ s.symbol }}</p>
 </div>
 
@@ -9,23 +9,33 @@
 <div style="margin-left: 200px">
 
 	<div class="w3-container">
-		<h2>{{ securities[securitiesSelectedTransactionsIndex].symbol }}</h2>
+		<h2>{{ securities[positionSelectedIndex].symbol }}</h2>
 	</div>
 
 	<div class="w3-container">
-		<table ng-show="securitiesSelectedTransactionsIndex >= 0" class="w3-table w3-striped">
+		<table ng-show="positionSelectedIndex >= 0" class="w3-table w3-striped">
 			<tr class="w3-grey">
 				<th class="w3-left-align">Tran Date</th>
 				<th class="w3-center-align">Type</th>
-				<th class="w3-right-align">Shares</th>
+				<th class="w3-right-align">Tran Shares</th>
 				<th class="w3-right-align">Price</th>
+				<th class="w3-right-align">Tot Shares</th>
+				<th class="w3-right-align">Principal</th>
+				<th class="w3-right-align">Value</th>
+				<th class="w3-right-align">Rlzd Gain</th>
+				<th class="w3-right-align">Unrlzd Gain</th>
 
 			</tr>
-			<tr ng-repeat="t in securitiesSelectedTransactions">
+			<tr ng-repeat="t in positionSelected.transactions">
 				<td class="w3-left-align">{{ t.tranDate | date:'yyyy-MM-dd' }}</td>
 				<td class="w3-center-align">{{ t.type }}</td>
 				<td class="w3-right-align">{{ t.shares }}</td>
 				<td class="w3-right-align">{{ t.price | currency }}</td>
+				<td class="w3-right-align">{{ t.totalShares }}</td>
+				<td class="w3-right-align">{{ t.principal | currency }}</td>
+				<td class="w3-right-align">{{ t.value | currency }}</td>
+				<td class="w3-right-align">{{ t.realizedGain | currency }}</td>
+				<td class="w3-right-align">{{ t.unrealizedGain | currency }}</td>
 
 			</tr>
 		</table>

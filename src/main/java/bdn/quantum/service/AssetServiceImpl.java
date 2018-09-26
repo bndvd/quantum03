@@ -156,6 +156,7 @@ public class AssetServiceImpl implements AssetService {
 		
 		if (s != null) {
 			String symbol = s.getSymbol();
+			BigDecimal tPrice = BigDecimal.ZERO;
 			BigDecimal principal = new BigDecimal(0);
 			BigDecimal shares = BigDecimal.ZERO;
 			BigDecimal realizedGain = BigDecimal.ZERO;
@@ -166,14 +167,15 @@ public class AssetServiceImpl implements AssetService {
 			transactions.sort(transactionComparator);
 			for (Transaction t : transactions) {
 				if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
-					BigDecimal tPrice = t.getPrice();
+					tPrice = t.getPrice();
 					BigDecimal tShares = t.getShares();
-					principal = principal.add(tPrice.multiply(tShares));
+					principal = principal.add(t.getPrice().multiply(tShares));
 					shares = shares.add(tShares);
 				}
 				// using Average Cost Basis for computing cost/profit and deducting from
 				// principal
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
+					tPrice = t.getPrice();
 					BigDecimal averageCostPerShare = principal.divide(shares, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
 					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).subtract(costOfSharesSold);
@@ -183,14 +185,24 @@ public class AssetServiceImpl implements AssetService {
 					shares = shares.subtract(t.getShares());
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
+					// do not update tPrice - since we want to use tPrice from previous transaction in the DIV case
 					realizedGain = realizedGain.add(t.getPrice().multiply(t.getShares()));
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
+					tPrice = t.getPrice();
 					shares = shares.multiply(t.getShares());
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_CONVERSION)) {
+					tPrice = t.getPrice();
 					shares = t.getShares();
 				}
+				// update total shares/value/realizedGain as of this transaction in Transaction
+				BigDecimal value = tPrice.multiply(shares);
+				t.setTotalShares(shares);
+				t.setPrincipal(principal);
+				t.setValue(value);
+				t.setRealizedGain(realizedGain);
+				t.setUnrealizedGain(value.subtract(principal));
 			}
 
 			BigDecimal lastStockPrice = BigDecimal.ZERO;

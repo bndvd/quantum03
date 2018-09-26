@@ -16,8 +16,10 @@ public class Transaction {
 	private BigDecimal shares;
 	private BigDecimal price;
 	private BigDecimal totalShares = BigDecimal.ZERO;
+	private BigDecimal principal = BigDecimal.ZERO;
 	private BigDecimal value = BigDecimal.ZERO;
 	private BigDecimal realizedGain = BigDecimal.ZERO;
+	private BigDecimal unrealizedGain = BigDecimal.ZERO;
 	
 
 	public Transaction(Integer id, Integer secId, Integer userId, Date tranDate, String type, BigDecimal shares,
@@ -113,6 +115,22 @@ public class Transaction {
 
 	public void setRealizedGain(BigDecimal realizedGain) {
 		this.realizedGain = realizedGain;
+	}
+
+	public BigDecimal getUnrealizedGain() {
+		return unrealizedGain;
+	}
+
+	public void setUnrealizedGain(BigDecimal unrealizedGain) {
+		this.unrealizedGain = unrealizedGain;
+	}
+
+	public BigDecimal getPrincipal() {
+		return principal;
+	}
+
+	public void setPrincipal(BigDecimal principal) {
+		this.principal = principal;
 	}
 
 }
