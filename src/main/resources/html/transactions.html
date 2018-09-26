@@ -24,6 +24,7 @@
 				<th class="w3-right-align">Value</th>
 				<th class="w3-right-align">Rlzd Gain</th>
 				<th class="w3-right-align">Unrlzd Gain</th>
+				<th class="w3-right-align">Total Gain</th>
 
 			</tr>
 			<tr ng-repeat="t in positionSelected.transactions">
@@ -36,6 +37,7 @@
 				<td class="w3-right-align">{{ t.value | currency }}</td>
 				<td class="w3-right-align">{{ t.realizedGain | currency }}</td>
 				<td class="w3-right-align">{{ t.unrealizedGain | currency }}</td>
+				<td class="w3-right-align">{{ (t.realizedGain + t.unrealizedGain) | currency }}</td>
 
 			</tr>
 		</table>

@@ -1,10 +1,10 @@
 <table class="w3-table w3-striped">
 	<tr class="w3-grey">
 		<th>Asset</th>
-		<th>Prin</th>
-		<th>Curr Val</th>
-		<th>Cap Gain</th>
-		<th>Total Prin</th>
+		<th>Principal</th>
+		<th>Value</th>
+		<th>Unrlzd Gain</th>
+		<th>Tot Principal</th>
 		<th>Rlzd Gain</th>
 		<th>Total Gain</th>
 		<th>Target Ratio</th>
@@ -15,13 +15,19 @@
 		<td class="w3-left-align">{{ a.basketName }}</td>
 		<td class="w3-right-align">{{ a.principal | currency }}</td>
 		<td class="w3-right-align">{{ a.lastValue | currency }}</td>
-		<td class="w3-right-align">{{ (a.lastValue - a.principal) | currency }}</td>
+		<td class="w3-right-align">{{ a.unrealizedGain | currency }}</td>
+		<td class="w3-right-align">{{ a.totalPrincipal | currency }}</td>
+		<td class="w3-right-align">{{ a.realizedGain | currency }}</td>
+		<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency }}</td>
 		
 	</tr>
 	<tr class="w3-grey">
 		<td class="w3-left-align">TOTAL</td>
 		<td class="w3-right-align">{{ assetsTotalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ assetsTotalLastValue | currency }}</td>
-		<td class="w3-right-align">{{ assetsTotalCapGain | currency }}</td>
+		<td class="w3-right-align">{{ assetsTotalUnrealizedGain | currency }}</td>
+		<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency }}</td>
+		<td class="w3-right-align">{{ assetsTotalRealizedGain | currency }}</td>
+		<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency }}</td>
 	</tr>
 </table>

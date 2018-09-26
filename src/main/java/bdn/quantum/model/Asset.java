@@ -12,19 +12,23 @@ public class Asset {
 	private Integer basketId;
 	private String basketName;
 	private BigDecimal principal;
+	private BigDecimal totalPrincipal;
 	private BigDecimal lastValue;
 	private BigDecimal realizedGain;
+	private BigDecimal unrealizedGain;
 
 	public Asset() {
 	}
 
-	public Asset(Integer basketId, String basketName, BigDecimal principal, BigDecimal lastValue,
-			BigDecimal realizedGain) {
+	public Asset(Integer basketId, String basketName, BigDecimal principal, BigDecimal totalPrincipal, BigDecimal lastValue,
+			BigDecimal realizedGain, BigDecimal unrealizedGain) {
 		this.basketId = basketId;
 		this.basketName = basketName;
 		this.principal = principal;
+		this.totalPrincipal = totalPrincipal;
 		this.lastValue = lastValue;
 		this.realizedGain = realizedGain;
+		this.unrealizedGain = unrealizedGain;
 	}
 
 	public Integer getBasketId() {
@@ -65,6 +69,22 @@ public class Asset {
 
 	public void setRealizedGain(BigDecimal realizedGain) {
 		this.realizedGain = realizedGain;
+	}
+
+	public BigDecimal getTotalPrincipal() {
+		return totalPrincipal;
+	}
+
+	public void setTotalPrincipal(BigDecimal totalPrincipal) {
+		this.totalPrincipal = totalPrincipal;
+	}
+
+	public BigDecimal getUnrealizedGain() {
+		return unrealizedGain;
+	}
+
+	public void setUnrealizedGain(BigDecimal unrealizedGain) {
+		this.unrealizedGain = unrealizedGain;
 	}
 
 	@Override
