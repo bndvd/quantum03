@@ -47,15 +47,20 @@ app.controller('dashboardCtrl', function($scope, $http) {
 app.controller('transactionsCtrl', function($scope, $http) {
 	$scope.positionSelectedIndex = -1;
 	$scope.positionSelected = [];
+	$scope.transactionAddTypeOptions = ["BUY", "SEL", "DIV", "SPL", "CNV"];
+	$scope.transactionAddDate = new Date();
+	$scope.transactionAddType = "";
+	$scope.transactionAddShares = "";
+	$scope.transactionAddPrice = "";
 	
 	$http.get("api/v1/securities").then(function(response) {
 		$scope.securities = response.data;
 	});
 	
-	$scope.loadPositionForSecurityIndex = function(index) {
-		$scope.positionSelectedIndex = index;
-		if (index >= 0 && index < $scope.securities.length) {
-			var secId = index + 1;
+	$scope.loadPositionForSecurityIndex = function(securityIndex) {
+		$scope.positionSelectedIndex = securityIndex;
+		if (securityIndex >= 0 && securityIndex < $scope.securities.length) {
+			var secId = securityIndex + 1;
 			$http.get("api/v1/position/"+secId).then(function(response) {
 				$scope.positionSelected = response.data;
 			});
@@ -63,6 +68,28 @@ app.controller('transactionsCtrl', function($scope, $http) {
 		else {
 			$scope.positionSelected = [];
 		}
+	};
+	
+	$scope.showTransactionAddDialog = function(show) {
+		if (show) {
+			$scope.transactionAddDate = new Date();
+			$scope.transactionAddType = "";
+			$scope.transactionAddShares = "";
+			$scope.transactionAddPrice = "";
+			document.getElementById('modalTranAdd').style.display='block';
+		}
+		else {
+			document.getElementById('modalTranAdd').style.display='none';
+		}
+	};
+	
+	$scope.addTransaction = function() {
+		window.alert("add transaction called: "+$scope.transactionAddDate+" "+$scope.transactionAddType+
+				" "+$scope.transactionAddShares+" "+$scope.transactionAddPrice);
+		
+		$http.post('/someUrl', data, config).then(successCallback, errorCallback);
+		
+		$scope.showTransactionAddDialog(false);
 	};
 	
 });

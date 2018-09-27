@@ -8,13 +8,21 @@
 <!-- Page Content -->
 <div style="margin-left: 200px">
 
-	<div class="w3-container">
-		<h2>{{ securities[positionSelectedIndex].symbol }}</h2>
+	<div ng-show="positionSelectedIndex >= 0"
+		class="w3-container w3-display-container">
+		<h2 class="w3-left-align">{{
+			securities[positionSelectedIndex].symbol }}</h2>
+		<span class="w3-display-topright">
+			<button ng-click="showTransactionAddDialog(true)" class="w3-button w3-grey">+</button>
+			<button class="w3-button w3-grey">&mdash;</button>
+		</span>
 	</div>
 
 	<div class="w3-container">
-		<table ng-show="positionSelectedIndex >= 0" class="w3-table w3-striped">
+		<table ng-show="positionSelectedIndex >= 0"
+			class="w3-table w3-striped">
 			<tr class="w3-grey">
+				<th class="w3-left-align">ID</th>
 				<th class="w3-left-align">Tran Date</th>
 				<th class="w3-center-align">Type</th>
 				<th class="w3-right-align">Tran Shares</th>
@@ -27,7 +35,8 @@
 				<th class="w3-right-align">Total Gain</th>
 
 			</tr>
-			<tr ng-repeat="t in positionSelected.transactions">
+			<tr ng-repeat="t in positionSelected.transactions | orderBy : tranDate : true">
+				<td class="w3-left-align">{{ t.id }}</td>
 				<td class="w3-left-align">{{ t.tranDate | date:'yyyy-MM-dd' }}</td>
 				<td class="w3-center-align">{{ t.type }}</td>
 				<td class="w3-right-align">{{ t.shares }}</td>
@@ -41,6 +50,50 @@
 
 			</tr>
 		</table>
+	</div>
+
+	<!-- Model dialog for Add Transaction -->
+	<div id="modalTranAdd" class="w3-modal">
+		<div class="w3-modal-content">
+			<header class="w3-container w3-black">
+				<span ng-click="showTransactionAddDialog(false)" class="w3-button w3-display-topright">&times;</span>
+				<h2>Add Transaction</h2>
+			</header>
+			
+			<div class="w3-container w3-margin">
+				<form = name="addTransactionForm">
+					<div class="w3-margin">
+						<label>Date</label>
+						<input name="tranDate" ng-model="transactionAddDate" class="w3-input w3-border" type="date" required>
+					</div>
+	
+					<div class="w3-margin">
+						<label>Transaction Type</label>
+						<select name="tranType" ng-model="transactionAddType" class="w3-select" required>
+							<option ng-repeat="tr in transactionAddTypeOptions">{{ tr }}</option>
+						</select>
+					</div>
+					
+					<div class="w3-row-padding">
+						<div class="w3-half">
+							<label>Shares</label> <input name="tranShares" ng-model="transactionAddShares" class="w3-input w3-border" type="number" required>
+						</div>
+						<div class="w3-half">
+							<label>Price</label> <input name="tranPrice" ng-model="transactionAddPrice" class="w3-input w3-border" type="number" required>
+						</div>
+					</div>
+				</form>
+			</div>
+			
+			<footer class="w3-container w3-black">
+				<p class="w3-right-align">
+					<button ng-disabled="!(addTransactionForm.tranDate.$valid && addTransactionForm.tranType.$valid &&
+										 addTransactionForm.tranShares.$valid && addTransactionForm.tranPrice.$valid)" 
+						ng-click="addTransaction()" class="w3-button w3-grey">Add</button>
+					<button ng-click="showTransactionAddDialog(false)" class="w3-button w3-grey">Cancel</button>
+				</p>
+			</footer>
+		</div>
 	</div>
 
 </div>
