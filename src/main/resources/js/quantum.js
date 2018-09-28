@@ -84,12 +84,45 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	};
 	
 	$scope.addTransaction = function() {
-		window.alert("add transaction called: "+$scope.transactionAddDate+" "+$scope.transactionAddType+
+		if ($scope.transactionAddDate == null || $scope.transactionAddType == "" || 
+				$scope.transactionAddShares == "" || $scope.transactionAddPrice == "") {
+			window.alert("Error adding transaction (invalid input): "+$scope.transactionAddDate+" "+$scope.transactionAddType+
 				" "+$scope.transactionAddShares+" "+$scope.transactionAddPrice);
+		}
 		
-		$http.post('/someUrl', data, config).then(successCallback, errorCallback);
+		var secId = $scope.positionSelectedIndex + 1;
+		var data = $.param({
+	            json: JSON.stringify({
+				    secId: secId,
+				    userId: 1,
+				    tranDate: "2018-09-27T14:30:00.000",
+				    type: $scope.transactionAddType,
+				    shares: $scope.transactionAddShares,
+				    price: $scope.transactionAddPrice
+	            })
+		});
+		/*var config = {
+                headers : {
+                    'Content-Type': 'application/json'
+                }
+        };*/
+			
+window.alert(data);
+
+		$http.post("api/v1/transaction", data).then(
+				// Success response
+				function(response) {
+					window.alert("Success adding transaction: "+response.status+"; "+response.statusText);
+				},
+				// Error response
+				function(response) {
+					window.alert("Error adding transaction: "+response.status+"; "+response.statusText);
+				}
+		);
 		
 		$scope.showTransactionAddDialog(false);
+		// refresh transaction view
+		//$scope.loadPositionForSecurityIndex($scope.positionSelectedIndex);
 	};
 	
 });

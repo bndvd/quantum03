@@ -21,7 +21,9 @@ public class Transaction {
 	private BigDecimal realizedGain = BigDecimal.ZERO;
 	private BigDecimal unrealizedGain = BigDecimal.ZERO;
 	
-
+	public Transaction() {
+	}
+	
 	public Transaction(Integer id, Integer secId, Integer userId, Date tranDate, String type, BigDecimal shares,
 			BigDecimal price) {
 		this.id = id;
