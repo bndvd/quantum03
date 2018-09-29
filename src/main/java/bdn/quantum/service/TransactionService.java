@@ -4,9 +4,9 @@ import bdn.quantum.model.Transaction;
 
 public interface TransactionService {
 	
-	Iterable<Transaction> getTransactionsForSecurity(Integer secId);
-	Transaction getTransaction(Integer id);
-	Transaction createTransaction(Transaction tranEntry);
-	void deleteTransaction(Integer id);
+	public Iterable<Transaction> getTransactionsForSecurity(Integer secId);
+	public Transaction getTransaction(Integer id);
+	public Transaction createTransaction(Transaction tranEntry);
+	public void deleteTransaction(Integer id);
 	
 }

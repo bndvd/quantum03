@@ -22,3 +22,9 @@ CREATE TABLE IF NOT EXISTS `quantum`.`basket` (
   `name` VARCHAR(64) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+
+CREATE TABLE IF NOT EXISTS `quantum`.`keyval` (
+  `kvkey` VARCHAR(128) NOT NULL,
+  `kvvalue` VARCHAR(1024) NOT NULL,
+  PRIMARY KEY (`kvkey`),
+  UNIQUE INDEX `kvkey_UNIQUE` (`kvkey` ASC) VISIBLE);

@@ -7,6 +7,7 @@ public final class QuantumConstants {
 	public static final String TABLE_TRANSACTION = "transaction";
 	public static final String TABLE_SECURITY = "security";
 	public static final String TABLE_BASKET = "basket";
+	public static final String TABLE_KEYVAL = "keyval";
 	
 	public static final String TRANSACTION_ID = "id";
 	public static final String TRANSACTION_SEC_ID = "secId";
@@ -22,6 +23,9 @@ public final class QuantumConstants {
 
 	public static final String BASKET_ID = "id";
 	public static final String BASKET_NAME = "name";
+
+	public static final String KEYVAL_KEY = "kvkey";
+	public static final String KEYVAL_VALUE = "kvvalue";
 
 	// Transaction
 	public static final String TRAN_TYPE_BUY = "BUY";
