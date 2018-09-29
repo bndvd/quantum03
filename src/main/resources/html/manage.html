@@ -1,1 +1,40 @@
-Manage page
+	<!-- Sidebar -->
+	<div class="w3-sidebar w3-grey w3-bar-block" style="width: 200px">
+		<p ng-click="showManagePageIndex(1)" class="w3-bar-item w3-button">Target Ratios</p>
+		<p ng-click="showManagePageIndex(2)" class="w3-bar-item w3-button">Settings</p>
+	</div>
+	
+	<!-- Page Content -->
+	<div style="margin-left: 200px">
+
+	<!-- TARGET RATIOS -->
+	<div ng-show="(managePageIndex == 1)"	class="w3-container w3-display-container">
+		<h2 class="w3-left-align">Target Ratios</h2>
+		<span class="w3-display-topright">
+			<button ng-click="saveTargetRatios()" class="w3-button w3-grey">Save</button>
+		</span>
+		
+		<div>
+			<table class="w3-table w3-striped">
+				<tr class="w3-grey">
+					<th>Asset</th>
+					<th>Ratio Factor</th>
+				</tr>
+				<tr ng-repeat="r in manageTargetRatiosByAsset">
+					<td>{{ r.basketName }}</td>
+					<td><input ng-model="r.ratio" type="number" required></td>
+				</tr>
+			</table>
+		</div>
+		
+	</div>
+
+	<!-- SETTINGS -->
+	<div ng-show="(managePageIndex == 2)"	class="w3-container w3-display-container">
+		<h2 class="w3-left-align">Settings</h2>
+		<span class="w3-display-topright">
+			<button ng-click="saveSettings()" class="w3-button w3-grey">Save</button>
+		</span>
+		
+	</div>
+
