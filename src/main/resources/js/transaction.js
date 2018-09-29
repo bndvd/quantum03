@@ -7,6 +7,7 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	$scope.transactionAddType = "";
 	$scope.transactionAddShares = "";
 	$scope.transactionAddPrice = "";
+	$scope.transactionDeleteTran = null;
 	
 	$http({
 		  method: "GET",
@@ -46,6 +47,13 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	};
 	
 	//
+	// reload currently selected Position
+	//
+	$scope.reloadPosition = function() {
+		$scope.loadPositionForSecurityIndex($scope.positionSelectedIndex);
+	};
+	
+	//
 	// Show Add Transaction dialog
 	//
 	$scope.showTransactionAddDialog = function(show) {
@@ -58,6 +66,20 @@ app.controller('transactionsCtrl', function($scope, $http) {
 		}
 		else {
 			document.getElementById('modalTranAdd').style.display='none';
+		}
+	};
+	
+	//
+	// Show Delete Transaction dialog
+	//
+	$scope.showTransactionDeleteDialog = function(show) {
+		if (show) {
+			$scope.transactionDeleteTran = null;
+			document.getElementById('modalTranDelete').style.display='block';
+		}
+		else {
+			document.getElementById('modalTranDelete').style.display='none';
+			$scope.transactionDeleteTran = null;
 		}
 	};
 	
@@ -111,9 +133,34 @@ app.controller('transactionsCtrl', function($scope, $http) {
 
 		
 		$scope.showTransactionAddDialog(false);
-		// refresh transaction view
-		$scope.loadPositionForSecurityIndex($scope.positionSelectedIndex);
+		// refresh transaction view after sleeping for 1 sec to allow post to happen
+		window.setTimeout($scope.reloadPosition, 1000);
 	};
+	
+	
+	//
+	// Delete Transaction
+	//
+	$scope.deleteTransaction = function() {
+		if ($scope.transactionDeleteTran == null) {
+			return;
+		}
+		$http({
+			  method: "DELETE",
+			  url: "api/v1/transaction/" + $scope.transactionDeleteTran.id
+			}).then(
+				function successCallback(response) {
+				},
+				function errorCallback(response) {
+					window.alert("Error deleting transaction: "+response.status);
+				}
+		);
+		$scope.transactionDeleteTran = null;
+		
+		$scope.showTransactionDeleteDialog(false);
+		// refresh transaction view after sleeping for 1 sec to allow post to happen
+		window.setTimeout($scope.reloadPosition, 1000);
+	}
 	
 });
 

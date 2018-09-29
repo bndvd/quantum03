@@ -40,6 +40,12 @@ public class TransactionController {
 		return transactionService.createTransaction(transaction);
 	}
 
+	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.DELETE)
+	public void deleteTransaction(@PathVariable(value="tranId") Integer tranId) {
+		System.out.println("TransactionController.deleteTransaction: tranId=" + tranId);
+		transactionService.deleteTransaction(tranId);
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ServiceError> handle(RuntimeException exc) {
 		ServiceError error = new ServiceError(HttpStatus.OK.value(), exc.getMessage());

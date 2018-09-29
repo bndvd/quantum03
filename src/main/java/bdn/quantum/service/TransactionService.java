@@ -7,5 +7,6 @@ public interface TransactionService {
 	Iterable<Transaction> getTransactionsForSecurity(Integer secId);
 	Transaction getTransaction(Integer id);
 	Transaction createTransaction(Transaction tranEntry);
+	void deleteTransaction(Integer id);
 	
 }
