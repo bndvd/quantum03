@@ -1,10 +1,15 @@
 // Manage Controller
 app.controller('manageCtrl', function($scope, $http) {
+	$scope.MANAGE_PAGE_SECURITIES = 1;
+	$scope.MANAGE_PAGE_RATIOS = 2;
+	$scope.MANAGE_PAGE_SETTINGS = 3;
+	
 	$scope.manageKeyvalMap;
 	$scope.managePageIndex = 0;
 	$scope.manageAssets;
 	$scope.manageTargetRatiosByAsset = null;
 	
+	$scope.manageNewAsset = "";
 	
 	$scope.refreshManageKeyvalMap = function() {
 		$http({
@@ -44,7 +49,7 @@ app.controller('manageCtrl', function($scope, $http) {
 						if (basketRatio == null) {
 							basketRatio = 0;
 						}
-						if (i >= $scope.manageTargetRatiosByAsset) {
+						if (i >= $scope.manageTargetRatiosByAsset.length) {
 							$scope.manageTargetRatiosByAsset.push({
 								basketId : basketId,
 								ratio : basketRatio,
@@ -70,10 +75,48 @@ app.controller('manageCtrl', function($scope, $http) {
 	// Show selected Manage page
 	//
 	$scope.showManagePageIndex = function(pageIndex) {
-		if (pageIndex == 1) {
+		if (pageIndex == $scope.MANAGE_PAGE_RATIOS) {
 			$scope.refreshManageAssetsAndTargetRatios();
 		}
 		$scope.managePageIndex = pageIndex;
+	};
+	
+	//
+	// Save Asset
+	//
+	$scope.saveAsset = function() {
+		if ($scope.manageNewAsset == null || $scope.manageNewAsset.trim() == "") {
+			return;
+		}
+		
+		var data = {
+				basketName : $scope.manageNewAsset
+		};
+	
+		$http({
+		    method: "POST",
+		    url: "api/v1/asset",
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+				},
+				// Error response
+				function errorCallback(response) {
+					window.alert("Error saving new asset: "+response.status+"; "+response.statusText);
+				}
+		);
+
+		$scope.manageNewAsset = "";
+		window.setTimeout($scope.refreshManageAssetsAndTargetRatios, 1000);
+	};
+	
+	//
+	// Save Security
+	//
+	$scope.saveSecurity = function() {
+		
 	};
 	
 	//
@@ -104,7 +147,7 @@ app.controller('manageCtrl', function($scope, $http) {
 			);
 		}
 		window.setTimeout($scope.refreshManageKeyvalMap, 1000);
-		$scope.refreshManageAssetsAndTargetRatios();
+		window.setTimeout($scope.refreshManageAssetsAndTargetRatios, 1000);
 	};
 	
 	//

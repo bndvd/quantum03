@@ -1,14 +1,46 @@
 	<!-- Sidebar -->
 	<div class="w3-sidebar w3-grey w3-bar-block" style="width: 200px">
-		<p ng-click="showManagePageIndex(1)" class="w3-bar-item w3-button">Target Ratios</p>
-		<p ng-click="showManagePageIndex(2)" class="w3-bar-item w3-button">Settings</p>
+		<p ng-click="showManagePageIndex(MANAGE_PAGE_SECURITIES)" class="w3-bar-item w3-button">Securities</p>
+		<p ng-click="showManagePageIndex(MANAGE_PAGE_RATIOS)" class="w3-bar-item w3-button">Target Ratios</p>
+		<p ng-click="showManagePageIndex(MANAGE_PAGE_SETTINGS)" class="w3-bar-item w3-button">Settings</p>
 	</div>
 	
 	<!-- Page Content -->
 	<div style="margin-left: 200px">
 
+
+	<!-- SECURITIES -->
+	<div ng-show="(managePageIndex == MANAGE_PAGE_SECURITIES)"	class="w3-container w3-display-container">
+		<h2 class="w3-left-align">Securities</h2>
+		
+		<div class="w3-container w3-light-grey">
+			<h4>Assets</h4>
+		</div>
+		
+		<div class="w3-margin">
+			<ul class="w3-ul w3-border" style="width:50%">
+				<li ng-repeat="a in manageAssets | orderBy : basketName : true">{{ a.basketName }}</li>
+			</ul>
+		</div>
+		
+		<div class="w3-margin w3-margin-bottom">
+			<form name="addSecurityForm">
+				<input name="newSecurity" ng-model="manageNewAsset" type="text" 
+						value="{{ manageNewAsset }}" class="w3-padding w3-border" style="width:50%" required>
+						
+				<button ng-disabled="!(addSecurityForm.newSecurity.$valid)"
+						ng-click="saveAsset()" class="w3-button w3-grey">+</button>
+			</form>
+		</div>
+		
+		<div class="w3-container w3-light-grey">
+			<h4>Securities</h4>
+		</div>
+		
+	</div>
+
 	<!-- TARGET RATIOS -->
-	<div ng-show="(managePageIndex == 1)"	class="w3-container w3-display-container">
+	<div ng-show="(managePageIndex == MANAGE_PAGE_RATIOS)"	class="w3-container w3-display-container">
 		<h2 class="w3-left-align">Target Ratios</h2>
 		<span class="w3-display-topright">
 			<button ng-click="saveTargetRatios()" class="w3-button w3-grey">Save</button>
@@ -22,7 +54,7 @@
 				</tr>
 				<tr ng-repeat="r in manageTargetRatiosByAsset">
 					<td>{{ r.basketName }}</td>
-					<td><input ng-model="r.ratio" type="number" required></td>
+					<td><input ng-model="r.ratio" type="number" value="{{ r.ratio }}" required></td>
 				</tr>
 			</table>
 		</div>
@@ -30,7 +62,7 @@
 	</div>
 
 	<!-- SETTINGS -->
-	<div ng-show="(managePageIndex == 2)"	class="w3-container w3-display-container">
+	<div ng-show="(managePageIndex == MANAGE_PAGE_SETTINGS)"	class="w3-container w3-display-container">
 		<h2 class="w3-left-align">Settings</h2>
 		<span class="w3-display-topright">
 			<button ng-click="saveSettings()" class="w3-button w3-grey">Save</button>

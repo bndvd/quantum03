@@ -155,6 +155,22 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
+	public Asset createAsset(Asset asset) {
+		if (asset == null) {
+			return null;
+		}
+		BasketEntity be = new BasketEntity();
+		be.setName(asset.getBasketName());
+		
+		be = basketRepository.save(be);
+		Asset result = null;
+		if (be != null) {
+			result = new Asset(be);
+		}
+		return result;
+	}
+
+	@Override
 	public Position getPosition(Integer secId) {
 		Security s = getSecurity(secId);
 		Position result = Position.EMPTY_POSITION;

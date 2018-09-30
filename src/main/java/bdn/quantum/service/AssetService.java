@@ -16,6 +16,7 @@ public interface AssetService {
 	public Security createSecurity(Security security);
 	public Asset getAsset(Integer basketId);
 	public Iterable<Asset> getAssets();
+	public Asset createAsset(Asset asset);
 	public Position getPosition(Integer secId);
 	public Iterable<Position> getPositions(Integer basketId);
 

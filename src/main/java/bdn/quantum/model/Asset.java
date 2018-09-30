@@ -1,7 +1,6 @@
 package bdn.quantum.model;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 //
 // Asset is a rough representation of a Basket, and is a grouping of one or more Positions that 
@@ -11,11 +10,11 @@ public class Asset {
 
 	private Integer basketId;
 	private String basketName;
-	private BigDecimal principal;
-	private BigDecimal totalPrincipal;
-	private BigDecimal lastValue;
-	private BigDecimal realizedGain;
-	private BigDecimal unrealizedGain;
+	private BigDecimal principal = BigDecimal.ZERO;
+	private BigDecimal totalPrincipal = BigDecimal.ZERO;
+	private BigDecimal lastValue = BigDecimal.ZERO;
+	private BigDecimal realizedGain = BigDecimal.ZERO;
+	private BigDecimal unrealizedGain = BigDecimal.ZERO;
 
 	public Asset() {
 	}
@@ -29,6 +28,11 @@ public class Asset {
 		this.lastValue = lastValue;
 		this.realizedGain = realizedGain;
 		this.unrealizedGain = unrealizedGain;
+	}
+	
+	public Asset(BasketEntity be) {
+		this.basketId = be.getId();
+		this.basketName = be.getName();
 	}
 
 	public Integer getBasketId() {

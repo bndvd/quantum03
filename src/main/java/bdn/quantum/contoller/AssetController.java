@@ -50,6 +50,11 @@ public class AssetController {
 		return assetService.getAssets();
 	}
 	
+	@RequestMapping(value = "/asset", method = RequestMethod.POST)
+	public Asset createAsset(@RequestBody Asset asset) {
+		return assetService.createAsset(asset);
+	}
+	
 	@RequestMapping(value = "/position/{secId}", method = RequestMethod.GET)
 	public Position getPosition(@PathVariable(value="secId") Integer secId) {
 		return assetService.getPosition(secId);
