@@ -37,6 +37,12 @@
 			<h4>Securities</h4>
 		</div>
 		
+		<div class="w3-margin">
+			<ul class="w3-ul w3-border" style="width:50%">
+				<li ng-repeat="s in manageSecurities | orderBy : symbol : true">{{ s.symbol }}  ({{ s.basketName }})</li>
+			</ul>
+		</div>
+		
 	</div>
 
 	<!-- TARGET RATIOS -->
@@ -52,7 +58,7 @@
 					<th>Asset</th>
 					<th>Ratio Factor</th>
 				</tr>
-				<tr ng-repeat="r in manageTargetRatiosByAsset">
+				<tr ng-repeat="r in manageTargetRatiosByAsset | orderBy : basketName : true">
 					<td>{{ r.basketName }}</td>
 					<td><input ng-model="r.ratio" type="number" value="{{ r.ratio }}" required></td>
 				</tr>

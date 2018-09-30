@@ -8,6 +8,7 @@ app.controller('manageCtrl', function($scope, $http) {
 	$scope.managePageIndex = 0;
 	$scope.manageAssets;
 	$scope.manageTargetRatiosByAsset = null;
+	$scope.manageSecurities;
 	
 	$scope.manageNewAsset = "";
 	
