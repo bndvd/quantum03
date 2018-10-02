@@ -19,7 +19,9 @@
 		<td class="w3-right-align">{{ a.totalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ a.realizedGain | currency }}</td>
 		<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency }}</td>
-		
+		<td class="w3-right-align">{{ a.targetRatio | number : 3 }}</td>
+		<td class="w3-right-align">{{ a.currentRatio | number : 3 }}</td>
+		<td class="w3-right-align">{{ a.ratioDeltaValue | currency }}</td>
 	</tr>
 	<tr class="w3-grey">
 		<td class="w3-left-align">TOTAL</td>
@@ -29,5 +31,8 @@
 		<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ assetsTotalRealizedGain | currency }}</td>
 		<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency }}</td>
+		<td class="w3-right-align">{{ 1.0 | number : 3 }}</td>
+		<td class="w3-right-align">{{ 1.0 | number : 3 }}</td>
+		<td class="w3-right-align">{{ 0.0 | currency }}</td>
 	</tr>
 </table>
