@@ -35,7 +35,10 @@ public class KeyvalServiceImpl implements KeyvalService {
 	public KeyvalEntity getKeyval(String key) {
 		Optional<KeyvalEntity> t = keyvalRepository.findById(key);
 		
-		KeyvalEntity ke = t.get();
+		KeyvalEntity ke = null;
+		if (t.isPresent()) {
+			ke = t.get();
+		}
 		return ke;
 	}
 

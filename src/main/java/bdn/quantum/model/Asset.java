@@ -16,6 +16,13 @@ public class Asset {
 	private BigDecimal realizedGain = BigDecimal.ZERO;
 	private BigDecimal unrealizedGain = BigDecimal.ZERO;
 
+	// optional elements - present only when all Assets are returned for portfolio and these
+	// statistics can be calculated relative to the portfolio
+	private BigDecimal targetRatio = BigDecimal.ZERO;
+	private BigDecimal currentRatio = BigDecimal.ZERO;
+	private BigDecimal ratioDeltaValue = BigDecimal.ZERO;
+
+	
 	public Asset() {
 	}
 
@@ -89,6 +96,30 @@ public class Asset {
 
 	public void setUnrealizedGain(BigDecimal unrealizedGain) {
 		this.unrealizedGain = unrealizedGain;
+	}
+
+	public BigDecimal getTargetRatio() {
+		return targetRatio;
+	}
+
+	public void setTargetRatio(BigDecimal targetRatio) {
+		this.targetRatio = targetRatio;
+	}
+
+	public BigDecimal getCurrentRatio() {
+		return currentRatio;
+	}
+
+	public void setCurrentRatio(BigDecimal currentRatio) {
+		this.currentRatio = currentRatio;
+	}
+
+	public BigDecimal getRatioDeltaValue() {
+		return ratioDeltaValue;
+	}
+
+	public void setRatioDeltaValue(BigDecimal ratioDeltaValue) {
+		this.ratioDeltaValue = ratioDeltaValue;
 	}
 
 	@Override

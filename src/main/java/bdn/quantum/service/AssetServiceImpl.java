@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.QuantumProperties;
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
+import bdn.quantum.model.KeyvalEntity;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Security;
 import bdn.quantum.model.SecurityEntity;
@@ -33,6 +35,8 @@ public class AssetServiceImpl implements AssetService {
 	@Autowired
 	private TransactionService transactionService;
 	@Autowired
+	private KeyvalService keyvalService;
+	@Autowired
 	private StockPriceService stockPriceService;
 
 	@Autowired
@@ -53,7 +57,10 @@ public class AssetServiceImpl implements AssetService {
 	public BasketEntity getBasket(Integer id) {
 		Optional<BasketEntity> b = basketRepository.findById(id);
 
-		BasketEntity result = b.get();
+		BasketEntity result = null;
+		if (b.isPresent()) {
+			result = b.get();
+		}
 		return result;
 	}
 
@@ -65,9 +72,12 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public Security getSecurity(Integer id) {
 		Optional<SecurityEntity> s = securityRepository.findById(id);
-		SecurityEntity se = s.get();
-
-		Security result = new Security(se);
+		
+		Security result = null;
+		if (s.isPresent()) {
+			SecurityEntity se = s.get();
+			result = new Security(se);
+		}
 		return result;
 	}
 
@@ -158,8 +168,58 @@ public class AssetServiceImpl implements AssetService {
 			}
 		}
 		result.sort(assetComparator);
+		
+		computeAssetStatistics(result);
 
 		return result;
+	}
+	
+	// compute asset statistics in context of portfolio
+	private void computeAssetStatistics(List<Asset> assets) {
+		if (assets == null || assets.size() < 1) {
+			return;
+		}
+		
+		BigDecimal valueSum = BigDecimal.ZERO;
+		BigDecimal targetRatioSum = BigDecimal.ZERO;
+		BigDecimal[] targetRatios = new BigDecimal[assets.size()];
+		for (int i = 0; i < targetRatios.length; i++) {
+			targetRatios[i] = BigDecimal.ZERO;
+		}
+		try {
+			for (int i = 0; i < assets.size(); i++) {
+				valueSum = valueSum.add(assets.get(i).getLastValue());
+				
+				Integer basketId = assets.get(i).getBasketId();
+				StringBuffer key = new StringBuffer();
+				key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.TARGET_RATIO);
+				key.append(basketId);
+				
+				KeyvalEntity ratioVal = keyvalService.getKeyval(key.toString());
+				if (ratioVal != null && ratioVal.getValue() != null && !ratioVal.getValue().equals("")) {
+					String ratioStr = ratioVal.getValue();
+					targetRatios[i] = new BigDecimal(ratioStr);
+					targetRatioSum = targetRatioSum.add(targetRatios[i]);
+				}
+			}
+			
+			// if we have non-zero target ratios
+			if (targetRatioSum.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+				for (int i = 0; i < assets.size(); i++) {
+					BigDecimal tr = targetRatios[i].divide(targetRatioSum,
+							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					assets.get(i).setTargetRatio(tr);
+					BigDecimal cr = assets.get(i).getLastValue().divide(valueSum,
+							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					assets.get(i).setCurrentRatio(cr);
+					BigDecimal deltaValue = cr.subtract(tr).multiply(valueSum);
+					assets.get(i).setRatioDeltaValue(deltaValue);
+				}
+			}
+		}
+		catch (Exception exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	@Override

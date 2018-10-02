@@ -42,10 +42,12 @@ public class TransactionServiceImpl implements TransactionService {
 	public Transaction getTransaction(Integer id) {
 		Optional<TranEntity> t = transactionRepository.findById(id);
 		
-		TranEntity te = t.get();
 		Transaction result = null;
-		if (te != null) {
-			result = new Transaction(te);
+		if (t.isPresent()) {
+			TranEntity te = t.get();
+			if (te != null) {
+				result = new Transaction(te);
+			}
 		}
 		return result;
 	}
