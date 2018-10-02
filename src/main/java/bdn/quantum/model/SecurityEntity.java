@@ -24,7 +24,8 @@ public class SecurityEntity {
 	private String symbol;
 	
 	
-	public SecurityEntity() {}
+	public SecurityEntity() {
+	}
 	
 	public SecurityEntity(Integer id, Integer basketId, String symbol) {
 		this.id = id;

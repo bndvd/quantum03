@@ -10,6 +10,9 @@ public class Security {
 	private String symbol;
 	
 	
+	public Security() {
+	}
+	
 	public Security(Integer id, Integer basketId, String symbol) {
 		this.id = id;
 		this.basketId = basketId;

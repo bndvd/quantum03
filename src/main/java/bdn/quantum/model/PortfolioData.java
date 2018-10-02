@@ -10,7 +10,8 @@ public class PortfolioData {
 	private Iterable<Security> securities;
 	private Iterable<Transaction> transactions;
 	
-	public PortfolioData() {}
+	public PortfolioData() {
+	}
 	
 	public PortfolioData(Iterable<BasketEntity> basketEntities, Iterable<Security> securities, Iterable<Transaction> transactions) {
 		setBasketEntities(basketEntities);

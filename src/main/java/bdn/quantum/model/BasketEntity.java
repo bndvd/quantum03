@@ -20,7 +20,8 @@ public class BasketEntity {
 	@Column(name = QuantumConstants.BASKET_NAME)
 	private String name;
 
-	public BasketEntity() {}
+	public BasketEntity() {
+	}
 	
 	public BasketEntity(Integer id, String name) {
 		this.id = id;

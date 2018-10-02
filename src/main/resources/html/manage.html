@@ -9,7 +9,7 @@
 	<div style="margin-left: 200px">
 
 
-	<!-- SECURITIES -->
+	<!-- ASSETS & SECURITIES -->
 	<div ng-show="(managePageIndex == MANAGE_PAGE_SECURITIES)"	class="w3-container w3-display-container">
 		<h2 class="w3-left-align">Securities</h2>
 		
@@ -24,11 +24,12 @@
 		</div>
 		
 		<div class="w3-margin w3-margin-bottom">
-			<form name="addSecurityForm">
-				<input name="newSecurity" ng-model="manageNewAsset" type="text" 
-						value="{{ manageNewAsset }}" class="w3-padding w3-border" style="width:50%" required>
+			<form name="addAssetForm">
+				<input name="newAsset" ng-model="manageNewAsset" type="text" 
+						value="{{ manageNewAsset }}" class="w3-padding w3-border" style="width:50%"
+						placeholder="Enter asset name" required>
 						
-				<button ng-disabled="!(addSecurityForm.newSecurity.$valid)"
+				<button ng-disabled="!(addAssetForm.newAsset.$valid)"
 						ng-click="saveAsset()" class="w3-button w3-grey">+</button>
 			</form>
 		</div>
@@ -41,6 +42,21 @@
 			<ul class="w3-ul w3-border" style="width:50%">
 				<li ng-repeat="s in manageSecurities | orderBy : symbol : true">{{ s.symbol }}  ({{ s.basketName }})</li>
 			</ul>
+		</div>
+		
+		<div class="w3-margin w3-margin-bottom">
+			<form name="addSecurityForm">
+				<select name="newSecurityBasket" ng-model="manageNewSecurityBasketId" class="w3-select" style="width:30%" required>
+					<option value="" selected disabled hidden>Select asset</option>
+					<option ng-repeat="a in manageAssets | orderBy : basketName : true" value="{{ a.basketId }}">{{ a.basketName }}</option>
+				</select>
+				<input name="newSecurity" ng-model="manageNewSecurity" type="text" 
+						value="{{ manageNewSecurity }}" class="w3-padding w3-border" style="width:50%"
+						placeholder="Enter security ticker symbol" required>
+						
+				<button ng-disabled="!(addSecurityForm.newSecurity.$valid && addSecurityForm.newSecurityBasket.$valid)"
+						ng-click="saveSecurity()" class="w3-button w3-grey">+</button>
+			</form>
 		</div>
 		
 	</div>
