@@ -1,6 +1,6 @@
 // Transaction Controller
 app.controller('transactionsCtrl', function($scope, $http) {
-	$scope.positionSelectedIndex = -1;
+	$scope.positionSelectedPageIndex = -1;
 	$scope.positionSelected = [];
 	$scope.transactionAddTypeOptions = ["BUY", "SEL", "DIV", "SPL", "CNV"];
 	$scope.transactionAddDate = new Date();
@@ -24,10 +24,10 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	//
 	// Load the transactions for a given Position
 	//
-	$scope.loadPositionForSecurityIndex = function(securityIndex) {
-		$scope.positionSelectedIndex = securityIndex;
-		if (securityIndex >= 0 && securityIndex < $scope.securities.length) {
-			var secId = securityIndex + 1;
+	$scope.loadPositionForPageIndex = function(pageIndex) {
+		$scope.positionSelectedPageIndex = pageIndex;
+		if (pageIndex >= 0 && pageIndex < $scope.securities.length) {
+			var secId = $scope.securities[pageIndex].id;
 			$http({
 				  method: "GET",
 				  url: "api/v1/position/"+secId
@@ -50,7 +50,7 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	// reload currently selected Position
 	//
 	$scope.reloadPosition = function() {
-		$scope.loadPositionForSecurityIndex($scope.positionSelectedIndex);
+		$scope.loadPositionForPageIndex($scope.positionSelectedPageIndex);
 	};
 	
 	//
@@ -88,12 +88,13 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	//
 	$scope.addTransaction = function() {
 		if ($scope.transactionAddDate == null || $scope.transactionAddType == "" || 
-				$scope.transactionAddShares == "" || $scope.transactionAddPrice == "") {
+				$scope.transactionAddShares == "" || $scope.transactionAddPrice == "" ||
+				$scope.positionSelectedPageIndex < 0 || $scope.positionSelectedPageIndex >= $scope.securities.length) {
 			window.alert("Error adding transaction (invalid input): "+$scope.transactionAddDate+" "+$scope.transactionAddType+
 				" "+$scope.transactionAddShares+" "+$scope.transactionAddPrice);
 		}
 		
-		var secId = $scope.positionSelectedIndex + 1;
+		var secId = $scope.securities[$scope.positionSelectedPageIndex].id;
 		var year = $scope.transactionAddDate.getFullYear();
 		var month = $scope.transactionAddDate.getMonth() + 1;
 		var monthStr = "" + month;

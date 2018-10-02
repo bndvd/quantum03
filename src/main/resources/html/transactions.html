@@ -1,17 +1,16 @@
 	<!-- Sidebar -->
 	<div class="w3-sidebar w3-grey w3-bar-block" style="width: 200px">
 		<p ng-repeat="s in securities track by $index"
-			ng-click="loadPositionForSecurityIndex($index)"
+			ng-click="loadPositionForPageIndex($index)"
 			class="w3-bar-item w3-button">{{ s.symbol }}</p>
 	</div>
 	
 	<!-- Page Content -->
 	<div style="margin-left: 200px">
 
-	<div ng-show="positionSelectedIndex >= 0"
+	<div ng-show="positionSelectedPageIndex >= 0"
 		class="w3-container w3-display-container">
-		<h2 class="w3-left-align">{{
-			securities[positionSelectedIndex].symbol }}</h2>
+		<h2 class="w3-left-align">{{ securities[positionSelectedPageIndex].symbol }}</h2>
 		<span class="w3-display-topright">
 			<button ng-click="showTransactionAddDialog(true)" class="w3-button w3-grey">+</button>
 			<button ng-click="showTransactionDeleteDialog(true)" class="w3-button w3-grey">&mdash;</button>
@@ -19,7 +18,7 @@
 	</div>
 
 	<div class="w3-container">
-		<table ng-show="positionSelectedIndex >= 0" class="w3-table w3-striped">
+		<table ng-show="positionSelectedPageIndex >= 0" class="w3-table w3-striped">
 			<tr class="w3-grey">
 				<th class="w3-left-align">ID</th>
 				<th class="w3-left-align">Tran Date</th>
