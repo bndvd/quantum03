@@ -15,9 +15,10 @@ import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Security;
 import bdn.quantum.model.SecurityEntity;
-import bdn.quantum.model.TranEntity;
 import bdn.quantum.model.Transaction;
+import bdn.quantum.model.util.AssetComparator;
 import bdn.quantum.model.util.PositionComparator;
+import bdn.quantum.model.util.SecurityComparator;
 import bdn.quantum.model.util.TransactionComparator;
 import bdn.quantum.repository.BasketRepository;
 import bdn.quantum.repository.SecurityRepository;
@@ -26,18 +27,22 @@ import bdn.quantum.repository.SecurityRepository;
 public class AssetServiceImpl implements AssetService {
 
 	@Autowired
-	BasketRepository basketRepository;
+	private BasketRepository basketRepository;
 	@Autowired
-	SecurityRepository securityRepository;
+	private SecurityRepository securityRepository;
 	@Autowired
-	TransactionService transactionService;
+	private TransactionService transactionService;
 	@Autowired
-	StockPriceService stockPriceService;
+	private StockPriceService stockPriceService;
 
 	@Autowired
-	TransactionComparator transactionComparator;
+	private PositionComparator positionComparator;
 	@Autowired
-	PositionComparator positionComparator;
+	private AssetComparator assetComparator;
+	@Autowired
+	private SecurityComparator securityComparator;
+	@Autowired
+	private TransactionComparator transactionComparator;
 
 	@Override
 	public Iterable<BasketEntity> getBaskets() {
@@ -69,13 +74,13 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public Iterable<Security> getSecurities() {
 		Iterable<SecurityEntity> seIter = securityRepository.findAll();
-		return convertSecurityEntityIterableToSecurityIterable(seIter);
+		return convertSecurityEntityIterableToSortedSecurityIterable(seIter);
 	}
 
 	@Override
 	public Iterable<Security> getSecuritiesInBasket(Integer basketId) {
 		Iterable<SecurityEntity> seIter = securityRepository.findByBasketId(basketId);
-		return convertSecurityEntityIterableToSecurityIterable(seIter);
+		return convertSecurityEntityIterableToSortedSecurityIterable(seIter);
 	}
 
 	@Override
@@ -93,12 +98,14 @@ public class AssetServiceImpl implements AssetService {
 		return result;
 	}
 
-	private Iterable<Security> convertSecurityEntityIterableToSecurityIterable(Iterable<SecurityEntity> seIter) {
+	private Iterable<Security> convertSecurityEntityIterableToSortedSecurityIterable(Iterable<SecurityEntity> seIter) {
 		List<Security> result = new ArrayList<>();
 		for (SecurityEntity se : seIter) {
 			Security s = new Security(se);
 			result.add(s);
 		}
+		result.sort(securityComparator);
+		
 		return result;
 	}
 
@@ -150,6 +157,7 @@ public class AssetServiceImpl implements AssetService {
 				result.add(a);
 			}
 		}
+		result.sort(assetComparator);
 
 		return result;
 	}

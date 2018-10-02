@@ -11,7 +11,7 @@
 		<th>Curr Ratio</th>
 		<th>Delta</th>
 	</tr>
-	<tr ng-repeat="a in assets | orderBy : basketName : true">
+	<tr ng-repeat="a in assets">
 		<td class="w3-left-align">{{ a.basketName }}</td>
 		<td class="w3-right-align">{{ a.principal | currency }}</td>
 		<td class="w3-right-align">{{ a.lastValue | currency }}</td>

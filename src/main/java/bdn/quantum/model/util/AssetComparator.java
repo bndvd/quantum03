@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import bdn.quantum.model.Asset;
 
-@Service("positionComparator")
+@Service("assetComparator")
 public class AssetComparator implements Comparator<Asset> {
 
 	@Override

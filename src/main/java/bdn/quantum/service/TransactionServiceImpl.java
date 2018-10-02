@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.TranEntity;
 import bdn.quantum.model.Transaction;
+import bdn.quantum.model.util.TransactionComparator;
 import bdn.quantum.repository.TransactionRepository;
 
 @Service("transactionService")
@@ -18,6 +19,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private TransactionRepository transactionRepository;
+	
+	@Autowired
+	private TransactionComparator transactionComparator;
+
 	
 	@Override
 	public Iterable<Transaction> getTransactionsForSecurity(Integer secId) {
@@ -28,6 +33,8 @@ public class TransactionServiceImpl implements TransactionService {
 			Transaction t = new Transaction(te);
 			result.add(t);
 		}
+		result.sort(transactionComparator);
+		
 		return result;
 	}
 
