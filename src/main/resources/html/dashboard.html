@@ -1,9 +1,10 @@
 <table class="w3-table w3-striped">
-	<tr class="w3-grey">
+	<tr class="w3-black">
 		<th>Asset</th>
 		<th>Principal</th>
 		<th>Value</th>
 		<th>Unrlzd Gain</th>
+		<th></th>
 		<th>Tot Principal</th>
 		<th>Rlzd Gain</th>
 		<th>Total Gain</th>
@@ -16,6 +17,7 @@
 		<td class="w3-right-align">{{ a.principal | currency }}</td>
 		<td class="w3-right-align">{{ a.lastValue | currency }}</td>
 		<td class="w3-right-align">{{ a.unrealizedGain | currency }}</td>
+		<td></td>
 		<td class="w3-right-align">{{ a.totalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ a.realizedGain | currency }}</td>
 		<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency }}</td>
@@ -28,6 +30,7 @@
 		<td class="w3-right-align">{{ assetsTotalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ assetsTotalLastValue | currency }}</td>
 		<td class="w3-right-align">{{ assetsTotalUnrealizedGain | currency }}</td>
+		<td></td>
 		<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency }}</td>
 		<td class="w3-right-align">{{ assetsTotalRealizedGain | currency }}</td>
 		<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency }}</td>

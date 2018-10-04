@@ -26,6 +26,9 @@ app.controller('manageCtrl', function($scope, $http) {
 					for (i = 0; i < response.data.length; i++) {
 						$scope.manageKeyvalMap[response.data[i].key] = response.data[i].value;
 					}
+
+					// read in specific values from keyval map
+					$scope.propTaxRate = $scope.manageKeyvalMap["pr.tax"];
 				},
 				function errorCallback(response) {
 					window.alert("Error loading manage keyvals: "+response.status);
@@ -234,7 +237,31 @@ app.controller('manageCtrl', function($scope, $http) {
 	// Save Settings
 	//
 	$scope.saveSettings = function() {
+		if ($scope.propTaxRate == null || $scope.propTaxRate == "" ||
+				! Number.isFinite($scope.propTaxRate)) {
+			return;
+		}
 		
+		var data = {
+			    key: "pr.tax",
+			    value: $scope.propTaxRate
+		};
+		$http({
+		    method: "POST",
+		    url: "api/v1/keyval",
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+				},
+				// Error response
+				function errorCallback(response) {
+					window.alert("Error saving property tax rate: "+response.status+"; "+response.statusText);
+				}
+		);
+		
+		window.setTimeout($scope.refreshManageKeyvalMap, 1000);
 	};
 	
 });
