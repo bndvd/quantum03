@@ -11,8 +11,9 @@ import bdn.quantum.QuantumConstants;
 //
 public class Position {
 
-	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-			BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new ArrayList<Transaction>());
+	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO,
+			BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+			BigDecimal.ZERO, new ArrayList<Transaction>());
 
 	private Integer secId;
 	private String symbol;
@@ -20,6 +21,8 @@ public class Position {
 	private BigDecimal totalPrincipal; // all money invested historically whether realized or unrealized gain
 	private BigDecimal shares;
 	private BigDecimal realizedGain; // profit/loss realized from sales of security or dividends
+	private BigDecimal realizedGainYtd;
+	private BigDecimal realizedGainYtdTax;
 	private BigDecimal unrealizedGain;
 	private BigDecimal lastPrice;
 	private BigDecimal lastValue;
@@ -29,13 +32,16 @@ public class Position {
 	}
 
 	public Position(Integer secId, String symbol, BigDecimal principal, BigDecimal totalPrincipal, BigDecimal shares,
-			BigDecimal realizedGain, BigDecimal unrealizedGain, BigDecimal lastPrice, BigDecimal lastValue, List<Transaction> transactions) {
+			BigDecimal realizedGain, BigDecimal realizedGainYtd, BigDecimal realizedGainYtdTax, BigDecimal unrealizedGain,
+			BigDecimal lastPrice, BigDecimal lastValue, List<Transaction> transactions) {
 		setSecId(secId);
 		setSymbol(symbol);
 		setPrincipal(principal);
 		setTotalPrincipal(totalPrincipal);
 		setShares(shares);
 		setRealizedGain(realizedGain);
+		setRealizedGainYtd(realizedGainYtd);
+		setRealizedGainYtdTax(realizedGainYtdTax);
 		setUnrealizedGain(unrealizedGain);
 		setLastPrice(lastPrice);
 		setLastValue(lastValue);
@@ -130,6 +136,22 @@ public class Position {
 
 	public void setLastValue(BigDecimal lastValue) {
 		this.lastValue = lastValue;
+	}
+
+	public BigDecimal getRealizedGainYtd() {
+		return realizedGainYtd;
+	}
+
+	public void setRealizedGainYtd(BigDecimal realizedGainYtd) {
+		this.realizedGainYtd = realizedGainYtd;
+	}
+
+	public BigDecimal getRealizedGainYtdTax() {
+		return realizedGainYtdTax;
+	}
+
+	public void setRealizedGainYtdTax(BigDecimal realizedGainYtdTax) {
+		this.realizedGainYtdTax = realizedGainYtdTax;
 	}
 
 	@Override

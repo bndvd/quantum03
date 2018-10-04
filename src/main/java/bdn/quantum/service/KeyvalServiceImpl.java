@@ -43,6 +43,19 @@ public class KeyvalServiceImpl implements KeyvalService {
 	}
 
 	@Override
+	public String getKeyvalStr(String key) {
+		String result = null;
+		if (key != null && ! key.trim().equals("")) {
+			KeyvalEntity ke = getKeyval(key);
+			if (ke != null && ke.getValue() != null && !ke.getValue().trim().equals("")) {
+				result = ke.getValue().trim();
+			}
+		}
+		
+		return result;
+	}
+
+	@Override
 	public void deleteKeyval(String key) {
 		keyvalRepository.deleteById(key);
 	}

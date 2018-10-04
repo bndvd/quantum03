@@ -8,6 +8,8 @@ import java.util.Date;
 //
 public class Transaction {
 
+	private static final Date CURRENT_DATE = new Date();
+	
 	private Integer id;
 	private Integer secId;
 	private Integer userId;
@@ -69,6 +71,14 @@ public class Transaction {
 
 	public void setTranDate(Date tranDate) {
 		this.tranDate = tranDate;
+	}
+	
+	public boolean isInCurrentYear() {
+		boolean result = false;
+		if (tranDate != null) {
+			result = (tranDate.getYear() == CURRENT_DATE.getYear());
+		}
+		return result;
 	}
 
 	public String getType() {

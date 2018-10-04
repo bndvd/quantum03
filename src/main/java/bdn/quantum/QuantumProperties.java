@@ -6,4 +6,6 @@ public final class QuantumProperties {
 	
 	public static final String TARGET_RATIO = "tr.";
 	
+	public static final String TAX_RATE = "tax";
+	
 }

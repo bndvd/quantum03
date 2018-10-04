@@ -13,7 +13,6 @@ import bdn.quantum.QuantumConstants;
 import bdn.quantum.QuantumProperties;
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
-import bdn.quantum.model.KeyvalEntity;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Security;
 import bdn.quantum.model.SecurityEntity;
@@ -130,6 +129,8 @@ public class AssetServiceImpl implements AssetService {
 			BigDecimal totalPrincipal = BigDecimal.ZERO;
 			BigDecimal lastValue = BigDecimal.ZERO;
 			BigDecimal realizedGain = BigDecimal.ZERO;
+			BigDecimal realizedGainYtd = BigDecimal.ZERO;
+			BigDecimal realizedGainYtdTax = BigDecimal.ZERO;
 			BigDecimal unrealizedGain = BigDecimal.ZERO;
 
 			Iterable<Position> positionIter = getPositions(basketId);
@@ -145,11 +146,13 @@ public class AssetServiceImpl implements AssetService {
 					lastValue = lastValue.add(positionValue);
 				}
 				realizedGain = realizedGain.add(p.getRealizedGain());
+				realizedGainYtd = realizedGainYtd.add(p.getRealizedGainYtd());
+				realizedGainYtdTax = realizedGainYtdTax.add(p.getRealizedGainYtdTax());
 				unrealizedGain = unrealizedGain.add(p.getUnrealizedGain());
 			}
 
 			result = new Asset(basketId, basketName, principal, totalPrincipal, lastValue, realizedGain,
-					unrealizedGain);
+					realizedGainYtd, realizedGainYtdTax, unrealizedGain);
 		}
 
 		return result;
@@ -195,9 +198,8 @@ public class AssetServiceImpl implements AssetService {
 				key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.TARGET_RATIO);
 				key.append(basketId);
 				
-				KeyvalEntity ratioVal = keyvalService.getKeyval(key.toString());
-				if (ratioVal != null && ratioVal.getValue() != null && !ratioVal.getValue().equals("")) {
-					String ratioStr = ratioVal.getValue();
+				String ratioStr = keyvalService.getKeyvalStr(key.toString());
+				if (ratioStr != null) {
 					targetRatios[i] = new BigDecimal(ratioStr);
 					targetRatioSum = targetRatioSum.add(targetRatios[i]);
 				}
@@ -244,12 +246,25 @@ public class AssetServiceImpl implements AssetService {
 		Position result = Position.EMPTY_POSITION;
 
 		if (s != null) {
+			BigDecimal taxRate = BigDecimal.ZERO;
+			String taxRateStr = keyvalService.getKeyvalStr(QuantumProperties.PROP_PREFIX + QuantumProperties.TAX_RATE);
+			if (taxRateStr != null) {
+				try {
+					taxRate = new BigDecimal(taxRateStr);
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
+					taxRate = BigDecimal.ZERO;
+				}
+			}
+			
 			String symbol = s.getSymbol();
 			BigDecimal tPrice = BigDecimal.ZERO;
 			BigDecimal principal = BigDecimal.ZERO;
 			BigDecimal totalPrincipal = BigDecimal.ZERO;
 			BigDecimal shares = BigDecimal.ZERO;
 			BigDecimal realizedGain = BigDecimal.ZERO;
+			BigDecimal realizedGainYtd = BigDecimal.ZERO;
 
 			Iterable<Transaction> tranIter = transactionService.getTransactionsForSecurity(secId);
 			List<Transaction> transactions = new ArrayList<>();
@@ -273,17 +288,29 @@ public class AssetServiceImpl implements AssetService {
 					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
 					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).subtract(costOfSharesSold);
 					realizedGain = realizedGain.add(transactionProfit);
+					// if transaction is in this year, add to realized gain YTD
+					if (t.isInCurrentYear()) {
+						realizedGainYtd = realizedGainYtd.add(transactionProfit);
+					}
 
 					principal = principal.subtract(costOfSharesSold);
 					shares = shares.subtract(t.getShares());
-				} else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
+				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
 					// do not update tPrice - since we want to use tPrice from previous transaction
 					// in the DIV case
-					realizedGain = realizedGain.add(t.getPrice().multiply(t.getShares()));
-				} else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
+					BigDecimal dividend = t.getPrice().multiply(t.getShares());
+					realizedGain = realizedGain.add(dividend);
+					// if transaction is in this year, add to realized gain YTD
+					if (t.isInCurrentYear()) {
+						realizedGainYtd = realizedGainYtd.add(dividend);
+					}
+				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
 					tPrice = t.getPrice();
 					shares = shares.multiply(t.getShares());
-				} else if (t.getType().equals(QuantumConstants.TRAN_TYPE_CONVERSION)) {
+				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_CONVERSION)) {
 					tPrice = t.getPrice();
 					shares = t.getShares();
 				}
@@ -305,8 +332,10 @@ public class AssetServiceImpl implements AssetService {
 			BigDecimal lastValue = lastStockPrice.multiply(shares);
 			BigDecimal unrealizedGain = lastValue.subtract(principal);
 
-			result = new Position(secId, symbol, principal, totalPrincipal, shares, realizedGain, unrealizedGain,
-					lastStockPrice, lastValue, transactions);
+			BigDecimal realizedGainYtdTax = realizedGainYtd.multiply(taxRate);
+			
+			result = new Position(secId, symbol, principal, totalPrincipal, shares, realizedGain, realizedGainYtd,
+					realizedGainYtdTax, unrealizedGain, lastStockPrice, lastValue, transactions);
 		}
 
 		return result;

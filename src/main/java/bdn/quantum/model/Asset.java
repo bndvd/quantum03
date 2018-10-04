@@ -14,6 +14,8 @@ public class Asset {
 	private BigDecimal totalPrincipal = BigDecimal.ZERO;
 	private BigDecimal lastValue = BigDecimal.ZERO;
 	private BigDecimal realizedGain = BigDecimal.ZERO;
+	private BigDecimal realizedGainYtd = BigDecimal.ZERO;
+	private BigDecimal realizedGainYtdTax = BigDecimal.ZERO;
 	private BigDecimal unrealizedGain = BigDecimal.ZERO;
 
 	// optional elements - present only when all Assets are returned for portfolio and these
@@ -27,13 +29,15 @@ public class Asset {
 	}
 
 	public Asset(Integer basketId, String basketName, BigDecimal principal, BigDecimal totalPrincipal, BigDecimal lastValue,
-			BigDecimal realizedGain, BigDecimal unrealizedGain) {
+			BigDecimal realizedGain, BigDecimal realizedGainYtd, BigDecimal realizedGainYtdTax, BigDecimal unrealizedGain) {
 		this.basketId = basketId;
 		this.basketName = basketName;
 		this.principal = principal;
 		this.totalPrincipal = totalPrincipal;
 		this.lastValue = lastValue;
 		this.realizedGain = realizedGain;
+		this.realizedGainYtd = realizedGainYtd;
+		this.realizedGainYtdTax = realizedGainYtdTax;
 		this.unrealizedGain = unrealizedGain;
 	}
 	
@@ -120,6 +124,22 @@ public class Asset {
 
 	public void setRatioDeltaValue(BigDecimal ratioDeltaValue) {
 		this.ratioDeltaValue = ratioDeltaValue;
+	}
+
+	public BigDecimal getRealizedGainYtd() {
+		return realizedGainYtd;
+	}
+
+	public void setRealizedGainYtd(BigDecimal realizedGainYtd) {
+		this.realizedGainYtd = realizedGainYtd;
+	}
+
+	public BigDecimal getRealizedGainYtdTax() {
+		return realizedGainYtdTax;
+	}
+
+	public void setRealizedGainYtdTax(BigDecimal realizedGainYtdTax) {
+		this.realizedGainYtdTax = realizedGainYtdTax;
 	}
 
 	@Override
