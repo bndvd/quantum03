@@ -242,6 +242,10 @@ public class AssetServiceImpl implements AssetService {
 
 	@Override
 	public Position getPosition(Integer secId) {
+		return getPosition(secId, true);
+	}
+	
+	private Position getPosition(Integer secId, boolean includeTransactions) {
 		Security s = getSecurity(secId);
 		Position result = Position.EMPTY_POSITION;
 
@@ -334,10 +338,32 @@ public class AssetServiceImpl implements AssetService {
 
 			BigDecimal realizedGainYtdTax = realizedGainYtd.multiply(taxRate);
 			
+			List<Transaction> transactionList = null;
+			if (includeTransactions) {
+				transactionList = transactions;
+			}
+			
 			result = new Position(secId, symbol, principal, totalPrincipal, shares, realizedGain, realizedGainYtd,
-					realizedGainYtdTax, unrealizedGain, lastStockPrice, lastValue, transactions);
+					realizedGainYtdTax, unrealizedGain, lastStockPrice, lastValue, transactionList);
 		}
 
+		return result;
+	}
+
+	@Override
+	public Iterable<Position> getPositions() {
+		List<Position> result = new ArrayList<>();
+
+		Iterable<SecurityEntity> securities = securityRepository.findAll();
+		for (SecurityEntity s : securities) {
+			Integer secId = s.getId();
+			Position p = getPosition(secId, false);
+			if (p != Position.EMPTY_POSITION) {
+				result.add(p);
+			}
+		}
+
+		result.sort(positionComparator);
 		return result;
 	}
 
@@ -348,7 +374,7 @@ public class AssetServiceImpl implements AssetService {
 		Iterable<SecurityEntity> securities = securityRepository.findByBasketId(basketId);
 		for (SecurityEntity s : securities) {
 			Integer secId = s.getId();
-			Position p = getPosition(secId);
+			Position p = getPosition(secId, false);
 			if (p != Position.EMPTY_POSITION) {
 				result.add(p);
 			}

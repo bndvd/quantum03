@@ -60,6 +60,11 @@ public class AssetController {
 		return assetService.getPosition(secId);
 	}
 	
+	@RequestMapping(value = "/positions", method = RequestMethod.GET)
+	public Iterable<Position> getPositions() {
+		return assetService.getPositions();
+	}
+	
 	@RequestMapping(value = "/positions/{basketId}", method = RequestMethod.GET)
 	public Iterable<Position> getPositions(@PathVariable(value="basketId") Integer basketId) {
 		return assetService.getPositions(basketId);

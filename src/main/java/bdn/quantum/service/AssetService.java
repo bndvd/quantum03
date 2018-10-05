@@ -18,6 +18,7 @@ public interface AssetService {
 	public Iterable<Asset> getAssets();
 	public Asset createAsset(Asset asset);
 	public Position getPosition(Integer secId);
+	public Iterable<Position> getPositions();
 	public Iterable<Position> getPositions(Integer basketId);
 
 }

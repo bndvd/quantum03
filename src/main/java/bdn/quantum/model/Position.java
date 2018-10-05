@@ -13,7 +13,7 @@ public class Position {
 
 	public static final Position EMPTY_POSITION = new Position(0, "", BigDecimal.ZERO, BigDecimal.ZERO,
 			BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-			BigDecimal.ZERO, new ArrayList<Transaction>());
+			BigDecimal.ZERO, null);
 
 	private Integer secId;
 	private String symbol;
