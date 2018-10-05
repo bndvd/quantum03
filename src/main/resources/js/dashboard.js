@@ -1,5 +1,6 @@
 // Dashboard Controller
 app.controller('dashboardCtrl', function($scope, $http) {
+	$scope.assets = [];
 	$scope.assetsTotalPrincipal = 0.0;
 	$scope.assetsTotalLastValue = 0.0;
 	$scope.assetsTotalUnrealizedGain = 0.0;
@@ -7,6 +8,8 @@ app.controller('dashboardCtrl', function($scope, $http) {
 	$scope.assetsTotalRealizedGainYtd = 0.0;
 	$scope.assetsTotalRealizedGainYtdTax = 0.0;
 	$scope.assetsTotalTotalPrincipal = 0.0;
+	
+	$scope.positions = [];
 
 	$http({
 		  method: "GET",
@@ -26,6 +29,18 @@ app.controller('dashboardCtrl', function($scope, $http) {
 			},
 			function errorCallback(response) {
 				window.alert("Error loading assets: "+response.status);
+			}
+	);
+
+	$http({
+		  method: "GET",
+		  url: "api/v1/positions"
+		}).then(
+			function successCallback(response) {
+				$scope.positions = response.data;
+			},
+			function errorCallback(response) {
+				window.alert("Error loading positions: "+response.status);
 			}
 	);
 
