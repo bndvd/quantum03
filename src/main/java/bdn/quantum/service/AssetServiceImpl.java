@@ -36,7 +36,7 @@ public class AssetServiceImpl implements AssetService {
 	@Autowired
 	private KeyvalService keyvalService;
 	@Autowired
-	private StockPriceService stockPriceService;
+	private SecurityPriceService securityPriceService;
 
 	@Autowired
 	private PositionComparator positionComparator;
@@ -329,7 +329,7 @@ public class AssetServiceImpl implements AssetService {
 
 			BigDecimal lastStockPrice = BigDecimal.ZERO;
 			try {
-				lastStockPrice = stockPriceService.getLastStockPrice(symbol);
+				lastStockPrice = securityPriceService.getLastStockPrice(symbol);
 			} catch (Exception e) {
 				System.err.println("Exception in IEXTrading packet: " + e.getMessage());
 			}
