@@ -178,9 +178,6 @@
 			</div>
 			
 			<footer class="w3-container w3-black">
-<p>tranid {{ updateTransactionForm.tranId.$valid }}</p>
-<p>tranPrice-valid {{ updateTransactionForm.tranPrice.$valid }}</p>
-<p>tranPrice-dirty {{ updateTransactionForm.tranPrice.$dirty }}</p>
 				<p class="w3-right-align">
 					<button ng-disabled="!(updateTransactionForm.tranId.$valid && updateTransactionForm.tranPrice.$valid && updateTransactionForm.tranPrice.$dirty)" 
 						ng-click="updateTransaction()" class="w3-button w3-grey">Update</button>

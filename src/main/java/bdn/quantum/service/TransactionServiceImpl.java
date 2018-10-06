@@ -61,6 +61,17 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		transaction.setTranDate(newDate);
 		
+		return saveTransaction(transaction);
+	}
+
+	@Override
+	public Transaction updateTransaction(Integer id, Transaction transaction) {
+		transaction.setId(id);
+		return saveTransaction(transaction);
+	}
+	
+	// used for creating (POST) and updating (PUT)
+	private Transaction saveTransaction(Transaction transaction) {
 		TranEntity te = new TranEntity(transaction.getId(), transaction.getSecId(), transaction.getUserId(),
 				transaction.getTranDate(), transaction.getType(), transaction.getShares(), transaction.getPrice());
 		te = transactionRepository.save(te);

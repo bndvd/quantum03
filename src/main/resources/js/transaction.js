@@ -189,11 +189,34 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	// Update Transaction
 	//
 	$scope.updateTransaction = function() {
-		if ($scope.transactionUpdateTran == null) {
-			return;
+		if ($scope.transactionUpdateTran == null || $scope.transactionUpdateNewPrice == null ||
+				$scope.positionSelectedPageIndex < 0 || $scope.positionSelectedPageIndex >= $scope.securities.length) {
+			window.alert("Error updating transaction (invalid input): "+$scope.transactionUpdateNewPrice);
 		}
-		
-		// TODO
+				
+		var data = {
+			    secId: $scope.transactionUpdateTran.secId,
+			    userId: $scope.transactionUpdateTran.userId,
+			    tranDate: $scope.transactionUpdateTran.tranDate,
+			    type: $scope.transactionUpdateTran.type,
+			    shares: $scope.transactionUpdateTran.shares,
+			    price: $scope.transactionUpdateNewPrice
+		};
+	
+		$http({
+		    method: "PUT",
+		    url: "api/v1/transaction/" + $scope.transactionUpdateTran.id,
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+				},
+				// Error response
+				function errorCallback(response) {
+					window.alert("Error updating transaction: "+response.status+"; "+response.statusText);
+				}
+		);
 		
 		$scope.showTransactionUpdateDialog(false);
 		// refresh transaction view after sleeping for 1 sec to allow post to happen

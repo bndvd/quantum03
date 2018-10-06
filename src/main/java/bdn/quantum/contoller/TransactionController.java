@@ -40,6 +40,12 @@ public class TransactionController {
 		return transactionService.createTransaction(transaction);
 	}
 
+	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.PUT)
+	public Transaction updateTransaction(@PathVariable(value="tranId") Integer tranId, @RequestBody Transaction transaction) {
+		System.out.println("TransactionController.updateTransaction: tranId=" + tranId);
+		return transactionService.updateTransaction(tranId, transaction);
+	}
+
 	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.DELETE)
 	public void deleteTransaction(@PathVariable(value="tranId") Integer tranId) {
 		System.out.println("TransactionController.deleteTransaction: tranId=" + tranId);
