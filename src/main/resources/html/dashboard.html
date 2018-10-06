@@ -21,38 +21,38 @@
 		<tr ng-repeat="a in assets">
 			<td class="w3-right-align"><b>{{ a.basketName }}</b></td>
 			<td></td>
-			<td class="w3-right-align">{{ a.principal | currency }}</td>
-			<td class="w3-right-align">{{ a.lastValue | currency }}</td>
-			<td class="w3-right-align">{{ a.unrealizedGain | currency }}</td>
+			<td class="w3-right-align">{{ a.principal | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ a.lastValue | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ a.unrealizedGain | currency : "$" : 0 }}</td>
 			<td></td>
-			<td class="w3-right-align">{{ a.totalPrincipal | currency }}</td>
-			<td class="w3-right-align">{{ a.realizedGain | currency }}</td>
-			<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency }}</td>
+			<td class="w3-right-align">{{ a.totalPrincipal | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ a.realizedGain | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency : "$" : 0 }}</td>
 			<td></td>
 			<td class="w3-right-align">{{ a.targetRatio | number : 3 }}</td>
 			<td class="w3-right-align">{{ a.currentRatio | number : 3 }}</td>
-			<td class="w3-right-align">{{ a.ratioDeltaValue | currency }}</td>
+			<td class="w3-right-align">{{ a.ratioDeltaValue | currency : "$" : 0 }}</td>
 			<td></td>
-			<td class="w3-right-align">{{ a.realizedGainYtd | currency }}</td>
-			<td class="w3-right-align">{{ a.realizedGainYtdTax | currency }}</td>
+			<td class="w3-right-align">{{ a.realizedGainYtd | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ a.realizedGainYtdTax | currency : "$" : 0 }}</td>
 		</tr>
 		<tr class="w3-grey">
 			<td class="w3-right-align">TOTAL</td>
 			<td></td>
-			<td class="w3-right-align">{{ assetsTotalPrincipal | currency }}</td>
-			<td class="w3-right-align">{{ assetsTotalLastValue | currency }}</td>
-			<td class="w3-right-align">{{ assetsTotalUnrealizedGain | currency }}</td>
+			<td class="w3-right-align">{{ assetsTotalPrincipal | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ assetsTotalLastValue | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ assetsTotalUnrealizedGain | currency : "$" : 0 }}</td>
 			<td></td>
-			<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency }}</td>
-			<td class="w3-right-align">{{ assetsTotalRealizedGain | currency }}</td>
-			<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency }}</td>
+			<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ assetsTotalRealizedGain | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency : "$" : 0 }}</td>
 			<td></td>
 			<td class="w3-right-align">{{ 1.0 | number : 3 }}</td>
 			<td class="w3-right-align">{{ 1.0 | number : 3 }}</td>
-			<td class="w3-right-align">{{ 0.0 | currency }}</td>
+			<td class="w3-right-align">{{ 0.0 | currency : "$" : 0 }}</td>
 			<td></td>
-			<td class="w3-right-align">{{ assetsTotalRealizedGainYtd | currency }}</td>
-			<td class="w3-right-align">{{ assetsTotalRealizedGainYtdTax | currency }}</td>
+			<td class="w3-right-align">{{ assetsTotalRealizedGainYtd | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ assetsTotalRealizedGainYtdTax | currency : "$" : 0 }}</td>
 		</tr>
 	</table>
 </div>
@@ -68,10 +68,10 @@
 		</tr>
 		<tr ng-repeat="p in positions">
 			<td class="w3-right-align"><b>{{ p.symbol }}</b></td>
-			<td class="w3-right-align">{{ p.principal | currency }}</td>
-			<td class="w3-right-align">{{ p.lastPrice | currency }}</td>
+			<td class="w3-right-align">{{ p.principal | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ p.lastPrice | currency : "$" : 2 }}</td>
 			<td class="w3-right-align">{{ p.shares | number : 2 }}</td>
-			<td class="w3-right-align">{{ p.lastValue | currency }}</td>
+			<td class="w3-right-align">{{ p.lastValue | currency : "$" : 0 }}</td>
 		</tr>
 
 </div>

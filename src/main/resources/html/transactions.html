@@ -40,7 +40,7 @@
 				<td class="w3-left-align">{{ t.tranDate | date:'yyyy-MM-dd' }}</td>
 				<td class="w3-center-align">{{ t.type }}</td>
 				<td class="w3-right-align">{{ t.shares }}</td>
-				<td class="w3-right-align">{{ t.price | currency }}</td>
+				<td class="w3-right-align">{{ t.price | currency : "$" : 4 }}</td>
 				<td class="w3-right-align">{{ t.totalShares }}</td>
 				<td class="w3-right-align">{{ t.principal | currency }}</td>
 				<td class="w3-right-align">{{ t.value | currency }}</td>
