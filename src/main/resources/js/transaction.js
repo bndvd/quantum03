@@ -8,6 +8,8 @@ app.controller('transactionsCtrl', function($scope, $http) {
 	$scope.transactionAddShares = "";
 	$scope.transactionAddPrice = "";
 	$scope.transactionDeleteTran = null;
+	$scope.transactionUpdateTran = null;
+	$scope.transactionUpdateNewPrice = null;
 	
 	$http({
 		  method: "GET",
@@ -81,6 +83,26 @@ app.controller('transactionsCtrl', function($scope, $http) {
 			document.getElementById('modalTranDelete').style.display='none';
 			$scope.transactionDeleteTran = null;
 		}
+	};
+	
+	//
+	// Show Update Transaction dialog
+	//
+	$scope.showTransactionUpdateDialog = function(show) {
+		if (show) {
+			$scope.transactionUpdateTran = null;
+			$scope.transactionUpdateNewPrice = null;
+			document.getElementById('modalTranUpdate').style.display='block';
+		}
+		else {
+			document.getElementById('modalTranUpdate').style.display='none';
+			$scope.transactionUpdateTran = null;
+			$scope.transactionUpdateNewPrice = null;
+		}
+	};
+	
+	$scope.processTransactionUpdateTranSelection = function() {
+		$scope.transactionUpdateNewPrice = $scope.transactionUpdateTran.price;
 	};
 	
 	//
@@ -161,7 +183,22 @@ app.controller('transactionsCtrl', function($scope, $http) {
 		$scope.showTransactionDeleteDialog(false);
 		// refresh transaction view after sleeping for 1 sec to allow post to happen
 		window.setTimeout($scope.reloadPosition, 1000);
-	}
+	};
 	
+	//
+	// Update Transaction
+	//
+	$scope.updateTransaction = function() {
+		if ($scope.transactionUpdateTran == null) {
+			return;
+		}
+		
+		// TODO
+		
+		$scope.showTransactionUpdateDialog(false);
+		// refresh transaction view after sleeping for 1 sec to allow post to happen
+		window.setTimeout($scope.reloadPosition, 1000);
+	};
+		
 });
 
