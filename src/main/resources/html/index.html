@@ -22,13 +22,13 @@
 			quantum 1.1.0
 		</span>
 		<span class="w3-display-topright w3-margin-right">
-			<span><a href="#!login">Login</a></span>
-			<span><a href="#!">Logout <b>{{  }}</b></a></span>
+			<span ng-show="!authSuccess"><a href="#!login">Login</a></span>
+			<span ng-show="authSuccess"><a href="#!">Logout <b>{{  }}</b></a></span>
 		</span>
 	</div>
 
 
-	<div class="w3-bar w3-black">
+	<div ng-show="authSuccess" class="w3-bar w3-black">
 		<a href="#!dashboard" class="w3-bar-item w3-button">DASHBOARD</a>
 		<a href="#!transactions" class="w3-bar-item w3-button">TRANSACTIONS</a>
 		<!--a href="#!comp" class="w3-bar-item w3-button">COMPARISONS</a-->
