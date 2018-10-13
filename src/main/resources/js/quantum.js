@@ -8,6 +8,10 @@ app.config(function($routeProvider, $httpProvider) {
         templateUrl : "login.html",
         controller : "navCtrl"
     })
+    .when("/login", {
+        templateUrl : "login.html",
+        controller : "navCtrl"
+    })
     .when("/dashboard", {
         templateUrl : "dashboard.html",
         controller : "dashboardCtrl"
@@ -28,10 +32,5 @@ app.config(function($routeProvider, $httpProvider) {
     
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
     
-});
-
-//Navigation Controller (user session, page redirect)
-app.controller('navCtrl', function() {
-	
 });
 

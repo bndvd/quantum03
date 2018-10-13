@@ -1,5 +1,5 @@
 // Manage Controller
-app.controller('manageCtrl', function($scope, $http) {
+app.controller("manageCtrl", function($scope, $http) {
 	$scope.MANAGE_PAGE_SECURITIES = 1;
 	$scope.MANAGE_PAGE_RATIOS = 2;
 	$scope.MANAGE_PAGE_SETTINGS = 3;

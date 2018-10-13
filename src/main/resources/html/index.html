@@ -2,13 +2,14 @@
 <html>
 
 <head>
-<meta charset="utf-8"/>
-<title>Quantum</title>
+	<meta charset="utf-8"/>
+	<title>Quantum</title>
 </head>
 
 <script type="text/javascript" src="angular.min.js"></script>
 <script type="text/javascript" src="angular-route.min.js"></script>
 <script type="text/javascript" src="quantum.js"></script>
+<script type="text/javascript" src="login.js"></script>
 <script type="text/javascript" src="dashboard.js"></script>
 <script type="text/javascript" src="transaction.js"></script>
 <script type="text/javascript" src="manage.js"></script>
@@ -16,13 +17,13 @@
 
 <body ng-app="qApp">
 
-	<div ng-controller="navCtrl" class="w3-panel w3-display-container">
+	<div class="w3-panel w3-display-container">
 		<span name="quantum-logo">
 			quantum 1.1.0
 		</span>
 		<span class="w3-display-topright w3-margin-right">
-			<span ng-show="!authenticated"><a href="#!">Login</a></span>
-			<span ng-show="authenticated"><a href="#!">Logout <b>{{  }}</b></a></span>
+			<span><a href="#!login">Login</a></span>
+			<span><a href="#!">Logout <b>{{  }}</b></a></span>
 		</span>
 	</div>
 
@@ -34,6 +35,7 @@
 		<a href="#!manage" class="w3-bar-item w3-button">MANAGE</a>
 	</div>
 	
+	<!-- the container that displays the content of #! selections -->
 	<div class="w3-container w3-padding-16" ng-view></div>
 
 </body>

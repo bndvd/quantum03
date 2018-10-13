@@ -1,5 +1,5 @@
 // Transaction Controller
-app.controller('transactionsCtrl', function($scope, $http) {
+app.controller("transactionsCtrl", function($scope, $http) {
 	$scope.positionSelectedPageIndex = -1;
 	$scope.positionSelected = [];
 	$scope.transactionAddTypeOptions = ["BUY", "SEL", "DIV", "SPL", "CNV"];

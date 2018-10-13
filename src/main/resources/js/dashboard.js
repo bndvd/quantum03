@@ -1,5 +1,5 @@
 // Dashboard Controller
-app.controller('dashboardCtrl', function($scope, $http) {
+app.controller("dashboardCtrl", function($scope, $http) {
 	$scope.assets = [];
 	$scope.assetsTotalPrincipal = 0.0;
 	$scope.assetsTotalLastValue = 0.0;
