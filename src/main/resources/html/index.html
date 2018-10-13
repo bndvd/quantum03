@@ -16,7 +16,15 @@
 
 <body ng-app="qApp">
 
-	<div class="w3-panel w3-right-align" name="quantum-logo">quantum 1.0</div>
+	<div ng-controller="navCtrl" class="w3-panel w3-display-container">
+		<span name="quantum-logo">
+			quantum 1.1.0
+		</span>
+		<span class="w3-display-topright w3-margin-right">
+			<span ng-show="!authenticated"><a href="#!">Login</a></span>
+			<span ng-show="authenticated"><a href="#!">Logout <b>{{  }}</b></a></span>
+		</span>
+	</div>
 
 
 	<div class="w3-bar w3-black">

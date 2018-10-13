@@ -2,8 +2,12 @@
 var app = angular.module("qApp", ["ngRoute"]);
 
 // Routing
-app.config(function($routeProvider) {
+app.config(function($routeProvider, $httpProvider) {
     $routeProvider
+    .when("/", {
+        templateUrl : "login.html",
+        controller : "navCtrl"
+    })
     .when("/dashboard", {
         templateUrl : "dashboard.html",
         controller : "dashboardCtrl"
@@ -19,7 +23,15 @@ app.config(function($routeProvider) {
     .when("/manage", {
         templateUrl : "manage.html",
         controller : "manageCtrl"
-    });
+    })
+    .otherwise("/");
+    
+    $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';
+    
 });
 
+//Navigation Controller (user session, page redirect)
+app.controller('navCtrl', function() {
+	
+});
 
