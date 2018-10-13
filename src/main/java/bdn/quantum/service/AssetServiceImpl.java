@@ -330,9 +330,14 @@ public class AssetServiceImpl implements AssetService {
 			BigDecimal lastStockPrice = BigDecimal.ZERO;
 			try {
 				lastStockPrice = securityPriceService.getLastStockPrice(symbol);
-			} catch (Exception e) {
-				System.err.println("Exception in IEXTrading packet: " + e.getMessage());
 			}
+			catch (Exception exc) {
+				System.err.println("Exception in IEXTrading packet: " + exc.getMessage());
+			}
+			catch (Error err) {
+				//System.err.println("Error in IEXTrading packet: " + err.getMessage());
+			}
+			
 			BigDecimal lastValue = lastStockPrice.multiply(shares);
 			BigDecimal unrealizedGain = lastValue.subtract(principal);
 
