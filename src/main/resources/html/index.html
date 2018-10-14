@@ -9,7 +9,7 @@
 <script type="text/javascript" src="angular.min.js"></script>
 <script type="text/javascript" src="angular-route.min.js"></script>
 <script type="text/javascript" src="quantum.js"></script>
-<script type="text/javascript" src="login.js"></script>
+<script type="text/javascript" src="user.js"></script>
 <script type="text/javascript" src="dashboard.js"></script>
 <script type="text/javascript" src="transaction.js"></script>
 <script type="text/javascript" src="manage.js"></script>
@@ -23,7 +23,7 @@
 		</span>
 		<span class="w3-display-topright w3-margin-right">
 			<span ng-show="!authSuccess"><a href="#!login">Login</a></span>
-			<span ng-show="authSuccess"><a href="#!">Logout <b>{{  }}</b></a></span>
+			<span ng-show="authSuccess"><a href="#!">Logout <b>{{ authSession.username }}</b></a></span>
 		</span>
 	</div>
 

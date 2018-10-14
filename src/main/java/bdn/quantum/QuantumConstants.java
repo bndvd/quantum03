@@ -42,4 +42,7 @@ public final class QuantumConstants {
 	// Stock quote constants
 	public static final long QUOTE_CACHE_LIFE_MILLIS = 10000;
 	
+	// User session life in milliseconds
+	public static final long USER_SESSION_LIFE_MILLIS = 600000;
+	
 }

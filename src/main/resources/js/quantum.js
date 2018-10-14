@@ -13,19 +13,15 @@ app.config(function($routeProvider, $httpProvider) {
         controller : "navCtrl"
     })
     .when("/dashboard", {
-        templateUrl : "dashboard.html",
+        templateUrl : "pages/dashboard.html",
         controller : "dashboardCtrl"
     })
     .when("/transactions", {
-        templateUrl : "transactions.html",
+        templateUrl : "pages/transactions.html",
         controller : "transactionsCtrl"
     })
-    .when("/comp", {
-        templateUrl : "comp.html",
-        controller : "compCtrl"
-    })
     .when("/manage", {
-        templateUrl : "manage.html",
+        templateUrl : "pages/manage.html",
         controller : "manageCtrl"
     })
     .otherwise("/");

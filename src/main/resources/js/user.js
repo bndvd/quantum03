@@ -1,10 +1,12 @@
 //Navigation Controller (user session, page redirect)
-app.controller("navCtrl", function($rootScope, $scope, $http) {
+app.controller("navCtrl", function($rootScope, $scope, $http, $location) {
 	$scope.LOGIN_MODE_SIGNIN = 1;
 	$scope.LOGIN_MODE_CHGPASSWORD = 2;
 	$scope.LOGIN_MODE_CREATE = 3;
 	
 	$rootScope.authSuccess = false;
+	$rootScope.authSession = null;
+	
 	$scope.authError = null;
 	$scope.createError = null;
 	
@@ -18,6 +20,14 @@ app.controller("navCtrl", function($rootScope, $scope, $http) {
 	$scope.loginNewPasswordRetype = null;
 	
 	
+	// Authenticate internal helper method
+	var authenticate = function(username, password, newPassword, callback) {
+		
+		$rootScope.authSuccess = true;
+	};
+	// call authenticate when controller is loaded to see if we're already authenticated
+	authenticate();
+
 	$scope.selectLoginMode = function(newMode) {
 		$scope.authError = null;
 		$scope.createError = null;
@@ -80,10 +90,6 @@ app.controller("navCtrl", function($rootScope, $scope, $http) {
 		$scope.loginPassword = null;
 		$scope.loginChgPassword = null;
 		$scope.loginChgPasswordRetype = null;
-	};
-	
-	var authenticate = function(username, password, newPassword, callback) {
-		$rootScope.authSuccess = true;
 	};
 	
 	$scope.createUsername = function() {

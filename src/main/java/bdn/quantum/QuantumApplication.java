@@ -9,4 +9,5 @@ public class QuantumApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(QuantumApplication.class, args);
 	}
+
 }

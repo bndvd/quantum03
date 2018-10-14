@@ -11,4 +11,5 @@ public final class QuantumProperties {
 	public static final String FUND_PROXY = "fp.";
 	public static final String FUND_FACTOR = "ff.";
 	
+	public static final String USER_CREDENTIALS = "wp.";
 }
