@@ -26,7 +26,7 @@
 					<p ng-show="(loginChgPassword!=loginChgPasswordRetype)"><i>New passwords must match</i></p>
 				</div>
 			
-				<p>{{ authError }}</p>
+				<p><b>{{ authMsg }}</b></p>
 
 				<p class="w3-right-align">
 					<button ng-disabled="!(userLoginForm.loginUnInput.$valid && userLoginForm.loginPwInput.$valid &&
@@ -51,7 +51,7 @@
 				<label>Confirm Password</label>
 				<input name="createPwRetypeInput" ng-model="loginNewPasswordRetype" class="w3-input" type="password" required>
 			
-				<p>{{ createError }}</p>
+				<p><b>{{ createMsg }}</b></p>
 				<p ng-show="(loginNewPassword!=loginNewPasswordRetype)"><i>Passwords must match</i></p>
 
 				<p class="w3-right-align">

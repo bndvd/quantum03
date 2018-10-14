@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.User;
 import bdn.quantum.model.UserSession;
 import bdn.quantum.service.UserService;
 
 @RestController("userController")
+@RequestMapping(QuantumConstants.REST_URL_BASE)
 public class UserController {
 
 	@Autowired

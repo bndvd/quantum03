@@ -7,8 +7,8 @@ app.controller("navCtrl", function($rootScope, $scope, $http, $location) {
 	$rootScope.authSuccess = false;
 	$rootScope.authSession = null;
 	
-	$scope.authError = null;
-	$scope.createError = null;
+	$scope.authMsg = null;
+	$scope.createMsg = null;
 	
 	$scope.loginMode = $scope.LOGIN_MODE_SIGNIN;
 	$scope.loginUsername = null;
@@ -20,17 +20,9 @@ app.controller("navCtrl", function($rootScope, $scope, $http, $location) {
 	$scope.loginNewPasswordRetype = null;
 	
 	
-	// Authenticate internal helper method
-	var authenticate = function(username, password, newPassword, callback) {
-		
-		$rootScope.authSuccess = true;
-	};
-	// call authenticate when controller is loaded to see if we're already authenticated
-	authenticate();
-
 	$scope.selectLoginMode = function(newMode) {
-		$scope.authError = null;
-		$scope.createError = null;
+		$scope.authMsg = null;
+		$scope.createMsg = null;
 		$scope.loginUsername = null;
 		$scope.loginPassword = null;
 		$scope.loginChgPassword = null;
@@ -51,67 +43,180 @@ app.controller("navCtrl", function($rootScope, $scope, $http, $location) {
 		}
 	};
 	
+	//
+	// Login
+	//
 	$scope.login = function() {
 		if ($scope.loginUsername == null || $scope.loginUsername.trim() == "" ||
 				$scope.loginPassword == null || $scope.loginPassword.trim() == "") {
-			$scope.authError = "Username and password must be non-blank. Passwords must match.";
+			$scope.authMsg = "Username and password must be non-blank. Passwords must match.";
 			return;
 		}
-
-		authenticate($scope.loginUsername, $scope.loginPassword, null, function() {
-			if ($rootScope.authSuccess) {
-				$location.path("/");
-				$scope.authError = null;
-			}
-			else {
-				$location.path("/login");
-				$scope.authError = "Error occurred while trying to authenticate";
-			}
-		});
-	      
-		$scope.authError = null;
-		$scope.loginUsername = null;
-		$scope.loginPassword = null;
+		
+		var data = {
+			    username: $scope.loginUsername,
+			    wp1: $scope.loginPassword,
+			    wp2: null
+		};
+	
+		$http({
+		    method: "POST",
+		    url: "api/v1/login",
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+					if (response.data != null && response.data.username != null && response.data.valid) {
+						$rootScope.authSuccess = true;
+						$rootScope.authSession = response.data;
+						$scope.authMsg = null;
+						$scope.loginUsername = null;
+						$scope.loginPassword = null;
+						$location.path("/dashboard");
+					}
+					else {
+						$rootScope.authSuccess = false;
+						$rootScope.authSession = null;
+						$scope.authMsg = "Login failed";
+						$scope.loginUsername = null;
+						$scope.loginPassword = null;
+					}
+				},
+				// Error response
+				function errorCallback(response) {
+					$rootScope.authSuccess = false;
+					$rootScope.authSession = null;
+					$location.path("/login");
+					$scope.authMsg = "Login failed";
+					$scope.loginUsername = null;
+					$scope.loginPassword = null;
+				}
+		);
 	};
 	
+	//
+	// Change Password
+	//
 	$scope.changePassword = function() {
 		if ($scope.loginUsername == null || $scope.loginUsername.trim() == "" ||
 				$scope.loginPassword == null || $scope.loginPassword.trim() == "" ||
 				$scope.loginChgPassword == null || $scope.loginChgPassword.trim() == "" ||
 				$scope.loginChgPasswordRetype == null || $scope.loginChgPasswordRetype.trim() == "" ||
 				($scope.loginChgPassword != $scope.loginChgPasswordRetype)) {
-			$scope.authError = "Username and password must be non-blank. New passwords must match.";
+			$scope.authMsg = "Username and password must be non-blank. New passwords must match.";
 			return;
 		}
-		// TODO
-		
-		$scope.authError = null;
-		$scope.loginUsername = null;
-		$scope.loginPassword = null;
-		$scope.loginChgPassword = null;
-		$scope.loginChgPasswordRetype = null;
+
+		var data = {
+			    username: $scope.loginUsername,
+			    wp1: $scope.loginPassword,
+			    wp2: $scope.loginChgPassword
+		};
+	
+		$http({
+		    method: "PUT",
+		    url: "api/v1/user/" + $scope.loginUsername,
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+					if (response.data != null && response.data.username != null) {
+						$scope.authMsg = "Password changed successfully";
+					}
+					else {
+						$scope.authMsg = "Password change failed. Make sure you entered the correct existing password.";
+					}
+					$scope.loginUsername = null;
+					$scope.loginPassword = null;
+					$scope.loginChgPassword = null;
+					$scope.loginChgPasswordRetype = null;
+				},
+				// Error response
+				function errorCallback(response) {
+					$scope.authMsg = "Password change failed";
+					$scope.loginUsername = null;
+					$scope.loginPassword = null;
+					$scope.loginChgPassword = null;
+					$scope.loginChgPasswordRetype = null;
+				}
+		);	
 	};
 	
+	//
+	// Create New User
+	//
 	$scope.createUsername = function() {
 		if ($scope.loginNewUsername == null || $scope.loginNewUsername.trim() == "" ||
 				$scope.loginNewPassword == null || $scope.loginNewPassword.trim() == "" ||
 				$scope.loginNewPasswordRetype == null || $scope.loginNewPasswordRetype.trim() == "" ||
 				$scope.loginNewPassword != $scope.loginNewPasswordRetype) {
-			$scope.createError = "Username and password must be non-blank";
+			$scope.createMsg = "Username and password must be non-blank";
 			return;
 		}
-		// TODO
-		
-		$scope.createError = null;
-		$scope.loginNewUsername = null;
-		$scope.loginNewPassword = null;
-		$scope.loginNewPasswordRetype = null;
+
+		var data = {
+			    username: $scope.loginNewUsername,
+			    wp1: $scope.loginNewPassword,
+			    wp2: null
+		};
+	
+		$http({
+		    method: "POST",
+		    url: "api/v1/user",
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+					if (response.data != null && response.data.username != null) {
+						$scope.createMsg = "User created successfully";
+					}
+					else {
+						$scope.createMsg = "User creation failed. Make sure the user does not already exist.";
+					}
+					$scope.loginNewUsername = null;
+					$scope.loginNewPassword = null;
+					$scope.loginNewPasswordRetype = null;
+				},
+				// Error response
+				function errorCallback(response) {
+					$scope.createMsg = "User creation failed";
+					$scope.loginNewUsername = null;
+					$scope.loginNewPassword = null;
+					$scope.loginNewPasswordRetype = null;
+				}
+		);	
 	};
 	
+	//
+	// Logout
+	//
 	$scope.logout = function() {
-		// TODO
-		
-		$rootScope.authSuccess = false;
+		var data = {
+			    username: $rootScope.authSession
+		};
+	
+		$http({
+		    method: "POST",
+		    url: "api/v1/logout",
+		    data: data,
+		    headers: {"Content-Type": "application/json"}
+		}).then(
+				// Success response
+				function successCallback(response) {
+					$rootScope.authSuccess = false;
+					$rootScope.authSession = null;
+					$location.path("/login");
+				},
+				// Error response
+				function errorCallback(response) {
+					$rootScope.authSuccess = false;
+					$rootScope.authSession = null;
+					$location.path("/login");
+				}
+		);
 	};
 	
 });
