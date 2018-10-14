@@ -346,6 +346,7 @@ app.controller("manageCtrl", function($scope, $http) {
 			    transactions: []
 		};
 		
+		// copy over only data that's persisted in the db
 		var i;
 		for (i = 0; i < data.transactions.length; i++) {
 			var t = data.transactions[i];
