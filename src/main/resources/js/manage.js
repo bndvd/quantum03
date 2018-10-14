@@ -3,6 +3,7 @@ app.controller("manageCtrl", function($scope, $http) {
 	$scope.MANAGE_PAGE_SECURITIES = 1;
 	$scope.MANAGE_PAGE_RATIOS = 2;
 	$scope.MANAGE_PAGE_SETTINGS = 3;
+	$scope.MANAGE_PAGE_BACKUP = 4;
 	
 	$scope.manageKeyvalMap;
 	$scope.managePageIndex = 0;
@@ -105,7 +106,7 @@ app.controller("manageCtrl", function($scope, $http) {
 					window.alert("Error loading manage assets: "+response.status);
 				}
 		);
-			};
+	};
 	$scope.refreshManageAssetsAndTargetRatios();
 	
 	
@@ -264,4 +265,103 @@ app.controller("manageCtrl", function($scope, $http) {
 		window.setTimeout($scope.refreshManageKeyvalMap, 1000);
 	};
 	
+	//
+	// Save Settings
+	//
+	$scope.backupPortfolio = function() {
+		$http({
+			  method: "GET",
+			  url: "api/v1/portfolioData"
+			}).then(
+				function successCallback(response) {
+					var portfolioData = response.data;
+					if (portfolioData != null) {
+						portfolioData = $scope.preparePortfolioDataForExport(portfolioData);
+						
+						var portfolioDataText = JSON.stringify(portfolioData);
+
+						var currentDate = new Date();
+						var dateStr = "" + currentDate.getFullYear();
+						var month = currentDate.getMonth() + 1;
+						if (month < 10) {
+							dateStr = dateStr + "0";
+						}
+						dateStr = dateStr + month;
+						var day = currentDate.getDate();
+						if (day < 10) {
+							dateStr = dateStr + "0";
+						}
+						dateStr = dateStr + day;
+						var filename = "qexport_" + dateStr + ".json";
+						
+						$scope.saveTextAsFile(portfolioDataText, filename);
+					}
+					else {
+						window.alert("Error backing up data because returned data was null.");
+					}
+				},
+				function errorCallback(response) {
+					window.alert("Error backing up data: "+response.status);
+				}
+		);
+
+	};
+	
+
+	$scope.saveTextAsFile = function(data, filename) {
+		if (data == null || filename == null) {
+			window.alert("Data backup: No data");
+			return;
+		}
+	
+	    var blob = new Blob([data], { type: "application/json" }),
+	    e = document.createEvent("MouseEvents"),
+	    a = document.createElement('a');
+	    // FOR IE:
+
+	    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+	        window.navigator.msSaveOrOpenBlob(blob, filename);
+	    }
+	    else
+	    {
+	        var e = document.createEvent("MouseEvents"),
+	        a = document.createElement("a");
+
+	        a.download = filename;
+	        a.href = window.URL.createObjectURL(blob);
+	        a.dataset.downloadurl = ["application/json", a.download, a.href].join(":");
+	        e.initEvent("click", true, false, window,
+	        0, 0, 0, 0, 0, false, false, false, false, 0, null);
+	        a.dispatchEvent(e);
+	    }
+	};
+	
+	
+	$scope.preparePortfolioDataForExport = function(data) {
+		var result = {
+			    version: data.version,
+			    lastDate: data.lastDate,
+			    basketEntities: data.basketEntities,
+			    securities: data.securities,
+			    transactions: []
+		};
+		
+		var i;
+		for (i = 0; i < data.transactions.length; i++) {
+			var t = data.transactions[i];
+			result.transactions.push({
+	            id: t.id,
+	            secId: t.secId,
+	            userId: t.userId,
+	            tranDate: t.tranDate,
+	            type: t.type,
+	            shares: t.shares,
+	            price: t.price
+			});
+		}
+		
+		return result;
+	};
+	
 });
+

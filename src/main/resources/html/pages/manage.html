@@ -5,6 +5,7 @@
 		<p ng-click="showManagePageIndex(MANAGE_PAGE_SECURITIES)" class="w3-bar-item w3-button">Securities</p>
 		<p ng-click="showManagePageIndex(MANAGE_PAGE_RATIOS)" class="w3-bar-item w3-button">Target Ratios</p>
 		<p ng-click="showManagePageIndex(MANAGE_PAGE_SETTINGS)" class="w3-bar-item w3-button">Settings</p>
+		<p ng-click="showManagePageIndex(MANAGE_PAGE_BACKUP)" class="w3-bar-item w3-button">Backup</p>
 	</div>
 	
 	<!-- Page Content -->
@@ -104,7 +105,15 @@
 				</tr>
 			</table>
 		</div>
+	</div>
+
+	<!-- BACKUP -->
+	<div ng-show="(managePageIndex == MANAGE_PAGE_BACKUP)" class="w3-container w3-display-container">
+		<h2 class="w3-left-align">Backup</h2>
 		
+		<div>
+			<button ng-click="backupPortfolio()" class="w3-button w3-grey">Export Data to File...</button>
+		</div>
 	</div>
 
 </div>
