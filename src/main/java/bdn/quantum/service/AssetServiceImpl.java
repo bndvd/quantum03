@@ -331,6 +331,9 @@ public class AssetServiceImpl implements AssetService {
 			try {
 				lastStockPrice = securityPriceService.getLastStockPrice(symbol);
 			}
+			catch (RuntimeException re) {
+				System.err.println("Exception in IEXTrading packet: " + re.getMessage());
+			}
 			catch (Exception exc) {
 				System.err.println("Exception in IEXTrading packet: " + exc.getMessage());
 			}
