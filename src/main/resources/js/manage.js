@@ -150,15 +150,16 @@ app.controller("manageCtrl", function($scope, $http) {
 		}).then(
 				// Success response
 				function successCallback(response) {
+					$scope.refreshManageAssetsAndTargetRatios();
 				},
 				// Error response
 				function errorCallback(response) {
 					window.alert("Error saving new asset: "+response.status+"; "+response.statusText);
+					$scope.refreshManageAssetsAndTargetRatios();
 				}
 		);
 
 		$scope.manageNewAsset = "";
-		window.setTimeout($scope.refreshManageAssetsAndTargetRatios, 1000);
 	};
 	
 	//
@@ -191,16 +192,17 @@ app.controller("manageCtrl", function($scope, $http) {
 		}).then(
 				// Success response
 				function successCallback(response) {
+					$scope.refreshManageAssetsAndTargetRatios();
 				},
 				// Error response
 				function errorCallback(response) {
 					window.alert("Error saving new security: "+response.status+"; "+response.statusText);
+					$scope.refreshManageAssetsAndTargetRatios();
 				}
 		);
 		
 		$scope.manageNewSecurity = "";
 		$scope.manageNewSecurityBasketId = null;
-		window.setTimeout($scope.refreshManageAssetsAndTargetRatios, 1000);
 	};
 	
 	//
@@ -223,15 +225,17 @@ app.controller("manageCtrl", function($scope, $http) {
 			}).then(
 					// Success response
 					function successCallback(response) {
+						$scope.refreshManageKeyvalMap();
+						$scope.refreshManageAssetsAndTargetRatios();
 					},
 					// Error response
 					function errorCallback(response) {
 						window.alert("Error saving target ratios: "+response.status+"; "+response.statusText);
+						$scope.refreshManageKeyvalMap();
+						$scope.refreshManageAssetsAndTargetRatios();
 					}
 			);
 		}
-		window.setTimeout($scope.refreshManageKeyvalMap, 1000);
-		window.setTimeout($scope.refreshManageAssetsAndTargetRatios, 1000);
 	};
 	
 	//
@@ -255,14 +259,14 @@ app.controller("manageCtrl", function($scope, $http) {
 		}).then(
 				// Success response
 				function successCallback(response) {
+					$scope.refreshManageKeyvalMap();
 				},
 				// Error response
 				function errorCallback(response) {
-					window.alert("Error saving property tax rate: "+response.status+"; "+response.statusText);
+					window.alert("Error saving properties: "+response.status+"; "+response.statusText);
+					$scope.refreshManageKeyvalMap();
 				}
-		);
-		
-		window.setTimeout($scope.refreshManageKeyvalMap, 1000);
+		);		
 	};
 	
 	//

@@ -147,17 +147,20 @@ app.controller("transactionsCtrl", function($scope, $http) {
 		}).then(
 				// Success response
 				function successCallback(response) {
+					$scope.reloadPosition();
 				},
 				// Error response
 				function errorCallback(response) {
 					window.alert("Error adding transaction: "+response.status+"; "+response.statusText);
+					$scope.reloadPosition();
 				}
 		);
 
 		
 		$scope.showTransactionAddDialog(false);
-		// refresh transaction view after sleeping for 1 sec to allow post to happen
-		window.setTimeout($scope.reloadPosition, 1000);
+		// OLD IMPLEMENTATION: refresh transaction view after sleeping for 1 sec to allow post to happen
+		// NEW IMPLEMENTATION: refresh in successCallback() and errorCallback()
+		//window.setTimeout($scope.reloadPosition, 1000);
 	};
 	
 	
@@ -173,16 +176,16 @@ app.controller("transactionsCtrl", function($scope, $http) {
 			  url: "api/v1/transaction/" + $scope.transactionDeleteTran.id
 			}).then(
 				function successCallback(response) {
+					$scope.reloadPosition();
 				},
 				function errorCallback(response) {
 					window.alert("Error deleting transaction: "+response.status);
+					$scope.reloadPosition();
 				}
 		);
 		$scope.transactionDeleteTran = null;
 		
 		$scope.showTransactionDeleteDialog(false);
-		// refresh transaction view after sleeping for 1 sec to allow post to happen
-		window.setTimeout($scope.reloadPosition, 1000);
 	};
 	
 	//
@@ -211,16 +214,16 @@ app.controller("transactionsCtrl", function($scope, $http) {
 		}).then(
 				// Success response
 				function successCallback(response) {
+					$scope.reloadPosition();
 				},
 				// Error response
 				function errorCallback(response) {
 					window.alert("Error updating transaction: "+response.status+"; "+response.statusText);
+					$scope.reloadPosition();
 				}
 		);
 		
 		$scope.showTransactionUpdateDialog(false);
-		// refresh transaction view after sleeping for 1 sec to allow post to happen
-		window.setTimeout($scope.reloadPosition, 1000);
 	};
 		
 });
