@@ -45,4 +45,8 @@ public final class QuantumConstants {
 	// User session life in milliseconds
 	public static final long USER_SESSION_LIFE_MILLIS = 600000;
 	
+	// Chart constants
+	public static final String CHART_STD_BENCHMARK_SYMBOL = "VTI";
+	public static final String CHART_STD_GROWTH = "stdgrowth";
+	
 }

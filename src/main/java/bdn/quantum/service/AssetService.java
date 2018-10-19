@@ -20,5 +20,6 @@ public interface AssetService {
 	public Position getPosition(Integer secId);
 	public Iterable<Position> getPositions();
 	public Iterable<Position> getPositions(Integer basketId);
+	public Iterable<Position> getPositions(boolean includeTransactions);
 
 }

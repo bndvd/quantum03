@@ -360,12 +360,17 @@ public class AssetServiceImpl implements AssetService {
 
 	@Override
 	public Iterable<Position> getPositions() {
+		return getPositions(false);
+	}
+	
+	@Override
+	public Iterable<Position> getPositions(boolean includeTransactions) {
 		List<Position> result = new ArrayList<>();
 
 		Iterable<SecurityEntity> securities = securityRepository.findAll();
 		for (SecurityEntity s : securities) {
 			Integer secId = s.getId();
-			Position p = getPosition(secId, false);
+			Position p = getPosition(secId, includeTransactions);
 			if (p != Position.EMPTY_POSITION) {
 				result.add(p);
 			}
