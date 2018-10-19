@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
-import pl.zankowski.iextrading4j.api.stocks.Quote;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
-import pl.zankowski.iextrading4j.client.rest.request.stocks.QuoteRequestBuilder;
+import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
 
 @Service("securityPriceService")
 public class SecurityPriceServiceImpl implements SecurityPriceService {
@@ -34,11 +33,9 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 				querySymbol = proxySymbol;
 			}
 			
-			final Quote quote = iexTradingClient.executeRequest(new QuoteRequestBuilder()
+			result = iexTradingClient.executeRequest(new PriceRequestBuilder()
 			        .withSymbol(querySymbol)
 			        .build());
-			
-			result = quote.getLatestPrice();
 			
 			if (proxySymbol != null) {
 				result = fundResolverService.convertProxyToFundValue(symbol, result);

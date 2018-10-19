@@ -6,7 +6,7 @@
 
 	<groupId>bdn</groupId>
 	<artifactId>quantum</artifactId>
-	<version>1.1.2</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>quantum</name>
@@ -65,6 +65,11 @@
 			<groupId>pl.zankowski</groupId>
 			<artifactId>iextrading4j-all</artifactId>
 			<version>2.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
 
