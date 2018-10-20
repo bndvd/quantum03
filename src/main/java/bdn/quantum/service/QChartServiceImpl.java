@@ -94,23 +94,23 @@ public class QChartServiceImpl implements QChartService {
 			tranList.add(t);
 		}
 		
-		QChartSeries series = buildPrincipalChartSeries(dateChain, tranList);
-		if (series == null) {
+		QChartSeries principalSeries = buildPrincipalChartSeries(dateChain, tranList);
+		if (principalSeries == null) {
 			return null;
 		}
-		result.addSeries(series);
+		result.addSeries(principalSeries);
 		
-		series = buildBenchmarkChartSeries(dateChain, benchmarkChartChain);
-		if (series == null) {
+		QChartSeries benchmarkSeries = buildBenchmarkChartSeries(principalSeries, benchmarkChartChain);
+		if (benchmarkSeries == null) {
 			return null;
 		}
-//		result.addSeries(series);
+//		result.addSeries(benchmarkSeries);
 		
-		series = buildUserPortfolioChartSeries(dateChain, tranList);
-		if (series == null) {
+		QChartSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, tranList);
+		if (userPotfolioSeries == null) {
 			return null;
 		}
-//		result.addSeries(series);
+//		result.addSeries(userPotfolioSeries);
 
 		return result;
 	}
@@ -168,14 +168,42 @@ public class QChartServiceImpl implements QChartService {
 		return result;
 	}
 	
-	private QChartSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Chart> benchmarkChartChain) {
-		if (dateChain == null || benchmarkChartChain == null) {
+	private QChartSeries buildBenchmarkChartSeries(QChartSeries principalSeries, Iterable<Chart> benchmarkChartChain) {
+		if (principalSeries == null || benchmarkChartChain == null || principalSeries.getPoints() == null) {
+			return null;
+		}
+		
+		List<Chart> benchmarkChartList = new ArrayList<Chart>();
+		for (Chart c : benchmarkChartChain) {
+			benchmarkChartList.add(c);
+		}
+		if (principalSeries.getPoints().size() != benchmarkChartList.size()) {
 			return null;
 		}
 		
 		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
 		
-		// TODO
+		BigDecimal shares = BigDecimal.ZERO;
+		BigDecimal oldPrincipal = BigDecimal.ZERO;
+		
+		List<QChartPoint> principalPoints = principalSeries.getPoints();
+		for (int i = 0; i < principalPoints.size(); i++) {
+			QChartPoint p = principalPoints.get(i);
+			BigDecimal newPrincipal = p.getValue();
+			BigDecimal principalDelta = newPrincipal.subtract(oldPrincipal);
+			// if non-zero change in principal
+			if (principalDelta.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+				
+			}
+			
+			BigDecimal closeSharePrice = benchmarkChartList.get(i).getClose();
+			BigDecimal benchmarkValue = shares.multiply(closeSharePrice);
+			
+			QChartPoint point = new QChartPoint(p.getId(), p.getDate(), benchmarkValue);
+			result.addPoint(point);
+			
+			oldPrincipal = newPrincipal;
+		}
 		
 		return result;
 	}
