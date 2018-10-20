@@ -22,6 +22,12 @@ public class TransactionController {
 	@Autowired
 	TransactionService transactionService;
 
+	@RequestMapping(value = "/transactions", method = RequestMethod.GET)
+	public Iterable<Transaction> getTransactions() {
+		System.out.println("TransactionController.getTransactions");
+		return transactionService.getTransactions();
+	}
+	
 	@RequestMapping(value = "/transactions/{secId}", method = RequestMethod.GET)
 	public Iterable<Transaction> getTransactions(@PathVariable(value="secId") Integer secId) {
 		System.out.println("TransactionController.getTransactions: secId=" + secId);

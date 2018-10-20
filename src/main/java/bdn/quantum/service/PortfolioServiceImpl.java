@@ -25,11 +25,9 @@ public class PortfolioServiceImpl implements PortfolioService {
 		Iterable<Security> securities = assetService.getSecurities();
 		List<Transaction> transactions = new ArrayList<Transaction>();
 		
-		for (Security s : securities) {
-			Iterable<Transaction> tIter = transactionService.getTransactionsForSecurity(s.getId());
-			for (Transaction t : tIter) {
-				transactions.add(t);
-			}
+		Iterable<Transaction> tIter = transactionService.getTransactions();
+		for (Transaction t : tIter) {
+			transactions.add(t);
 		}
 		
 		PortfolioData result = new PortfolioData(basketIter, securities, transactions);

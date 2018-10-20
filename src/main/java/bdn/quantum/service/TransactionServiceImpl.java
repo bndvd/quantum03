@@ -23,6 +23,20 @@ public class TransactionServiceImpl implements TransactionService {
 	@Autowired
 	private TransactionComparator transactionComparator;
 
+
+	@Override
+	public Iterable<Transaction> getTransactions() {
+		Iterable<TranEntity> teIter = transactionRepository.findAll();
+		
+		List<Transaction> result = new ArrayList<>();
+		for (TranEntity te : teIter) {
+			Transaction t = new Transaction(te);
+			result.add(t);
+		}
+		result.sort(transactionComparator);
+		
+		return result;
+	}
 	
 	@Override
 	public Iterable<Transaction> getTransactionsForSecurity(Integer secId) {
