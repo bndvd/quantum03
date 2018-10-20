@@ -1,15 +1,21 @@
 package bdn.quantum.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import pl.zankowski.iextrading4j.api.stocks.Chart;
+import pl.zankowski.iextrading4j.api.stocks.ChartRange;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
+import pl.zankowski.iextrading4j.client.rest.request.stocks.ChartRequestBuilder;
 import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
 
 @Service("securityPriceService")
@@ -33,9 +39,15 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 				querySymbol = proxySymbol;
 			}
 			
-			result = iexTradingClient.executeRequest(new PriceRequestBuilder()
-			        .withSymbol(querySymbol)
-			        .build());
+			try {
+				result = iexTradingClient.executeRequest(new PriceRequestBuilder()
+				        .withSymbol(querySymbol)
+				        .build());
+			}
+			catch (Exception exc) {
+				System.err.println("SecurityPriceServiceImpl.getLastStockPrice:: "+exc);
+				result = BigDecimal.ZERO;
+			}
 			
 			if (proxySymbol != null) {
 				result = fundResolverService.convertProxyToFundValue(symbol, result);
@@ -52,6 +64,24 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 		return result;
 	}
 	
+	@Override
+	public Iterable<Chart> getMaxChartChain(String symbol) {
+		List<Chart> chartList = null;
+		
+		try {
+			chartList = iexTradingClient.executeRequest(new ChartRequestBuilder()
+					.withChartRange(ChartRange.FIVE_YEARS)
+					.withSymbol(symbol)
+					.build());
+		}
+		catch (Exception exc) {
+			System.err.println("SecurityPriceServiceImpl.getMaxDateChain:: "+exc);
+			chartList = null;
+		}
+		
+		return chartList;
+	}
+
 	private BigDecimal getQuoteFromCache(String symbol) {
 		BigDecimal result = null;
 		StockQuoteMemento memento = lastStockPriceCache.get(symbol);

@@ -1,18 +1,18 @@
-package bdn.quantum.model.chart;
+package bdn.quantum.model.qchart;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChartSeries {
+public class QChartSeries {
 
 	private String seriesName = "series";
-	private List<ChartPoint> points = new ArrayList<>();
+	private List<QChartPoint> points = new ArrayList<>();
 	
 	
-	public ChartSeries() {
+	public QChartSeries() {
 	}
 	
-	public ChartSeries(String seriesName) {
+	public QChartSeries(String seriesName) {
 		this.seriesName = seriesName;
 	}
 
@@ -24,15 +24,15 @@ public class ChartSeries {
 		this.seriesName = seriesName;
 	}
 
-	public List<ChartPoint> getPoints() {
+	public List<QChartPoint> getPoints() {
 		return points;
 	}
 
-	public void setPoints(List<ChartPoint> points) {
+	public void setPoints(List<QChartPoint> points) {
 		this.points = points;
 	}
 	
-	public void addPoint(ChartPoint point) {
+	public void addPoint(QChartPoint point) {
 		points.add(point);
 	}
 }

@@ -1,16 +1,16 @@
-package bdn.quantum.model.chart;
+package bdn.quantum.model.qchart;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class ChartPoint {
+public class QChartPoint {
 
 	private int id;
 	private LocalDate date;
 	private BigDecimal value;
 	
 	
-	public ChartPoint(int id, LocalDate date, BigDecimal value) {
+	public QChartPoint(int id, LocalDate date, BigDecimal value) {
 		this.id = id;
 		this.date = date;
 		this.value = value;
