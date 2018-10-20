@@ -104,13 +104,13 @@ public class QChartServiceImpl implements QChartService {
 		if (series == null) {
 			return null;
 		}
-		result.addSeries(series);
+//		result.addSeries(series);
 		
 		series = buildUserPortfolioChartSeries(dateChain, tranList);
 		if (series == null) {
 			return null;
 		}
-		result.addSeries(series);
+//		result.addSeries(series);
 
 		return result;
 	}
@@ -132,13 +132,12 @@ public class QChartServiceImpl implements QChartService {
 		for (LocalDate ld : dateChain) {
 			pointId++;
 			
-			BigDecimal principalAdjust = BigDecimal.ZERO;
-			
 			if (nextTranIndex < tranList.size()) {
+				BigDecimal principalAdjust = BigDecimal.ZERO;
 				Transaction t = tranList.get(nextTranIndex);
 				LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 				
-				do {
+				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
 					Integer secId = t.getSecId();
 					
 					BigDecimal oldSecPrincipal = secIdToPrincipalMap.get(secId);
@@ -158,20 +157,15 @@ public class QChartServiceImpl implements QChartService {
 					t = tranList.get(nextTranIndex);
 					nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 				}
-				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld));
+				
+				portfolioPrincipal = portfolioPrincipal.add(principalAdjust);
 			}
-			
-			portfolioPrincipal = portfolioPrincipal.add(principalAdjust);
 			
 			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
 			result.addPoint(point);
 		}
 		
 		return result;
-	}
-	
-	private LocalDate convertDateToLocalDate(Date date) {
-		return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
 	private QChartSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Chart> benchmarkChartChain) {
@@ -196,6 +190,10 @@ public class QChartServiceImpl implements QChartService {
 		// TODO
 		
 		return result;
+	}
+	
+	private LocalDate convertDateToLocalDate(Date date) {
+		return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
 }
