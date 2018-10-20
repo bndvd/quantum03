@@ -16,6 +16,10 @@ app.config(function($routeProvider, $httpProvider) {
         templateUrl : "pages/dashboard.html",
         controller : "dashboardCtrl"
     })
+    .when("/charts", {
+        templateUrl : "pages/charts.html",
+        controller : "chartsCtrl"
+    })
     .when("/transactions", {
         templateUrl : "pages/transactions.html",
         controller : "transactionsCtrl"

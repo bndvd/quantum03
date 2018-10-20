@@ -1,17 +1,24 @@
 package bdn.quantum.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.model.Position;
 import bdn.quantum.model.Transaction;
 import bdn.quantum.model.qchart.QChart;
+import bdn.quantum.model.qchart.QChartPoint;
 import bdn.quantum.model.qchart.QChartSeries;
+import bdn.quantum.model.util.TransactionComparator;
 import pl.zankowski.iextrading4j.api.stocks.Chart;
 
 @Service("chartService")
@@ -20,9 +27,11 @@ public class QChartServiceImpl implements QChartService {
 	private static final DateTimeFormatter CHART_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd");;
 
 	@Autowired
-	private TransactionService transactionService;
+	private AssetService assetService;
 	@Autowired
 	private SecurityPriceService securityPriceService;
+	@Autowired
+	private TransactionComparator transactionComparator;
 	
 	@Override
 	public QChart getChart(String chartName) {
@@ -32,11 +41,29 @@ public class QChartServiceImpl implements QChartService {
 			Iterable<Chart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.CHART_STD_BENCHMARK_SYMBOL);
 			if (benchmarkChartChain != null) {
 				Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
-				Iterable<Transaction> tranIter = transactionService.getTransactions();
+				Iterable<Position> positionIter = assetService.getPositions(true);
+				Iterable<Transaction> tranIter = getSortedTransactionsFromPositions(positionIter);
 				result = buildStdGrowthChart(dateChain, benchmarkChartChain, tranIter);
 			}
 		}
 
+		return result;
+	}
+
+	private Iterable<Transaction> getSortedTransactionsFromPositions(Iterable<Position> positionIter) {
+		if (positionIter == null) {
+			return null;
+		}
+		
+		List<Transaction> result = new ArrayList<>();
+		for (Position p : positionIter) {
+			List<Transaction> tranList = p.getTransactions();
+			if (tranList != null) {
+				result.addAll(tranList);
+			}
+		}
+		result.sort(transactionComparator);
+		
 		return result;
 	}
 
@@ -94,11 +121,57 @@ public class QChartServiceImpl implements QChartService {
 			return null;
 		}
 		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
+		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_PRINCIPAL);
 		
-		// TODO
+		BigDecimal portfolioPrincipal = BigDecimal.ZERO;
+		int nextTranIndex = 0;
+		int pointId = 0;
+		// running principal for each security; deltas at transaction determine adjustments to portfolio principal
+		HashMap<Integer, BigDecimal> secIdToPrincipalMap = new HashMap<>();
+		
+		for (LocalDate ld : dateChain) {
+			pointId++;
+			
+			BigDecimal principalAdjust = BigDecimal.ZERO;
+			
+			if (nextTranIndex < tranList.size()) {
+				Transaction t = tranList.get(nextTranIndex);
+				LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+				
+				do {
+					Integer secId = t.getSecId();
+					
+					BigDecimal oldSecPrincipal = secIdToPrincipalMap.get(secId);
+					if (oldSecPrincipal == null) {
+						oldSecPrincipal = BigDecimal.ZERO;
+						secIdToPrincipalMap.put(secId, oldSecPrincipal);
+					}
+					
+					BigDecimal newSecPrincipal = t.getPrincipal();
+					principalAdjust = principalAdjust.add(newSecPrincipal.subtract(oldSecPrincipal));
+					secIdToPrincipalMap.put(secId, newSecPrincipal);
+					
+					nextTranIndex++;
+					if (nextTranIndex >= tranList.size()) {
+						break;
+					}
+					t = tranList.get(nextTranIndex);
+					nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+				}
+				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld));
+			}
+			
+			portfolioPrincipal = portfolioPrincipal.add(principalAdjust);
+			
+			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
+			result.addPoint(point);
+		}
 		
 		return result;
+	}
+	
+	private LocalDate convertDateToLocalDate(Date date) {
+		return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
 	private QChartSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Chart> benchmarkChartChain) {
@@ -118,7 +191,7 @@ public class QChartServiceImpl implements QChartService {
 			return null;
 		}
 		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
+		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_USER_PORTFOLIO);
 		
 		// TODO
 		

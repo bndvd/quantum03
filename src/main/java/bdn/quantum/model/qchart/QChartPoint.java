@@ -5,18 +5,18 @@ import java.time.LocalDate;
 
 public class QChartPoint {
 
-	private int id;
+	private Integer id;
 	private LocalDate date;
 	private BigDecimal value;
 	
 	
-	public QChartPoint(int id, LocalDate date, BigDecimal value) {
+	public QChartPoint(Integer id, LocalDate date, BigDecimal value) {
 		this.id = id;
 		this.date = date;
 		this.value = value;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -28,7 +28,7 @@ public class QChartPoint {
 		return value;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
