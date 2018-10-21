@@ -1,6 +1,7 @@
 package bdn.quantum.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -104,7 +105,7 @@ public class QChartServiceImpl implements QChartService {
 		if (benchmarkSeries == null) {
 			return null;
 		}
-//		result.addSeries(benchmarkSeries);
+		result.addSeries(benchmarkSeries);
 		
 		QChartSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, tranList);
 		if (userPotfolioSeries == null) {
@@ -191,9 +192,13 @@ public class QChartServiceImpl implements QChartService {
 			QChartPoint p = principalPoints.get(i);
 			BigDecimal newPrincipal = p.getValue();
 			BigDecimal principalDelta = newPrincipal.subtract(oldPrincipal);
-			// if non-zero change in principal
+			// if non-zero change in principal, calculate the # additional shares we will add at the price
+			// of the opening share price
 			if (principalDelta.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
-				
+				BigDecimal openSharePrice = benchmarkChartList.get(i).getOpen();
+				BigDecimal sharesDelta = principalDelta.divide(openSharePrice,
+								QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+				shares = shares.add(sharesDelta);
 			}
 			
 			BigDecimal closeSharePrice = benchmarkChartList.get(i).getClose();
