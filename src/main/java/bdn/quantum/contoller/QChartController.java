@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
-import bdn.quantum.model.qchart.QChart;
+import bdn.quantum.model.qchart.QPlot;
 import bdn.quantum.service.QChartService;
 
 @RestController("chartController")
@@ -18,7 +18,7 @@ public class QChartController {
 	private QChartService qChartService;
 	
 	@RequestMapping(value = "/chart/{chartName}", method = RequestMethod.GET)
-	public QChart getChart(@PathVariable(value="chartName") String chartName) {
+	public QPlot getChart(@PathVariable(value="chartName") String chartName) {
 		return qChartService.getChart(chartName);
 	}
 	

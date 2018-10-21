@@ -3,7 +3,7 @@ package bdn.quantum.model.qchart;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QChartSeries {
+public class QPlotSeries {
 
 	public static final Integer QCHART_SERIES_UNDEFINED = Integer.valueOf(0);
 	public static final Integer QCHART_SERIES_PRINCIPAL = Integer.valueOf(1);
@@ -11,13 +11,13 @@ public class QChartSeries {
 	public static final Integer QCHART_SERIES_USER_PORTFOLIO = Integer.valueOf(3);
 	
 	private Integer type = QCHART_SERIES_UNDEFINED;
-	private List<QChartPoint> points = new ArrayList<>();
+	private List<QPlotPoint> points = new ArrayList<>();
 	
 	
-	public QChartSeries() {
+	public QPlotSeries() {
 	}
 	
-	public QChartSeries(Integer type) {
+	public QPlotSeries(Integer type) {
 		this.type = type;
 	}
 
@@ -29,15 +29,15 @@ public class QChartSeries {
 		this.type = type;
 	}
 
-	public List<QChartPoint> getPoints() {
+	public List<QPlotPoint> getPoints() {
 		return points;
 	}
 
-	public void setPoints(List<QChartPoint> points) {
+	public void setPoints(List<QPlotPoint> points) {
 		this.points = points;
 	}
 	
-	public void addPoint(QChartPoint point) {
+	public void addPoint(QPlotPoint point) {
 		points.add(point);
 	}
 }

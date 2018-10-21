@@ -1,9 +1,9 @@
 package bdn.quantum.service;
 
-import bdn.quantum.model.qchart.QChart;
+import bdn.quantum.model.qchart.QPlot;
 
 public interface QChartService {
 
-	public QChart getChart(String chartName);
+	public QPlot getChart(String chartName);
 	
 }

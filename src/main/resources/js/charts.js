@@ -12,16 +12,27 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	$scope.CHARTSERIES_USERPORTFOLIO_ID = 3;
 	
 	$scope.chartSeriesIdToNameMap = {};
-	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_PRINCIPAL_ID] = "Principal";
-	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_TOTALUSMARKET_ID] = "USTotMkt";
+	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_PRINCIPAL_ID] = "Cash";
+	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_TOTALUSMARKET_ID] = "Tot Mkt";
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_USERPORTFOLIO_ID] = $rootScope.authSession.username;
 
+	$scope.graphMsgStdGrowth = null;
+	
 	
 	$scope.loadGraph = function(graphId, graphData) {
 		var gStdGrowth = new Dygraph(
 				document.getElementById(graphId),
 				graphData,
-				{}
+				{
+					includeZero: true,
+					colors: ["rgb(180,180,180)", "rgb(120,120,120)", "rgb(0,0,0)"],
+					axisLabelWidth: 80,
+					axisLabelFontSize: 12,
+					digitsAfterDecimal: 0,
+					labelsSeparateLines: false,
+					labelsDiv: "graphIdStdGrowthLegend",
+					hideOverlayOnMouseOut: false
+				}
 		);
 	};
 	
@@ -29,6 +40,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	// Generate Std Growth Graph
 	//
 	$scope.generateStdGrowthGraph = function() {
+		$scope.graphMsgStdGrowth = "Building Portfolio Comparison Chart...";
 		$http({
 			  method: "GET",
 			  url: "api/v1/chart/" + $scope.chartIdToNameMap[$scope.CHART_STD_GROWTH_ID]
@@ -65,11 +77,12 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 						}
 						
 						// load graph object
+						$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (5-year)";
 						$scope.loadGraph("graphIdStdGrowth", gData);
 					}
 				},
 				function errorCallback(response) {
-					window.alert("Error loading graph: "+response.status);
+					$scope.graphMsgStdGrowth = "Error loading Portfolio Comparison Chart";
 				}
 		);
 	};

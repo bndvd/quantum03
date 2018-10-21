@@ -3,14 +3,14 @@ package bdn.quantum.model.qchart;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class QChartPoint {
+public class QPlotPoint {
 
 	private Integer id;
 	private LocalDate date;
 	private BigDecimal value;
 	
 	
-	public QChartPoint(Integer id, LocalDate date, BigDecimal value) {
+	public QPlotPoint(Integer id, LocalDate date, BigDecimal value) {
 		this.id = id;
 		this.date = date;
 		this.value = value;
@@ -38,6 +38,13 @@ public class QChartPoint {
 
 	public void setValue(BigDecimal value) {
 		this.value = value;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("(").append(date).append(",").append(value).append(")");
+		return sb.toString();
 	}
 	
 }

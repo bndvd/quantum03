@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumProperties;
 
-@Service("findResolverService")
+@Service("fundResolverService")
 public class FundResolverServiceImpl implements FundResolverService {
 
 	@Autowired

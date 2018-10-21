@@ -144,5 +144,12 @@ public class Transaction {
 	public void setPrincipal(BigDecimal principal) {
 		this.principal = principal;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("(").append(tranDate).append("::").append(type).append("::").append(shares).append("::").append(price).append(")");
+		return sb.toString();
+	}
 
 }

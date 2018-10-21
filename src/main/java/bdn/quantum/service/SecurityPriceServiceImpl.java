@@ -1,7 +1,6 @@
 package bdn.quantum.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.model.qchart.QChart;
 import pl.zankowski.iextrading4j.api.stocks.Chart;
 import pl.zankowski.iextrading4j.api.stocks.ChartRange;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
@@ -65,21 +65,35 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 	}
 	
 	@Override
-	public Iterable<Chart> getMaxChartChain(String symbol) {
-		List<Chart> chartList = null;
+	public Iterable<QChart> getMaxChartChain(String symbol) {
+		List<QChart> qChartList = null;
+		
+		String querySymbol = symbol;
+		String proxySymbol = fundResolverService.getStockProxy(symbol);
+		if (proxySymbol != null) {
+			querySymbol = proxySymbol;
+		}
 		
 		try {
-			chartList = iexTradingClient.executeRequest(new ChartRequestBuilder()
+			List<Chart> chartList = iexTradingClient.executeRequest(new ChartRequestBuilder()
 					.withChartRange(ChartRange.FIVE_YEARS)
-					.withSymbol(symbol)
+					.withSymbol(querySymbol)
 					.build());
+			
+			if (chartList != null) {
+				qChartList = new ArrayList<>();
+				for (Chart c : chartList) {
+					QChart qc = new QChart(symbol, c, fundResolverService);
+					qChartList.add(qc);
+				}
+			}
 		}
 		catch (Exception exc) {
 			System.err.println("SecurityPriceServiceImpl.getMaxDateChain:: "+exc);
-			chartList = null;
+			qChartList = null;
 		}
 		
-		return chartList;
+		return qChartList;
 	}
 
 	private BigDecimal getQuoteFromCache(String symbol) {

@@ -1,44 +1,49 @@
 package bdn.quantum.model.qchart;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import bdn.quantum.service.FundResolverService;
+import pl.zankowski.iextrading4j.api.stocks.Chart;
 
 public class QChart {
 
-	public static final Integer QCHART_STD_UNDEFINED = Integer.valueOf(0);
-	public static final Integer QCHART_STD_GROWTH = Integer.valueOf(1);
+	private static final DateTimeFormatter CHART_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd");;
+
+	private String symbol;
+	private Chart chart;
+	private FundResolverService fundResolverService;
 	
-	private Integer type = QCHART_STD_UNDEFINED;
-	private List<QChartSeries> seriesList = new ArrayList<>();
+	private String proxySymbol = null;
 	
 	
-	public QChart() {
+	public QChart(String symbol, Chart chart, FundResolverService fundResolverService) {
+		this.symbol = symbol;
+		this.chart = chart;
+		this.fundResolverService = fundResolverService;
+		this.proxySymbol = fundResolverService.getStockProxy(symbol);
 	}
 	
-	public QChart(Integer type) {
-		this.type = type;
+	public LocalDate getDate() {
+		LocalDate ld = LocalDate.parse(chart.getDate(), CHART_DTF);
+		return ld;
 	}
-
-	public Integer getType() {
-		return type;
-	}
-
-	public void setType(Integer type) {
-		this.type = type;
-	}
-
-	public List<QChartSeries> getSeriesList() {
-		return seriesList;
-	}
-
-	public void setSeriesList(List<QChartSeries> seriesList) {
-		this.seriesList = seriesList;
-	}
-
-	public void addSeries(QChartSeries series) {
-		if (series == null) {
-			return;
+	
+	public BigDecimal getOpen() {
+		BigDecimal result = chart.getOpen();
+		if (proxySymbol != null) {
+			result = fundResolverService.convertProxyToFundValue(symbol, result);
 		}
-		seriesList.add(series);
+		return result;
 	}
+	
+	public BigDecimal getClose() {
+		BigDecimal result = chart.getClose();
+		if (proxySymbol != null) {
+			result = fundResolverService.convertProxyToFundValue(symbol, result);
+		}
+		return result;
+	}
+	
 }

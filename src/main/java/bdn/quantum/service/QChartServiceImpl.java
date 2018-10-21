@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,15 +16,13 @@ import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Transaction;
 import bdn.quantum.model.qchart.QChart;
-import bdn.quantum.model.qchart.QChartPoint;
-import bdn.quantum.model.qchart.QChartSeries;
+import bdn.quantum.model.qchart.QPlot;
+import bdn.quantum.model.qchart.QPlotPoint;
+import bdn.quantum.model.qchart.QPlotSeries;
 import bdn.quantum.model.util.TransactionComparator;
-import pl.zankowski.iextrading4j.api.stocks.Chart;
 
 @Service("chartService")
 public class QChartServiceImpl implements QChartService {
-
-	private static final DateTimeFormatter CHART_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd");;
 
 	@Autowired
 	private AssetService assetService;
@@ -35,11 +32,11 @@ public class QChartServiceImpl implements QChartService {
 	private TransactionComparator transactionComparator;
 	
 	@Override
-	public QChart getChart(String chartName) {
-		QChart result = null;
+	public QPlot getChart(String chartName) {
+		QPlot result = null;
 		
 		if (QuantumConstants.CHART_STD_GROWTH.equals(chartName)) {
-			Iterable<Chart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.CHART_STD_BENCHMARK_SYMBOL);
+			Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.CHART_STD_BENCHMARK_SYMBOL);
 			if (benchmarkChartChain != null) {
 				Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 				Iterable<Position> positionIter = assetService.getPositions(true);
@@ -50,27 +47,27 @@ public class QChartServiceImpl implements QChartService {
 		return result;
 	}
 
-	private QChart buildStdGrowthChart(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
-						Iterable<Chart> benchmarkChartChain) {
+	private QPlot buildStdGrowthChart(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+						Iterable<QChart> benchmarkChartChain) {
 		if (dateChain == null || positionIter == null || benchmarkChartChain == null) {
 			return null;
 		}
 		
-		QChart result = new QChart(QChart.QCHART_STD_GROWTH);
+		QPlot result = new QPlot(QPlot.QCHART_STD_GROWTH);
 		
-		QChartSeries principalSeries = buildPrincipalChartSeries(dateChain, positionIter);
+		QPlotSeries principalSeries = buildPrincipalChartSeries(dateChain, positionIter);
 		if (principalSeries == null) {
 			return null;
 		}
 		result.addSeries(principalSeries);
 		
-		QChartSeries benchmarkSeries = buildBenchmarkChartSeries(dateChain, positionIter, benchmarkChartChain);
+		QPlotSeries benchmarkSeries = buildBenchmarkChartSeries(dateChain, positionIter, benchmarkChartChain);
 		if (benchmarkSeries == null) {
 			return null;
 		}
 		result.addSeries(benchmarkSeries);
 		
-		QChartSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, positionIter);
+		QPlotSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, positionIter);
 		if (userPotfolioSeries == null) {
 			return null;
 		}
@@ -80,12 +77,12 @@ public class QChartServiceImpl implements QChartService {
 	}
 	
 	
-	private QChartSeries buildPrincipalChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
+	private QPlotSeries buildPrincipalChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
 		if (dateChain == null || positionIter == null) {
 			return null;
 		}
 		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_PRINCIPAL);
+		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_PRINCIPAL);
 		
 		List<Transaction> allTranList = getSortedTransactionsFromPositions(positionIter);
 		
@@ -127,62 +124,62 @@ public class QChartServiceImpl implements QChartService {
 				portfolioPrincipal = portfolioPrincipal.add(principalDelta);
 			}
 			
-			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
+			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
 			result.addPoint(point);
 		}
 		
 		return result;
 	}
 	
-	private QChartSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
-						Iterable<Chart> benchmarkChartChain) {
+	private QPlotSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+						Iterable<QChart> benchmarkChartChain) {
 		if (dateChain == null || benchmarkChartChain == null) {
 			return null;
 		}
 		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
+		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_TOTAL_US_MARKET);
 		
-		List<QChartPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, benchmarkChartChain);
+		List<QPlotPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, benchmarkChartChain);
 		result.setPoints(points);
 		
 		return result;
 	}
 	
-	private QChartSeries buildUserPortfolioChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
+	private QPlotSeries buildUserPortfolioChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
 		if (dateChain == null || positionIter == null) {
 			return null;
 		}
 
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_USER_PORTFOLIO);
+		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_USER_PORTFOLIO);
 
-		List<QChartPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, null);
+		List<QPlotPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, null);
 		result.setPoints(points);
 
 		return result;
 	}
 	
-	private List<QChartPoint> buildPortfolioSeriesPoints(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
-			Iterable<Chart> singlePortfolioSecChartChain) {
+	private List<QPlotPoint> buildPortfolioSeriesPoints(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+			Iterable<QChart> singlePortfolioSecChartChain) {
 		if (dateChain == null || positionIter == null) {
 			return null;
 		}
 		
-		List<QChartPoint> result = new ArrayList<>();
+		List<QPlotPoint> result = new ArrayList<>();
 		
-		List<List<QChartPoint>> chartPointListsBySec = new ArrayList<>();
+		List<List<QPlotPoint>> chartPointListsBySec = new ArrayList<>();
 		for (Position p : positionIter) {
 			List<Transaction> secTranList = p.getTransactions();
 			
 			if (secTranList != null && secTranList.size() > 0) {
 				// if all positions collapse to a simulated portfolio represented by a single security (e.g., benchmark)
 				// get the chart chain for that security once
-				Iterable<Chart> secChartChain = singlePortfolioSecChartChain;
+				Iterable<QChart> secChartChain = singlePortfolioSecChartChain;
 				if (secChartChain == null) {
 					secChartChain = securityPriceService.getMaxChartChain(p.getSymbol());
 				}
 				
 				if (secChartChain != null) {
-					List<QChartPoint> secPoints = buildSecuritySeriesPoints(dateChain, secTranList, secChartChain);
+					List<QPlotPoint> secPoints = buildSecuritySeriesPoints(dateChain, secTranList, secChartChain);
 					chartPointListsBySec.add(secPoints);
 				}
 				else {
@@ -207,25 +204,25 @@ public class QChartServiceImpl implements QChartService {
 				portfolioValue = portfolioValue.add(chartPointListsBySec.get(j).get(i).getValue());
 			}
 
-			QChartPoint p = new QChartPoint(id, localDate, portfolioValue);
+			QPlotPoint p = new QPlotPoint(id, localDate, portfolioValue);
 			result.add(p);
 		}
 
 		return result;
 	}
 
-	private List<QChartPoint> buildSecuritySeriesPoints(Iterable<LocalDate> dateChain, List<Transaction> secTranList,
-			Iterable<Chart> secChartChain) {
+	private List<QPlotPoint> buildSecuritySeriesPoints(Iterable<LocalDate> dateChain, List<Transaction> secTranList,
+			Iterable<QChart> secChartChain) {
 		if (dateChain == null || secTranList == null || secChartChain == null) {
 			return null;
 		}
 
-		List<QChartPoint> result = new ArrayList<>();
+		List<QPlotPoint> result = new ArrayList<>();
 
-		HashMap<LocalDate, Chart> dateToChartMap = new HashMap<>();
-		for (Chart c : secChartChain) {
-			LocalDate ld = LocalDate.parse(c.getDate(), CHART_DTF);
-			dateToChartMap.put(ld, c);
+		HashMap<LocalDate, QChart> dateToChartMap = new HashMap<>();
+		for (QChart qc : secChartChain) {
+			LocalDate ld = qc.getDate();
+			dateToChartMap.put(ld, qc);
 		}
 
 		BigDecimal secShares = BigDecimal.ZERO;
@@ -237,9 +234,9 @@ public class QChartServiceImpl implements QChartService {
 			pointId++;
 
 			BigDecimal secValue = BigDecimal.ZERO;
-			Chart c = dateToChartMap.get(ld);
+			QChart qc = dateToChartMap.get(ld);
 
-			if (c != null) {
+			if (qc != null) {
 				if (nextTranIndex < secTranList.size()) {
 					BigDecimal principalDelta = BigDecimal.ZERO;
 					Transaction t = secTranList.get(nextTranIndex);
@@ -259,17 +256,17 @@ public class QChartServiceImpl implements QChartService {
 						nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 					}
 
-					BigDecimal openingSharePrice = c.getOpen();
+					BigDecimal openingSharePrice = qc.getOpen();
 					BigDecimal shareDelta = principalDelta.divide(openingSharePrice,
 							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					secShares = secShares.add(shareDelta);
 				}
 
-				BigDecimal closeSharePrice = c.getClose();
+				BigDecimal closeSharePrice = qc.getClose();
 				secValue = secShares.multiply(closeSharePrice);
 			}
 
-			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, secValue);
+			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, secValue);
 			result.add(point);
 		}
 
@@ -293,14 +290,14 @@ public class QChartServiceImpl implements QChartService {
 		return result;
 	}
 
-	private Iterable<LocalDate> buildDateChain(Iterable<Chart> chartChain) {
+	private Iterable<LocalDate> buildDateChain(Iterable<QChart> chartChain) {
 		if (chartChain == null) {
 			return null;
 		}
 		
 		List<LocalDate> result = new ArrayList<LocalDate>();
-		for (Chart c : chartChain) {
-			LocalDate date = LocalDate.parse(c.getDate(), CHART_DTF);
+		for (QChart qc : chartChain) {
+			LocalDate date = qc.getDate();
 			result.add(date);
 		}
 		
