@@ -43,15 +43,240 @@ public class QChartServiceImpl implements QChartService {
 			if (benchmarkChartChain != null) {
 				Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 				Iterable<Position> positionIter = assetService.getPositions(true);
-				Iterable<Transaction> tranIter = getSortedTransactionsFromPositions(positionIter);
-				result = buildStdGrowthChart(dateChain, benchmarkChartChain, tranIter);
+				result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
 			}
 		}
 
 		return result;
 	}
 
-	private Iterable<Transaction> getSortedTransactionsFromPositions(Iterable<Position> positionIter) {
+	private QChart buildStdGrowthChart(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+						Iterable<Chart> benchmarkChartChain) {
+		if (dateChain == null || positionIter == null || benchmarkChartChain == null) {
+			return null;
+		}
+		
+		QChart result = new QChart(QChart.QCHART_STD_GROWTH);
+		
+		QChartSeries principalSeries = buildPrincipalChartSeries(dateChain, positionIter);
+		if (principalSeries == null) {
+			return null;
+		}
+		result.addSeries(principalSeries);
+		
+		QChartSeries benchmarkSeries = buildBenchmarkChartSeries(dateChain, positionIter, benchmarkChartChain);
+		if (benchmarkSeries == null) {
+			return null;
+		}
+		result.addSeries(benchmarkSeries);
+		
+		QChartSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, positionIter);
+		if (userPotfolioSeries == null) {
+			return null;
+		}
+		result.addSeries(userPotfolioSeries);
+
+		return result;
+	}
+	
+	
+	private QChartSeries buildPrincipalChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
+		if (dateChain == null || positionIter == null) {
+			return null;
+		}
+		
+		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_PRINCIPAL);
+		
+		List<Transaction> allTranList = getSortedTransactionsFromPositions(positionIter);
+		
+		BigDecimal portfolioPrincipal = BigDecimal.ZERO;
+		int nextTranIndex = 0;
+		int pointId = 0;
+		// running principal for each security; deltas at transaction determine adjustments to portfolio principal
+		HashMap<Integer, BigDecimal> secIdToPrincipalMap = new HashMap<>();
+		
+		for (LocalDate ld : dateChain) {
+			pointId++;
+			
+			if (nextTranIndex < allTranList.size()) {
+				BigDecimal principalDelta = BigDecimal.ZERO;
+				Transaction t = allTranList.get(nextTranIndex);
+				LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+				
+				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
+					Integer secId = t.getSecId();
+					
+					BigDecimal oldSecPrincipal = secIdToPrincipalMap.get(secId);
+					if (oldSecPrincipal == null) {
+						oldSecPrincipal = BigDecimal.ZERO;
+						secIdToPrincipalMap.put(secId, oldSecPrincipal);
+					}
+					
+					BigDecimal newSecPrincipal = t.getPrincipal();
+					principalDelta = principalDelta.add(newSecPrincipal.subtract(oldSecPrincipal));
+					secIdToPrincipalMap.put(secId, newSecPrincipal);
+					
+					nextTranIndex++;
+					if (nextTranIndex >= allTranList.size()) {
+						break;
+					}
+					t = allTranList.get(nextTranIndex);
+					nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+				}
+				
+				portfolioPrincipal = portfolioPrincipal.add(principalDelta);
+			}
+			
+			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
+			result.addPoint(point);
+		}
+		
+		return result;
+	}
+	
+	private QChartSeries buildBenchmarkChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+						Iterable<Chart> benchmarkChartChain) {
+		if (dateChain == null || benchmarkChartChain == null) {
+			return null;
+		}
+		
+		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
+		
+		List<QChartPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, benchmarkChartChain);
+		result.setPoints(points);
+		
+		return result;
+	}
+	
+	private QChartSeries buildUserPortfolioChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
+		if (dateChain == null || positionIter == null) {
+			return null;
+		}
+
+		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_USER_PORTFOLIO);
+
+		List<QChartPoint> points = buildPortfolioSeriesPoints(dateChain, positionIter, null);
+		result.setPoints(points);
+
+		return result;
+	}
+	
+	private List<QChartPoint> buildPortfolioSeriesPoints(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+			Iterable<Chart> singlePortfolioSecChartChain) {
+		if (dateChain == null || positionIter == null) {
+			return null;
+		}
+		
+		List<QChartPoint> result = new ArrayList<>();
+		
+		List<List<QChartPoint>> chartPointListsBySec = new ArrayList<>();
+		for (Position p : positionIter) {
+			List<Transaction> secTranList = p.getTransactions();
+			
+			if (secTranList != null && secTranList.size() > 0) {
+				// if all positions collapse to a simulated portfolio represented by a single security (e.g., benchmark)
+				// get the chart chain for that security once
+				Iterable<Chart> secChartChain = singlePortfolioSecChartChain;
+				if (secChartChain == null) {
+					secChartChain = securityPriceService.getMaxChartChain(p.getSymbol());
+				}
+				
+				if (secChartChain != null) {
+					List<QChartPoint> secPoints = buildSecuritySeriesPoints(dateChain, secTranList, secChartChain);
+					chartPointListsBySec.add(secPoints);
+				}
+				else {
+					System.err.println("QCharServiceImpl.buildPortfolioSeriesPoints - Could not get chart chain for symbol: " + p.getSymbol() +
+							". Graph will not include this security and may be inaccurate.");
+				}
+			}
+		}
+
+		if (chartPointListsBySec.size() < 1) {
+			return null;
+		}
+
+		// to create user portfolio series, add the security values across all
+		// securities
+		for (int i = 0; i < chartPointListsBySec.get(0).size(); i++) {
+			Integer id = chartPointListsBySec.get(0).get(i).getId();
+			LocalDate localDate = chartPointListsBySec.get(0).get(i).getDate();
+
+			BigDecimal portfolioValue = BigDecimal.ZERO;
+			for (int j = 0; j < chartPointListsBySec.size(); j++) {
+				portfolioValue = portfolioValue.add(chartPointListsBySec.get(j).get(i).getValue());
+			}
+
+			QChartPoint p = new QChartPoint(id, localDate, portfolioValue);
+			result.add(p);
+		}
+
+		return result;
+	}
+
+	private List<QChartPoint> buildSecuritySeriesPoints(Iterable<LocalDate> dateChain, List<Transaction> secTranList,
+			Iterable<Chart> secChartChain) {
+		if (dateChain == null || secTranList == null || secChartChain == null) {
+			return null;
+		}
+
+		List<QChartPoint> result = new ArrayList<>();
+
+		HashMap<LocalDate, Chart> dateToChartMap = new HashMap<>();
+		for (Chart c : secChartChain) {
+			LocalDate ld = LocalDate.parse(c.getDate(), CHART_DTF);
+			dateToChartMap.put(ld, c);
+		}
+
+		BigDecimal secShares = BigDecimal.ZERO;
+		BigDecimal secPrincipal = BigDecimal.ZERO;
+		int nextTranIndex = 0;
+		int pointId = 0;
+
+		for (LocalDate ld : dateChain) {
+			pointId++;
+
+			BigDecimal secValue = BigDecimal.ZERO;
+			Chart c = dateToChartMap.get(ld);
+
+			if (c != null) {
+				if (nextTranIndex < secTranList.size()) {
+					BigDecimal principalDelta = BigDecimal.ZERO;
+					Transaction t = secTranList.get(nextTranIndex);
+					LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+
+					while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
+						BigDecimal oldSecPrincipal = secPrincipal;
+						BigDecimal newSecPrincipal = t.getPrincipal();
+						principalDelta = principalDelta.add(newSecPrincipal.subtract(oldSecPrincipal));
+						secPrincipal = newSecPrincipal;
+
+						nextTranIndex++;
+						if (nextTranIndex >= secTranList.size()) {
+							break;
+						}
+						t = secTranList.get(nextTranIndex);
+						nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
+					}
+
+					BigDecimal openingSharePrice = c.getOpen();
+					BigDecimal shareDelta = principalDelta.divide(openingSharePrice,
+							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					secShares = secShares.add(shareDelta);
+				}
+
+				BigDecimal closeSharePrice = c.getClose();
+				secValue = secShares.multiply(closeSharePrice);
+			}
+
+			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, secValue);
+			result.add(point);
+		}
+
+		return result;
+	}
+
+	private List<Transaction> getSortedTransactionsFromPositions(Iterable<Position> positionIter) {
 		if (positionIter == null) {
 			return null;
 		}
@@ -78,149 +303,6 @@ public class QChartServiceImpl implements QChartService {
 			LocalDate date = LocalDate.parse(c.getDate(), CHART_DTF);
 			result.add(date);
 		}
-		
-		return result;
-	}
-	
-	private QChart buildStdGrowthChart(Iterable<LocalDate> dateChain, 
-						Iterable<Chart> benchmarkChartChain, Iterable<Transaction> tranIter) {
-		if (dateChain == null || benchmarkChartChain == null || tranIter == null) {
-			return null;
-		}
-		
-		QChart result = new QChart(QChart.QCHART_STD_GROWTH);
-		
-		List<Transaction> tranList = new ArrayList<>();
-		for (Transaction t : tranIter) {
-			tranList.add(t);
-		}
-		
-		QChartSeries principalSeries = buildPrincipalChartSeries(dateChain, tranList);
-		if (principalSeries == null) {
-			return null;
-		}
-		result.addSeries(principalSeries);
-		
-		QChartSeries benchmarkSeries = buildBenchmarkChartSeries(principalSeries, benchmarkChartChain);
-		if (benchmarkSeries == null) {
-			return null;
-		}
-		result.addSeries(benchmarkSeries);
-		
-		QChartSeries userPotfolioSeries = buildUserPortfolioChartSeries(dateChain, tranList);
-		if (userPotfolioSeries == null) {
-			return null;
-		}
-//		result.addSeries(userPotfolioSeries);
-
-		return result;
-	}
-	
-	
-	private QChartSeries buildPrincipalChartSeries(Iterable<LocalDate> dateChain, List<Transaction> tranList) {
-		if (dateChain == null || tranList == null) {
-			return null;
-		}
-		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_PRINCIPAL);
-		
-		BigDecimal portfolioPrincipal = BigDecimal.ZERO;
-		int nextTranIndex = 0;
-		int pointId = 0;
-		// running principal for each security; deltas at transaction determine adjustments to portfolio principal
-		HashMap<Integer, BigDecimal> secIdToPrincipalMap = new HashMap<>();
-		
-		for (LocalDate ld : dateChain) {
-			pointId++;
-			
-			if (nextTranIndex < tranList.size()) {
-				BigDecimal principalAdjust = BigDecimal.ZERO;
-				Transaction t = tranList.get(nextTranIndex);
-				LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
-				
-				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
-					Integer secId = t.getSecId();
-					
-					BigDecimal oldSecPrincipal = secIdToPrincipalMap.get(secId);
-					if (oldSecPrincipal == null) {
-						oldSecPrincipal = BigDecimal.ZERO;
-						secIdToPrincipalMap.put(secId, oldSecPrincipal);
-					}
-					
-					BigDecimal newSecPrincipal = t.getPrincipal();
-					principalAdjust = principalAdjust.add(newSecPrincipal.subtract(oldSecPrincipal));
-					secIdToPrincipalMap.put(secId, newSecPrincipal);
-					
-					nextTranIndex++;
-					if (nextTranIndex >= tranList.size()) {
-						break;
-					}
-					t = tranList.get(nextTranIndex);
-					nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
-				}
-				
-				portfolioPrincipal = portfolioPrincipal.add(principalAdjust);
-			}
-			
-			QChartPoint point = new QChartPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
-			result.addPoint(point);
-		}
-		
-		return result;
-	}
-	
-	private QChartSeries buildBenchmarkChartSeries(QChartSeries principalSeries, Iterable<Chart> benchmarkChartChain) {
-		if (principalSeries == null || benchmarkChartChain == null || principalSeries.getPoints() == null) {
-			return null;
-		}
-		
-		List<Chart> benchmarkChartList = new ArrayList<Chart>();
-		for (Chart c : benchmarkChartChain) {
-			benchmarkChartList.add(c);
-		}
-		if (principalSeries.getPoints().size() != benchmarkChartList.size()) {
-			return null;
-		}
-		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_TOTAL_US_MARKET);
-		
-		BigDecimal shares = BigDecimal.ZERO;
-		BigDecimal oldPrincipal = BigDecimal.ZERO;
-		
-		List<QChartPoint> principalPoints = principalSeries.getPoints();
-		for (int i = 0; i < principalPoints.size(); i++) {
-			QChartPoint p = principalPoints.get(i);
-			BigDecimal newPrincipal = p.getValue();
-			BigDecimal principalDelta = newPrincipal.subtract(oldPrincipal);
-			// if non-zero change in principal, calculate the # additional shares we will add at the price
-			// of the opening share price
-			if (principalDelta.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
-				BigDecimal openSharePrice = benchmarkChartList.get(i).getOpen();
-				BigDecimal sharesDelta = principalDelta.divide(openSharePrice,
-								QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
-				shares = shares.add(sharesDelta);
-			}
-			
-			BigDecimal closeSharePrice = benchmarkChartList.get(i).getClose();
-			BigDecimal benchmarkValue = shares.multiply(closeSharePrice);
-			
-			QChartPoint point = new QChartPoint(p.getId(), p.getDate(), benchmarkValue);
-			result.addPoint(point);
-			
-			oldPrincipal = newPrincipal;
-		}
-		
-		return result;
-	}
-
-	private QChartSeries buildUserPortfolioChartSeries(Iterable<LocalDate> dateChain, List<Transaction> tranList) {
-		if (dateChain == null || tranList == null) {
-			return null;
-		}
-		
-		QChartSeries result = new QChartSeries(QChartSeries.QCHART_SERIES_USER_PORTFOLIO);
-		
-		// TODO
 		
 		return result;
 	}
