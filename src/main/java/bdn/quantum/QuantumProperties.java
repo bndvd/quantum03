@@ -8,6 +8,7 @@ public final class QuantumProperties {
 	
 	public static final String TAX_RATE = "tax";
 	
+	public static final String READ_FUND_PROXIES = "readFundProxies";
 	public static final String FUND_PROXY = "fp.";
 	public static final String FUND_FACTOR = "ff.";
 	

@@ -18,9 +18,11 @@ public class FundResolverServiceImpl implements FundResolverService {
 	private Map<String, String> hcFundToProxyMap = new HashMap<>();
 	private Map<String, BigDecimal> hcFundToFactorMap = new HashMap<>();
 	
+	private static Boolean readFundProxyFromDb = null;
+	
 	
 	public FundResolverServiceImpl() {
-		initHardcodedProxies();
+		initProxies();
 	}
 	
 	
@@ -30,14 +32,18 @@ public class FundResolverServiceImpl implements FundResolverService {
 			return null;
 		}
 		
-		// check database first
-		String property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_PROXY + fundSymbol;
-		String result = keyvalService.getKeyvalStr(property);
-		if (result != null && ! result.trim().equals("")) {
-			property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_FACTOR + fundSymbol;
-			String factor = keyvalService.getKeyvalStr(property);
-			if (factor == null || factor.trim().equals("")) {
-				result = null;
+		String result = null;
+		
+		if (shouldReadFundProxyFromDb()) {
+			// check database
+			String property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_PROXY + fundSymbol;
+			result = keyvalService.getKeyvalStr(property);
+			if (result != null && ! result.trim().equals("")) {
+				property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_FACTOR + fundSymbol;
+				String factor = keyvalService.getKeyvalStr(property);
+				if (factor == null || factor.trim().equals("")) {
+					result = null;
+				}
 			}
 		}
 		
@@ -54,16 +60,19 @@ public class FundResolverServiceImpl implements FundResolverService {
 		BigDecimal factor = null;
 		
 		if (fundSymbol != null && ! fundSymbol.trim().equals("") && proxyValue != null) {
-			// check database first
-			String property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_FACTOR + fundSymbol;
-			String factorStr = keyvalService.getKeyvalStr(property);
-			if (factorStr != null && ! factorStr.trim().equals("")) {
-				try {
-					factor = new BigDecimal(factorStr);
-				}
-				catch (Exception exc) {
-					exc.printStackTrace();
-					factor = null;
+			
+			if (shouldReadFundProxyFromDb()) {
+				// check database first
+				String property = QuantumProperties.PROP_PREFIX + QuantumProperties.FUND_FACTOR + fundSymbol;
+				String factorStr = keyvalService.getKeyvalStr(property);
+				if (factorStr != null && ! factorStr.trim().equals("")) {
+					try {
+						factor = new BigDecimal(factorStr);
+					}
+					catch (Exception exc) {
+						exc.printStackTrace();
+						factor = null;
+					}
 				}
 			}
 			
@@ -80,9 +89,23 @@ public class FundResolverServiceImpl implements FundResolverService {
 		
 		return result;
 	}
+	
+	private boolean shouldReadFundProxyFromDb() {
+		if (readFundProxyFromDb == null) {
+			readFundProxyFromDb = Boolean.FALSE;
+			
+			String property = QuantumProperties.PROP_PREFIX + QuantumProperties.READ_FUND_PROXIES;
+			String propertyValue = keyvalService.getKeyvalStr(property);
+			if (propertyValue != null && propertyValue.equalsIgnoreCase("true")) {
+				readFundProxyFromDb = Boolean.TRUE;
+			}
+		}
+		return readFundProxyFromDb.booleanValue();
+	}
 
 	
-	private void initHardcodedProxies() {
+	private void initProxies() {
+		// Hardcoded Proxies
 		// VTI - VTSAX
 		hcFundToProxyMap.put("VTSAX", "VTI");
 		hcFundToFactorMap.put("VTSAX", new BigDecimal(0.486708868));
