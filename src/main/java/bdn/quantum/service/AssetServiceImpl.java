@@ -184,6 +184,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 		
 		BigDecimal valueSum = BigDecimal.ZERO;
+		BigDecimal[] currentRatios = new BigDecimal[assets.size()];
 		BigDecimal targetRatioSum = BigDecimal.ZERO;
 		BigDecimal[] targetRatios = new BigDecimal[assets.size()];
 		for (int i = 0; i < targetRatios.length; i++) {
@@ -192,6 +193,7 @@ public class AssetServiceImpl implements AssetService {
 		try {
 			for (int i = 0; i < assets.size(); i++) {
 				valueSum = valueSum.add(assets.get(i).getLastValue());
+				currentRatios[i] = BigDecimal.ZERO;
 				
 				Integer basketId = assets.get(i).getBasketId();
 				StringBuffer key = new StringBuffer();
@@ -205,16 +207,22 @@ public class AssetServiceImpl implements AssetService {
 				}
 			}
 			
+			// if we have non-zero total value, we can calculate the current ratios
+			if (valueSum.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+				for (int i = 0; i < assets.size(); i++) {
+					currentRatios[i] = assets.get(i).getLastValue().divide(valueSum,
+							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					assets.get(i).setCurrentRatio(currentRatios[i]);
+				}
+			}
+			
 			// if we have non-zero target ratios
 			if (targetRatioSum.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
 				for (int i = 0; i < assets.size(); i++) {
 					BigDecimal tr = targetRatios[i].divide(targetRatioSum,
 							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					assets.get(i).setTargetRatio(tr);
-					BigDecimal cr = assets.get(i).getLastValue().divide(valueSum,
-							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
-					assets.get(i).setCurrentRatio(cr);
-					BigDecimal deltaValue = cr.subtract(tr).multiply(valueSum);
+					BigDecimal deltaValue = currentRatios[i].subtract(tr).multiply(valueSum);
 					assets.get(i).setRatioDeltaValue(deltaValue);
 				}
 			}

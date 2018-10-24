@@ -53,36 +53,52 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 						
 						var i;
 						var j;
-						var gData = "";
-	
-						// dygraphs format:
-						// 1st line: Date,Col2,Col3\n
-						// 2nd line: date,ser1pt1,ser2pt1\n
-						// 3rd line: date,ser1pt2,ser2pt2\n
-						// ...
-						
-						gData = gData + $scope.DATEAXIS_NAME;
+						var validData = true;
 						for (i = 0; i < series.length; i++) {
-							var seriesId = series[i].type;
-							gData = gData + "," + $scope.chartSeriesIdToNameMap[seriesId];
+							if (series[i].points == null || series[i].points.length < 1) {
+								validData = false;
+								break;
+							}
 						}
-						gData = gData + "\n";
 						
-						for (i = 0; i < series[0].points.length; i++) {
-							gData = gData + series[0].points[i].date;
-							for (j = 0; j < series.length; j++) {
-								gData = gData + "," + series[j].points[i].value;
+						if (validData) {
+							var gData = "";
+		
+							// dygraphs format:
+							// 1st line: Date,Col2,Col3\n
+							// 2nd line: date,ser1pt1,ser2pt1\n
+							// 3rd line: date,ser1pt2,ser2pt2\n
+							// ...
+							
+							gData = gData + $scope.DATEAXIS_NAME;
+							for (i = 0; i < series.length; i++) {
+								var seriesId = series[i].type;
+								gData = gData + "," + $scope.chartSeriesIdToNameMap[seriesId];
 							}
 							gData = gData + "\n";
+							
+							for (i = 0; i < series[0].points.length; i++) {
+								gData = gData + series[0].points[i].date;
+								for (j = 0; j < series.length; j++) {
+									gData = gData + "," + series[j].points[i].value;
+								}
+								gData = gData + "\n";
+							}
+							
+							// load graph object
+							$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (simulated)";
+							$scope.loadGraph("graphIdStdGrowth", gData);
 						}
-						
-						// load graph object
-						$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (simulated)";
-						$scope.loadGraph("graphIdStdGrowth", gData);
+						else {
+							$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
+						}
+					}
+					else {
+						$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
 					}
 				},
 				function errorCallback(response) {
-					$scope.graphMsgStdGrowth = "Error loading Portfolio Comparison Chart";
+					$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
 				}
 		);
 	};
