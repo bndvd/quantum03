@@ -55,11 +55,11 @@ public class QChartServiceImpl implements QChartService {
 		
 		QPlot result = new QPlot(QPlot.QCHART_STD_GROWTH);
 		
-		QPlotSeries principalSeries = buildPrincipalChartSeries(dateChain, positionIter);
-		if (principalSeries == null) {
+		QPlotSeries cashSeries = buildCashChartSeries(dateChain, positionIter);
+		if (cashSeries == null) {
 			return null;
 		}
-		result.addSeries(principalSeries);
+		result.addSeries(cashSeries);
 		
 		QPlotSeries benchmarkSeries = buildBenchmarkChartSeries(dateChain, positionIter, benchmarkChartChain);
 		if (benchmarkSeries == null) {
@@ -77,41 +77,38 @@ public class QChartServiceImpl implements QChartService {
 	}
 	
 	
-	private QPlotSeries buildPrincipalChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
+	private QPlotSeries buildCashChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
 		if (dateChain == null || positionIter == null) {
 			return null;
 		}
 		
-		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_PRINCIPAL);
+		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_CASH);
 		
 		List<Transaction> allTranList = getSortedTransactionsFromPositions(positionIter);
 		
-		BigDecimal portfolioPrincipal = BigDecimal.ZERO;
+		BigDecimal portfolioCash = BigDecimal.ZERO;
 		int nextTranIndex = 0;
 		int pointId = 0;
-		// running principal for each security; deltas at transaction determine adjustments to portfolio principal
-		HashMap<Integer, BigDecimal> secIdToPrincipalMap = new HashMap<>();
 		
 		for (LocalDate ld : dateChain) {
 			pointId++;
 			
 			if (nextTranIndex < allTranList.size()) {
-				BigDecimal principalDelta = BigDecimal.ZERO;
+				BigDecimal cashDelta = BigDecimal.ZERO;
 				Transaction t = allTranList.get(nextTranIndex);
 				LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 				
 				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
-					Integer secId = t.getSecId();
 					
-					BigDecimal oldSecPrincipal = secIdToPrincipalMap.get(secId);
-					if (oldSecPrincipal == null) {
-						oldSecPrincipal = BigDecimal.ZERO;
-						secIdToPrincipalMap.put(secId, oldSecPrincipal);
+					// adjust cash value by value bought or sold
+					if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
+						BigDecimal tranValue = t.getShares().multiply(t.getPrice());
+						cashDelta = cashDelta.add(tranValue);
 					}
-					
-					BigDecimal newSecPrincipal = t.getPrincipal();
-					principalDelta = principalDelta.add(newSecPrincipal.subtract(oldSecPrincipal));
-					secIdToPrincipalMap.put(secId, newSecPrincipal);
+					else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
+						BigDecimal tranValue = t.getShares().multiply(t.getPrice());
+						cashDelta = cashDelta.subtract(tranValue);
+					}
 					
 					nextTranIndex++;
 					if (nextTranIndex >= allTranList.size()) {
@@ -121,10 +118,10 @@ public class QChartServiceImpl implements QChartService {
 					nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 				}
 				
-				portfolioPrincipal = portfolioPrincipal.add(principalDelta);
+				portfolioCash = portfolioCash.add(cashDelta);
 			}
 			
-			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, portfolioPrincipal);
+			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, portfolioCash);
 			result.addPoint(point);
 		}
 		
@@ -226,7 +223,6 @@ public class QChartServiceImpl implements QChartService {
 		}
 
 		BigDecimal secShares = BigDecimal.ZERO;
-		BigDecimal secPrincipal = BigDecimal.ZERO;
 		int nextTranIndex = 0;
 		int pointId = 0;
 
@@ -238,15 +234,20 @@ public class QChartServiceImpl implements QChartService {
 
 			if (qc != null) {
 				if (nextTranIndex < secTranList.size()) {
-					BigDecimal principalDelta = BigDecimal.ZERO;
+					BigDecimal valueDelta = BigDecimal.ZERO;
 					Transaction t = secTranList.get(nextTranIndex);
 					LocalDate nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 
 					while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
-						BigDecimal oldSecPrincipal = secPrincipal;
-						BigDecimal newSecPrincipal = t.getPrincipal();
-						principalDelta = principalDelta.add(newSecPrincipal.subtract(oldSecPrincipal));
-						secPrincipal = newSecPrincipal;
+						
+						if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
+							BigDecimal tranValue = t.getShares().multiply(t.getPrice());
+							valueDelta = valueDelta.add(tranValue);
+						}
+						else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
+							BigDecimal tranValue = t.getShares().multiply(t.getPrice());
+							valueDelta = valueDelta.subtract(tranValue);
+						}
 
 						nextTranIndex++;
 						if (nextTranIndex >= secTranList.size()) {
@@ -256,14 +257,12 @@ public class QChartServiceImpl implements QChartService {
 						nextTranLocalDate = convertDateToLocalDate(t.getTranDate());
 					}
 
-					BigDecimal openingSharePrice = qc.getOpen();
-					BigDecimal shareDelta = principalDelta.divide(openingSharePrice,
+					BigDecimal shareDelta = valueDelta.divide(qc.getClose(),
 							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					secShares = secShares.add(shareDelta);
 				}
 
-				BigDecimal closeSharePrice = qc.getClose();
-				secValue = secShares.multiply(closeSharePrice);
+				secValue = secShares.multiply(qc.getClose());
 			}
 
 			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, secValue);

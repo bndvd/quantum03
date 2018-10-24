@@ -25,7 +25,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 				graphData,
 				{
 					includeZero: true,
-					colors: ["rgb(180,180,180)", "rgb(120,120,120)", "rgb(0,0,0)"],
+					colors: ["rgb(200,200,200)", "rgb(100,100,100)", "rgb(0,0,0)"],
 					axisLabelWidth: 80,
 					axisLabelFontSize: 12,
 					digitsAfterDecimal: 0,
@@ -77,7 +77,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 						}
 						
 						// load graph object
-						$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (5-year)";
+						$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (simulated)";
 						$scope.loadGraph("graphIdStdGrowth", gData);
 					}
 				},

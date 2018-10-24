@@ -108,9 +108,15 @@ public class FundResolverServiceImpl implements FundResolverService {
 		// Hardcoded Proxies
 		// VTI - VTSAX
 		hcFundToProxyMap.put("VTSAX", "VTI");
-		hcFundToFactorMap.put("VTSAX", new BigDecimal(0.486708868));
+		hcFundToFactorMap.put("VTSAX", new BigDecimal(0.486697770));
+		// VTI - VTSMX
+		hcFundToProxyMap.put("VTSMX", "VTI");
+		hcFundToFactorMap.put("VTSMX", new BigDecimal(0.486492719));
 		// VBR - VSIAX
 		hcFundToProxyMap.put("VSIAX", "VBR");
-		hcFundToFactorMap.put("VSIAX", new BigDecimal(0.429572334));
+		hcFundToFactorMap.put("VSIAX", new BigDecimal(0.429618283));
+		// VBR - VISVX
+		hcFundToProxyMap.put("VISVX", "VBR");
+		hcFundToFactorMap.put("VISVX", new BigDecimal(0.239677464));
 	}
 }

@@ -59,7 +59,7 @@
 		<div class="w3-modal-content">
 			<header class="w3-container w3-black">
 				<span ng-click="showTransactionAddDialog(false)" class="w3-button w3-display-topright">&times;</span>
-				<h2>Add Transaction</h2>
+				<h2>Add Transaction ({{ securities[positionSelectedPageIndex].symbol }})</h2>
 			</header>
 			
 			<div class="w3-container w3-padding-32">
@@ -103,7 +103,7 @@
 		<div class="w3-modal-content">
 			<header class="w3-container w3-black">
 				<span ng-click="showTransactionDeleteDialog(false)" class="w3-button w3-display-topright">&times;</span>
-				<h2>Delete Transaction</h2>
+				<h2>Delete Transaction ({{ securities[positionSelectedPageIndex].symbol }})</h2>
 			</header>
 			
 			<div class="w3-container w3-padding-32">
@@ -147,7 +147,7 @@
 		<div class="w3-modal-content">
 			<header class="w3-container w3-black">
 				<span ng-click="showTransactionUpdateDialog(false)" class="w3-button w3-display-topright">&times;</span>
-				<h2>Update Transaction</h2>
+				<h2>Update Transaction ({{ securities[positionSelectedPageIndex].symbol }})</h2>
 			</header>
 			
 			<div class="w3-container w3-padding-32">
