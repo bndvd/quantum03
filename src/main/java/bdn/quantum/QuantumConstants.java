@@ -40,13 +40,14 @@ public final class QuantumConstants {
 	public static final double THRESHOLD_DECIMAL_EQUALING_ZERO = 0.000000001;
 	
 	// Stock quote constants
-	public static final long QUOTE_CACHE_LIFE_MILLIS = 10000;
+	public static final long QUOTE_CACHE_LIFE_MILLIS = 300000;
 	
 	// User session life in milliseconds
 	public static final long USER_SESSION_LIFE_MILLIS = 600000;
 	
-	// Chart constants
-	public static final String CHART_STD_BENCHMARK_SYMBOL = "VTI";
-	public static final String CHART_STD_GROWTH = "stdgrowth";
+	// Plot constants
+	public static final String PLOT_STD_BENCHMARK_SYMBOL = "VTI";
+	public static final String PLOT_STD_GROWTH = "stdgrowth";
+	public static final long PLOT_CACHE_LIFE_MILLIS = 300000;
 	
 }

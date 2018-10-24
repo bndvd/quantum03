@@ -8,18 +8,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.qchart.QPlot;
-import bdn.quantum.service.QChartService;
+import bdn.quantum.service.QPlotService;
 
-@RestController("chartController")
+@RestController("plotController")
 @RequestMapping(QuantumConstants.REST_URL_BASE)
-public class QChartController {
+public class QPlotController {
 
 	@Autowired
-	private QChartService qChartService;
+	private QPlotService qPlotService;
 	
 	@RequestMapping(value = "/chart/{chartName}", method = RequestMethod.GET)
-	public QPlot getChart(@PathVariable(value="chartName") String chartName) {
-		return qChartService.getChart(chartName);
+	public QPlot getPlot(@PathVariable(value="chartName") String chartName) {
+		return qPlotService.getPlot(chartName);
 	}
 	
 

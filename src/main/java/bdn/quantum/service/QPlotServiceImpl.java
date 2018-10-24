@@ -22,7 +22,7 @@ import bdn.quantum.model.qchart.QPlotSeries;
 import bdn.quantum.model.util.TransactionComparator;
 
 @Service("chartService")
-public class QChartServiceImpl implements QChartService {
+public class QPlotServiceImpl implements QPlotService {
 
 	@Autowired
 	private AssetService assetService;
@@ -31,16 +31,30 @@ public class QChartServiceImpl implements QChartService {
 	@Autowired
 	private TransactionComparator transactionComparator;
 	
+	private HashMap<String, QPlotMemento> qPlotCache = new HashMap<>();
+	
+	
 	@Override
-	public QPlot getChart(String chartName) {
-		QPlot result = null;
+	public QPlot getPlot(String plotName) {
+		if (plotName == null || plotName.trim().equals("")) {
+			return null;
+		}
 		
-		if (QuantumConstants.CHART_STD_GROWTH.equals(chartName)) {
-			Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.CHART_STD_BENCHMARK_SYMBOL);
-			if (benchmarkChartChain != null) {
-				Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
-				Iterable<Position> positionIter = assetService.getPositions(true);
-				result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
+		QPlot result = null;
+		result = getQPlotFromCache(plotName);
+		
+		if (result == null) {
+			if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
+				Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.PLOT_STD_BENCHMARK_SYMBOL);
+				if (benchmarkChartChain != null) {
+					Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
+					Iterable<Position> positionIter = assetService.getPositions(true);
+					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
+					
+					if (result != null) {
+						qPlotCache.put(plotName, new QPlotMemento(result));
+					}
+				}
 			}
 		}
 
@@ -307,4 +321,37 @@ public class QChartServiceImpl implements QChartService {
 		return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
+	private QPlot getQPlotFromCache(String plotName) {
+		QPlot result = null;
+		QPlotMemento memento = qPlotCache.get(plotName);
+		if (memento != null) {
+			if (memento.getAgeInMillis() < QuantumConstants.PLOT_CACHE_LIFE_MILLIS) {
+				result = memento.getQPlot();
+			}
+			else {
+				qPlotCache.remove(plotName);
+			}
+		}
+		return result;
+	}
+
+}
+
+class QPlotMemento {
+	private Date timestamp = new Date();
+	private QPlot qPlot;
+	
+	public QPlotMemento(QPlot qPlot) {
+		this.qPlot = qPlot;
+	}
+	
+	public QPlot getQPlot() {
+		return qPlot;
+	}
+	
+	public long getAgeInMillis() {
+		Date currTimestamp = new Date();
+		long result = currTimestamp.getTime() - timestamp.getTime();
+		return result;
+	}
 }

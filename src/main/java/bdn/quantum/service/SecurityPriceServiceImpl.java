@@ -99,8 +99,13 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 	private BigDecimal getQuoteFromCache(String symbol) {
 		BigDecimal result = null;
 		StockQuoteMemento memento = lastStockPriceCache.get(symbol);
-		if (memento != null && memento.getAgeInMillis() < QuantumConstants.QUOTE_CACHE_LIFE_MILLIS) {
-			result = memento.getQuote();
+		if (memento != null) {
+			if (memento.getAgeInMillis() < QuantumConstants.QUOTE_CACHE_LIFE_MILLIS) {
+				result = memento.getQuote();
+			}
+			else {
+				lastStockPriceCache.remove(symbol);
+			}
 		}
 		return result;
 	}
