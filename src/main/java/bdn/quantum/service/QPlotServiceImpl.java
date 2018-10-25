@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.QuantumProperties;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Transaction;
 import bdn.quantum.model.qchart.QChart;
@@ -29,6 +30,8 @@ public class QPlotServiceImpl implements QPlotService {
 	@Autowired
 	private SecurityPriceService securityPriceService;
 	@Autowired
+	private KeyvalService keyvalService;
+	@Autowired
 	private TransactionComparator transactionComparator;
 	
 	private HashMap<String, QPlotMemento> qPlotCache = new HashMap<>();
@@ -41,18 +44,28 @@ public class QPlotServiceImpl implements QPlotService {
 		}
 		
 		QPlot result = null;
-		result = getQPlotFromCache(plotName);
+		String benchmarkSymbol = QuantumConstants.PLOT_STD_BENCHMARK_SYMBOL;
+		
+		// try to read benchmark symbol from db config
+		StringBuffer key = new StringBuffer();
+		key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.QPLOT_BENCHMARK_SYMBOL);
+		String benchmarkSymbolInProp = keyvalService.getKeyvalStr(key.toString());
+		if (benchmarkSymbolInProp != null && ! benchmarkSymbolInProp.trim().equals("")) {
+			benchmarkSymbol = benchmarkSymbolInProp.trim().toUpperCase();
+		}
+		
+		result = getQPlotFromCache(plotName, benchmarkSymbol);
 		
 		if (result == null) {
 			if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
-				Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(QuantumConstants.PLOT_STD_BENCHMARK_SYMBOL);
+				Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(benchmarkSymbol);
 				if (benchmarkChartChain != null) {
 					Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 					Iterable<Position> positionIter = assetService.getPositions(true);
 					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
 					
 					if (result != null) {
-						qPlotCache.put(plotName, new QPlotMemento(result));
+						addQPlotToCache(plotName, benchmarkSymbol, result);
 					}
 				}
 			}
@@ -326,18 +339,44 @@ public class QPlotServiceImpl implements QPlotService {
 		return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
-	private QPlot getQPlotFromCache(String plotName) {
+	private QPlot getQPlotFromCache(String plotName, String benchmarkSymbol) {
+		if (plotName == null || plotName.trim().equals("") || 
+						benchmarkSymbol == null || benchmarkSymbol.trim().equals("")) {
+			return null;
+		}
+		
 		QPlot result = null;
-		QPlotMemento memento = qPlotCache.get(plotName);
+		
+		String cacheKey = getCacheKey(plotName, benchmarkSymbol);
+		QPlotMemento memento = qPlotCache.get(cacheKey);
 		if (memento != null) {
 			if (memento.getAgeInMillis() < QuantumConstants.PLOT_CACHE_LIFE_MILLIS) {
 				result = memento.getQPlot();
 			}
 			else {
-				qPlotCache.remove(plotName);
+				qPlotCache.remove(cacheKey);
 			}
 		}
 		return result;
+	}
+	
+	private void addQPlotToCache(String plotName, String benchmarkSymbol, QPlot qPlot) {
+		if (plotName == null || plotName.trim().equals("") || benchmarkSymbol == null
+				|| benchmarkSymbol.trim().equals("") || qPlot == null) {
+			return;
+		}
+		String cacheKey = getCacheKey(plotName, benchmarkSymbol);
+		qPlotCache.put(cacheKey, new QPlotMemento(qPlot));
+	}
+	
+	private String getCacheKey(String plotName, String benchmarkSymbol) {
+		if (plotName == null || plotName.trim().equals("") || benchmarkSymbol == null
+				|| benchmarkSymbol.trim().equals("")) {
+			return null;
+		}
+		StringBuffer result = new StringBuffer();
+		result.append(plotName).append("#!#").append(benchmarkSymbol);
+		return result.toString();
 	}
 
 }

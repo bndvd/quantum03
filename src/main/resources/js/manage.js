@@ -17,7 +17,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.manageNewSecurityBasketId = null;
 	
 	// saved properties (settings)
-	$scope.propTaxRate = null;
+	$scope.propTaxRate;
 	$scope.propQPlotBenchmarkSymbol = null;
 	
 	
@@ -36,6 +36,9 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 					// read in specific values from keyval map
 					$scope.propTaxRate = $scope.manageKeyvalMap["pr.tax"];
 					$scope.propQPlotBenchmarkSymbol = $scope.manageKeyvalMap["pr.qpbs"];
+					if ($scope.propQPlotBenchmarkSymbol == null) {
+						$scope.propQPlotBenchmarkSymbol = "VTI";
+					}
 				},
 				function errorCallback(response) {
 					window.alert("Error loading manage keyvals: "+response.status);
@@ -249,7 +252,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	//
 	$scope.saveSettings = function() {
 		// save Tax Rate setting
-		if ($scope.propTaxRate != null && $scope.propTaxRate != "" && Number.isFinite($scope.propTaxRate)) {
+		if ($scope.propTaxRate == 0 || Number.isFinite($scope.propTaxRate)) {
 			saveSetting("pr.tax", $scope.propTaxRate);
 		}
 		if ($scope.propQPlotBenchmarkSymbol != null && $scope.propQPlotBenchmarkSymbol.trim() != "") {
