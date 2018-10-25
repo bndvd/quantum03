@@ -21,7 +21,11 @@ public class TransactionController {
 	
 	@Autowired
 	TransactionService transactionService;
-
+	
+	@Autowired
+	QPlotController qPlotController;
+	
+	
 	@RequestMapping(value = "/transactions", method = RequestMethod.GET)
 	public Iterable<Transaction> getTransactions() {
 		System.out.println("TransactionController.getTransactions");
@@ -64,4 +68,7 @@ public class TransactionController {
 		return new ResponseEntity<>(error, HttpStatus.OK);
 	}
 
+	public void transactionsUpdated() {
+		qPlotController.plotDataChanged();
+	}
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.contoller.TransactionController;
 import bdn.quantum.model.TranEntity;
 import bdn.quantum.model.Transaction;
 import bdn.quantum.model.util.TransactionComparator;
@@ -17,6 +18,9 @@ import bdn.quantum.repository.TransactionRepository;
 @Service("transactionService")
 public class TransactionServiceImpl implements TransactionService {
 
+	@Autowired
+	private TransactionController transactionController;
+	
 	@Autowired
 	private TransactionRepository transactionRepository;
 	
@@ -89,6 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
 		TranEntity te = new TranEntity(transaction.getId(), transaction.getSecId(), transaction.getUserId(),
 				transaction.getTranDate(), transaction.getType(), transaction.getShares(), transaction.getPrice());
 		te = transactionRepository.save(te);
+		transactionController.transactionsUpdated();
 		
 		Transaction result = null;
 		if (te != null) {
@@ -100,6 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public void deleteTransaction(Integer id) {
 		transactionRepository.deleteById(id);
+		transactionController.transactionsUpdated();
 	}
 
 }

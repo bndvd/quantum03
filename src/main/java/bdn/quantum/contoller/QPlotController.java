@@ -22,6 +22,9 @@ public class QPlotController {
 		return qPlotService.getPlot(chartName);
 	}
 	
-
+	
+	public void plotDataChanged() {
+		qPlotService.clear();
+	}
 	
 }

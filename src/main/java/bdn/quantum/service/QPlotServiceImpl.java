@@ -61,6 +61,11 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 
+	@Override
+	public void clear() {
+		qPlotCache.clear();
+	}
+
 	private QPlot buildStdGrowthChart(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
 						Iterable<QChart> benchmarkChartChain) {
 		if (dateChain == null || positionIter == null || benchmarkChartChain == null) {

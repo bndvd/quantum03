@@ -95,6 +95,10 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 		
 		return qChartList;
 	}
+	
+	public void clear() {
+		lastStockPriceCache.clear();
+	}
 
 	private BigDecimal getQuoteFromCache(String symbol) {
 		BigDecimal result = null;
