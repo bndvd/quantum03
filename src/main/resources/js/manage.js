@@ -1,5 +1,5 @@
 // Manage Controller
-app.controller("manageCtrl", function($scope, $http) {
+app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.MANAGE_PAGE_SECURITIES = 1;
 	$scope.MANAGE_PAGE_RATIOS = 2;
 	$scope.MANAGE_PAGE_SETTINGS = 3;
@@ -35,6 +35,7 @@ app.controller("manageCtrl", function($scope, $http) {
 
 					// read in specific values from keyval map
 					$scope.propTaxRate = $scope.manageKeyvalMap["pr.tax"];
+					$scope.propQPlotBenchmarkSymbol = $scope.manageKeyvalMap["pr.qpbs"];
 				},
 				function errorCallback(response) {
 					window.alert("Error loading manage keyvals: "+response.status);
@@ -247,14 +248,24 @@ app.controller("manageCtrl", function($scope, $http) {
 	// Save Settings
 	//
 	$scope.saveSettings = function() {
-		if ($scope.propTaxRate == null || $scope.propTaxRate == "" ||
-				! Number.isFinite($scope.propTaxRate)) {
+		// save Tax Rate setting
+		if ($scope.propTaxRate != null && $scope.propTaxRate != "" && Number.isFinite($scope.propTaxRate)) {
+			saveSetting("pr.tax", $scope.propTaxRate);
+		}
+		if ($scope.propQPlotBenchmarkSymbol != null && $scope.propQPlotBenchmarkSymbol.trim() != "") {
+			saveSetting("pr.qpbs", $scope.propQPlotBenchmarkSymbol.trim().toUpperCase());
+		}
+	};
+	
+	
+	var saveSetting = function(key, value) {
+		if (key == null || value == null) {
 			return;
 		}
 		
 		var data = {
-			    key: "pr.tax",
-			    value: $scope.propTaxRate
+			    key: key,
+			    value: value
 		};
 		$http({
 		    method: "POST",
@@ -268,14 +279,14 @@ app.controller("manageCtrl", function($scope, $http) {
 				},
 				// Error response
 				function errorCallback(response) {
-					window.alert("Error saving properties: "+response.status+"; "+response.statusText);
+					window.alert("Error saving property: "+response.status+"; "+response.statusText);
 					$scope.refreshManageKeyvalMap();
 				}
 		);		
 	};
 	
 	//
-	// Save Settings
+	// Back up portfolio to local disk
 	//
 	$scope.backupPortfolio = function() {
 		$http({

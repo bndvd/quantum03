@@ -6,7 +6,9 @@ public final class QuantumProperties {
 	
 	public static final String TARGET_RATIO = "tr.";
 	
+	// general properties
 	public static final String TAX_RATE = "tax";
+	public static final String QPLOT_BENCHMARK_SYMBOL = "qpbs";
 	
 	public static final String READ_FUND_PROXIES = "readFundProxies";
 	public static final String FUND_PROXY = "fp.";

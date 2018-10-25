@@ -8,12 +8,12 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	
 	$scope.DATEAXIS_NAME = "Date";
 	$scope.CHARTSERIES_PRINCIPAL_ID = 1;
-	$scope.CHARTSERIES_TOTALUSMARKET_ID = 2;
+	$scope.CHARTSERIES_BENCHMARK_ID = 2;
 	$scope.CHARTSERIES_USERPORTFOLIO_ID = 3;
 	
 	$scope.chartSeriesIdToNameMap = {};
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_PRINCIPAL_ID] = "Cash";
-	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_TOTALUSMARKET_ID] = "Tot Mkt";
+	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_BENCHMARK_ID] = "Benchmark";
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_USERPORTFOLIO_ID] = $rootScope.authSession.username;
 
 	$scope.graphMsgStdGrowth = null;
@@ -40,7 +40,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	// Generate Std Growth Graph
 	//
 	$scope.generateStdGrowthGraph = function() {
-		$scope.graphMsgStdGrowth = "Building Portfolio Comparison Chart...";
+		$scope.graphMsgStdGrowth = "Building Portfolio Benchmark Chart...";
 		$http({
 			  method: "GET",
 			  url: "api/v1/chart/" + $scope.chartIdToNameMap[$scope.CHART_STD_GROWTH_ID]
@@ -86,19 +86,19 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 							}
 							
 							// load graph object
-							$scope.graphMsgStdGrowth = "My Portfolio vs Total Stock Market (simulated)";
+							$scope.graphMsgStdGrowth = "Portfolio vs Benchmark";
 							$scope.loadGraph("graphIdStdGrowth", gData);
 						}
 						else {
-							$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
+							$scope.graphMsgStdGrowth = "Portfolio Benchmark Chart Not Available";
 						}
 					}
 					else {
-						$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
+						$scope.graphMsgStdGrowth = "Portfolio Benchmark Chart Not Available";
 					}
 				},
 				function errorCallback(response) {
-					$scope.graphMsgStdGrowth = "Portfolio Comparison Chart Not Available";
+					$scope.graphMsgStdGrowth = "Portfolio Benchmark Chart Not Available";
 				}
 		);
 	};
