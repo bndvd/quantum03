@@ -16,6 +16,11 @@ app.controller("manageCtrl", function($scope, $http) {
 	$scope.manageNewSecurity = "";
 	$scope.manageNewSecurityBasketId = null;
 	
+	// saved properties (settings)
+	$scope.propTaxRate = null;
+	$scope.propQPlotBenchmarkSymbol = null;
+	
+	
 	$scope.refreshManageKeyvalMap = function() {
 		$http({
 			  method: "GET",
