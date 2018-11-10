@@ -7,7 +7,6 @@ app.controller("dashboardCtrl", function($scope, $http) {
 	$scope.assetsTotalRealizedGain = 0.0;
 	$scope.assetsTotalRealizedGainYtd = 0.0;
 	$scope.assetsTotalRealizedGainYtdTax = 0.0;
-	$scope.assetsTotalTotalPrincipal = 0.0;
 	
 	$scope.positions = [];
 
@@ -24,7 +23,6 @@ app.controller("dashboardCtrl", function($scope, $http) {
 					$scope.assetsTotalRealizedGain += $scope.assets[i].realizedGain;
 					$scope.assetsTotalRealizedGainYtd += $scope.assets[i].realizedGainYtd;
 					$scope.assetsTotalRealizedGainYtdTax += $scope.assets[i].realizedGainYtdTax;
-					$scope.assetsTotalTotalPrincipal += $scope.assets[i].totalPrincipal;
 				}
 			},
 			function errorCallback(response) {
@@ -37,7 +35,13 @@ app.controller("dashboardCtrl", function($scope, $http) {
 		  url: "api/v1/positions"
 		}).then(
 			function successCallback(response) {
-				$scope.positions = response.data;
+				$scope.positions = [];
+				var i;
+				for (i = 0; i < response.data.length; i++) {
+					if (response.data[i].shares != 0) {
+						$scope.positions.push(response.data[i]);
+					}
+				}
 			},
 			function errorCallback(response) {
 				window.alert("Error loading positions: "+response.status);

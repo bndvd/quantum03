@@ -8,8 +8,6 @@
 			<th class="w3-right-align">Principal</th>
 			<th class="w3-right-align">Value</th>
 			<th class="w3-right-align">Unrlzd Gain</th>
-			<th></th>
-			<th class="w3-right-align">Tot Principal</th>
 			<th class="w3-right-align">Rlzd Gain</th>
 			<th class="w3-right-align">Total Gain</th>
 			<th></th>
@@ -26,8 +24,6 @@
 			<td class="w3-right-align">{{ a.principal | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ a.lastValue | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ a.unrealizedGain | currency : "$" : 0 }}</td>
-			<td></td>
-			<td class="w3-right-align">{{ a.totalPrincipal | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ a.realizedGain | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ (a.realizedGain + a.unrealizedGain) | currency : "$" : 0 }}</td>
 			<td></td>
@@ -44,8 +40,6 @@
 			<td class="w3-right-align">{{ assetsTotalPrincipal | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ assetsTotalLastValue | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ assetsTotalUnrealizedGain | currency : "$" : 0 }}</td>
-			<td></td>
-			<td class="w3-right-align">{{ assetsTotalTotalPrincipal | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ assetsTotalRealizedGain | currency : "$" : 0 }}</td>
 			<td class="w3-right-align">{{ (assetsTotalRealizedGain + assetsTotalUnrealizedGain) | currency : "$" : 0 }}</td>
 			<td></td>
