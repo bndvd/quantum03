@@ -1,5 +1,7 @@
 package bdn.quantum;
 
+import java.math.BigDecimal;
+
 public final class QuantumConstants {
 
 	public static final String REST_URL_BASE = "api/v1/";
@@ -50,5 +52,7 @@ public final class QuantumConstants {
 	public static final String PLOT_STD_GROWTH_NORM = "stdgrowthnorm";
 	public static final long PLOT_CACHE_LIFE_MILLIS = 300000;
 	public static final String PLOT_STD_BENCHMARK_SYMBOL = "VTI";
+	public static final BigDecimal STD_GROWTH_NORM_INIT_PRINCIPAL = new BigDecimal(10000);
+	
 	
 }

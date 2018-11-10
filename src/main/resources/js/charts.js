@@ -37,6 +37,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 				{
 					includeZero: true,
 					colors: ["rgb(200,200,200)", "rgb(100,100,100)", "rgb(0,0,0)"],
+					gridLineColor: "rgb(220,220,220)",
 					axisLabelWidth: 80,
 					axisLabelFontSize: 12,
 					digitsAfterDecimal: 0,

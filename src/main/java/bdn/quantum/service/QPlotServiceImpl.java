@@ -311,8 +311,53 @@ public class QPlotServiceImpl implements QPlotService {
 	
 	
 	private QPlot normalizeStdGrowthChart(QPlot stdGrowthChart) {
-		//TODO
-		return stdGrowthChart.clone();
+		QPlot result = stdGrowthChart.clone();
+		List<QPlotSeries> series = result.getSeriesList();
+		
+		// identify which series is cash
+		int cashIndex = -1;
+		QPlotSeries cashSeries = null;
+		for (int i = 0; i < series.size(); i++) {
+			QPlotSeries s = series.get(i);
+			if (s != null && QPlotSeries.QCHART_SERIES_CASH.equals(s.getType()) && s.getPoints() != null &&
+					s.getPoints().size() > 0) {
+				cashIndex = i;
+				cashSeries = s;
+				break;
+			}
+		}
+		if (cashIndex < 0) {
+			return null;
+		}
+		
+		// New_Security_Value = Const_Principal [10,000] * Old_Security_Value / Old_Cash_Value
+		for (int i = 0; i < cashSeries.getPoints().size(); i++) {
+			QPlotPoint cashPoint = cashSeries.getPoints().get(i);
+			BigDecimal cashValue = cashPoint.getValue();
+			
+			for (int j = 0; j < series.size(); j++) {
+				if (j == cashIndex) {
+					continue;
+				}
+				
+				QPlotPoint portfolioPoint = series.get(j).getPoints().get(i);
+				
+				if (cashValue.abs().doubleValue() < QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+					portfolioPoint.setValue(BigDecimal.ZERO);
+				}
+				else {
+					BigDecimal portfolioValue = portfolioPoint.getValue();
+					BigDecimal newValue = QuantumConstants.STD_GROWTH_NORM_INIT_PRINCIPAL
+								.multiply(portfolioValue)
+								.divide(cashValue, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+					portfolioPoint.setValue(newValue);
+				}
+			}
+			
+			cashPoint.setValue(QuantumConstants.STD_GROWTH_NORM_INIT_PRINCIPAL);
+		}
+		
+		return result;
 	}
 	
 
