@@ -40,4 +40,14 @@ public class QPlotSeries {
 	public void addPoint(QPlotPoint point) {
 		points.add(point);
 	}
+	
+	@Override
+	public QPlotSeries clone() {
+		QPlotSeries result = new QPlotSeries(this.type);
+		for (QPlotPoint p : this.points) {
+			QPlotPoint pClone = p.clone();
+			result.addPoint(pClone);
+		}
+		return result;
+	}
 }

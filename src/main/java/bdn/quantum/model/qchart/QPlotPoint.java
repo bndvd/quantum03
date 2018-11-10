@@ -47,4 +47,10 @@ public class QPlotPoint {
 		return sb.toString();
 	}
 	
+	@Override
+	public QPlotPoint clone() {
+		QPlotPoint result = new QPlotPoint(this.id, this.date, this.value);
+		return result;
+	}
+	
 }

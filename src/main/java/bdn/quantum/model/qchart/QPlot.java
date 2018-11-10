@@ -41,4 +41,14 @@ public class QPlot {
 		}
 		seriesList.add(series);
 	}
+	
+	@Override
+	public QPlot clone() {
+		QPlot result = new QPlot(this.type);
+		for (QPlotSeries s : this.seriesList) {
+			QPlotSeries sClone = s.clone();
+			result.addSeries(sClone);
+		}
+		return result;
+	}
 }

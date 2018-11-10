@@ -47,6 +47,7 @@ public final class QuantumConstants {
 	
 	// Plot constants
 	public static final String PLOT_STD_GROWTH = "stdgrowth";
+	public static final String PLOT_STD_GROWTH_NORM = "stdgrowthnorm";
 	public static final long PLOT_CACHE_LIFE_MILLIS = 300000;
 	public static final String PLOT_STD_BENCHMARK_SYMBOL = "VTI";
 	

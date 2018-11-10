@@ -57,17 +57,22 @@ public class QPlotServiceImpl implements QPlotService {
 		result = getQPlotFromCache(plotName, benchmarkSymbol);
 		
 		if (result == null) {
+						
 			if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
 				Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(benchmarkSymbol);
 				if (benchmarkChartChain != null) {
 					Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 					Iterable<Position> positionIter = assetService.getPositions(true);
 					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
-					
-					if (result != null) {
-						addQPlotToCache(plotName, benchmarkSymbol, result);
-					}
 				}
+			}
+			else if (QuantumConstants.PLOT_STD_GROWTH_NORM.equals(plotName)) {
+				QPlot stdGrowthPlot = getPlot(QuantumConstants.PLOT_STD_GROWTH);
+				result = normalizeStdGrowthChart(stdGrowthPlot);
+			}
+			
+			if (result != null) {
+				addQPlotToCache(plotName, benchmarkSymbol, result);
 			}
 		}
 
@@ -303,6 +308,13 @@ public class QPlotServiceImpl implements QPlotService {
 
 		return result;
 	}
+	
+	
+	private QPlot normalizeStdGrowthChart(QPlot stdGrowthChart) {
+		//TODO
+		return stdGrowthChart.clone();
+	}
+	
 
 	private List<Transaction> getSortedTransactionsFromPositions(Iterable<Position> positionIter) {
 		if (positionIter == null) {
