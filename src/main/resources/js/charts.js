@@ -2,19 +2,19 @@
 app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	
 	$scope.CHART_ENUM_STD_GROWTH = 1;
-	$scope.CHART_ENUM_STD_GROWTH_NORM = 2;
+	$scope.CHART_ENUM_SIM_TARGET = 2;
 
 	$scope.chartToNameMap = {};
 	$scope.chartToNameMap[$scope.CHART_ENUM_STD_GROWTH] = "stdgrowth";
-	$scope.chartToNameMap[$scope.CHART_ENUM_STD_GROWTH_NORM] = "stdgrowthnorm";
+	$scope.chartToNameMap[$scope.CHART_ENUM_SIM_TARGET] = "simtarget";
 	
 	$scope.chartToGraphIdMap = {};
 	$scope.chartToGraphIdMap[$scope.CHART_ENUM_STD_GROWTH] = "graphIdStdGrowth";
-	$scope.chartToGraphIdMap[$scope.CHART_ENUM_STD_GROWTH_NORM] = "graphIdStdGrowthNorm";
+	$scope.chartToGraphIdMap[$scope.CHART_ENUM_SIM_TARGET] = "graphIdSimTarget";
 	
 	$scope.chartToGraphLegendIdMap = {};
 	$scope.chartToGraphLegendIdMap[$scope.CHART_ENUM_STD_GROWTH] = "graphIdStdGrowthLegend";
-	$scope.chartToGraphLegendIdMap[$scope.CHART_ENUM_STD_GROWTH_NORM] = "graphIdStdGrowthNormLegend";
+	$scope.chartToGraphLegendIdMap[$scope.CHART_ENUM_SIM_TARGET] = "graphIdSimTargetLegend";
 	
 	$scope.DATEAXIS_NAME = "Date";
 	$scope.CHARTSERIES_PRINCIPAL_ID = 1;
@@ -27,7 +27,7 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_USERPORTFOLIO_ID] = $rootScope.authSession.username;
 
 	$scope.graphMsgStdGrowth = null;
-	$scope.graphMsgStdGrowthNorm = null;
+	$scope.graphMsgSimTarget = null;
 	
 	
 	$scope.loadGraph = function(chartEnum, graphData) {
@@ -131,11 +131,11 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 				}
 		);
 		
-		// STD GROWTH NORM GRAPH
-		$scope.graphMsgStdGrowthNorm = "Building $10,000 Growth Chart...";
+		// SIMULATED TARGET PORTFOLIO GRAPH
+		$scope.graphMsgSimTarget = "Building Simulated Target Chart...";
 		$http({
 			  method: "GET",
-			  url: "api/v1/chart/" + $scope.chartToNameMap[$scope.CHART_ENUM_STD_GROWTH_NORM]
+			  url: "api/v1/chart/" + $scope.chartToNameMap[$scope.CHART_ENUM_SIM_TARGET]
 			}).then(
 				function successCallback(response) {
 					// non-empty series data
@@ -143,20 +143,20 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 									response.data.seriesList.length > 0) {
 						var series = response.data.seriesList;
 						
-						var graphSuccess = $scope.parseAndLoadGraphData($scope.CHART_ENUM_STD_GROWTH_NORM, series);
+						var graphSuccess = $scope.parseAndLoadGraphData($scope.CHART_ENUM_SIM_TARGET, series);
 						if (graphSuccess) {	
-							$scope.graphMsgStdGrowthNorm = "$10,000 Growth";
+							$scope.graphMsgSimTarget = "Simulated Target Portfolio vs Benchmark";
 						}
 						else {
-							$scope.graphMsgStdGrowthNorm = "$10,000 Growth Chart Not Available";
+							$scope.graphMsgSimTarget = "Simulated Target Chart Not Available";
 						}
 					}
 					else {
-						$scope.graphMsgStdGrowthNorm = "$10,000 Growth Chart Not Available";
+						$scope.graphMsgSimTarget = "Simulated Target Chart Not Available";
 					}
 				},
 				function errorCallback(response) {
-					$scope.graphMsgStdGrowthNorm = "$10,000 Growth Chart Not Available";
+					$scope.graphMsgSimTarget = "Simulated Target Chart Not Available";
 				}
 		);
 	};

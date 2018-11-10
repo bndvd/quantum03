@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
-import bdn.quantum.model.qchart.QChart;
+import bdn.quantum.model.qplot.QChart;
 import pl.zankowski.iextrading4j.api.stocks.Chart;
 import pl.zankowski.iextrading4j.api.stocks.ChartRange;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;

@@ -2,7 +2,7 @@ package bdn.quantum.service;
 
 import java.math.BigDecimal;
 
-import bdn.quantum.model.qchart.QChart;
+import bdn.quantum.model.qplot.QChart;
 
 public interface SecurityPriceService {
 

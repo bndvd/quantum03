@@ -49,10 +49,11 @@ public final class QuantumConstants {
 	
 	// Plot constants
 	public static final String PLOT_STD_GROWTH = "stdgrowth";
-	public static final String PLOT_STD_GROWTH_NORM = "stdgrowthnorm";
+	public static final String PLOT_SIMULATED_TARGET = "simtarget";
 	public static final long PLOT_CACHE_LIFE_MILLIS = 300000;
 	public static final String PLOT_STD_BENCHMARK_SYMBOL = "VTI";
-	public static final BigDecimal STD_GROWTH_NORM_INIT_PRINCIPAL = new BigDecimal(10000);
+	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INIT = new BigDecimal(10000);
+	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INCR = new BigDecimal(100);
 	
 	
 }

@@ -14,12 +14,14 @@ import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.QuantumProperties;
+import bdn.quantum.model.Asset;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Transaction;
-import bdn.quantum.model.qchart.QChart;
-import bdn.quantum.model.qchart.QPlot;
-import bdn.quantum.model.qchart.QPlotPoint;
-import bdn.quantum.model.qchart.QPlotSeries;
+import bdn.quantum.model.qplot.QChart;
+import bdn.quantum.model.qplot.QPlot;
+import bdn.quantum.model.qplot.QPlotPoint;
+import bdn.quantum.model.qplot.QPlotSeries;
+import bdn.quantum.model.util.AssetSymbolManager;
 import bdn.quantum.model.util.TransactionComparator;
 
 @Service("chartService")
@@ -33,6 +35,10 @@ public class QPlotServiceImpl implements QPlotService {
 	private KeyvalService keyvalService;
 	@Autowired
 	private TransactionComparator transactionComparator;
+	@Autowired
+	private AssetSymbolManager assetSymbolManager;
+	@Autowired
+	private PortfolioSimulator portfolioSimulator;
 	
 	private HashMap<String, QPlotMemento> qPlotCache = new HashMap<>();
 	
@@ -57,18 +63,17 @@ public class QPlotServiceImpl implements QPlotService {
 		result = getQPlotFromCache(plotName, benchmarkSymbol);
 		
 		if (result == null) {
+			Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(benchmarkSymbol);
+			Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 						
-			if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
-				Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(benchmarkSymbol);
-				if (benchmarkChartChain != null) {
-					Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
+			if (benchmarkChartChain != null && dateChain != null) {
+				if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
 					Iterable<Position> positionIter = assetService.getPositions(true);
 					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
 				}
-			}
-			else if (QuantumConstants.PLOT_STD_GROWTH_NORM.equals(plotName)) {
-				QPlot stdGrowthPlot = getPlot(QuantumConstants.PLOT_STD_GROWTH);
-				result = normalizeStdGrowthChart(stdGrowthPlot);
+				else if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
+					result = buildSimTargetChart(dateChain, benchmarkChartChain);
+				}
 			}
 			
 			if (result != null) {
@@ -255,7 +260,7 @@ public class QPlotServiceImpl implements QPlotService {
 
 		HashMap<LocalDate, QChart> dateToChartMap = new HashMap<>();
 		for (QChart qc : secChartChain) {
-			LocalDate ld = qc.getDate();
+			LocalDate ld = qc.getLocalDate();
 			dateToChartMap.put(ld, qc);
 		}
 
@@ -310,54 +315,22 @@ public class QPlotServiceImpl implements QPlotService {
 	}
 	
 	
-	private QPlot normalizeStdGrowthChart(QPlot stdGrowthChart) {
-		QPlot result = stdGrowthChart.clone();
-		List<QPlotSeries> series = result.getSeriesList();
-		
-		// identify which series is cash
-		int cashIndex = -1;
-		QPlotSeries cashSeries = null;
-		for (int i = 0; i < series.size(); i++) {
-			QPlotSeries s = series.get(i);
-			if (s != null && QPlotSeries.QCHART_SERIES_CASH.equals(s.getType()) && s.getPoints() != null &&
-					s.getPoints().size() > 0) {
-				cashIndex = i;
-				cashSeries = s;
-				break;
+	// Simulated Target Portfolio Chart
+	private QPlot buildSimTargetChart(Iterable<LocalDate> dateChain, Iterable<QChart> benchmarkChartChain) {
+		// read in target ratios
+		Iterable<Asset> assets = assetService.getAssets();
+		HashMap<String, BigDecimal> symbolToTargetRatioMap = new HashMap<>();
+		for (Asset a : assets) {
+			BigDecimal targetRatio = a.getTargetRatio();
+			// only consider non-zero target ratios
+			if (targetRatio != null && targetRatio.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+				String stockSymbol = assetSymbolManager.getSymbolForAsset(a.getBasketId());
+				symbolToTargetRatioMap.put(stockSymbol, targetRatio);
 			}
 		}
-		if (cashIndex < 0) {
-			return null;
-		}
 		
-		// New_Security_Value = Const_Principal [10,000] * Old_Security_Value / Old_Cash_Value
-		for (int i = 0; i < cashSeries.getPoints().size(); i++) {
-			QPlotPoint cashPoint = cashSeries.getPoints().get(i);
-			BigDecimal cashValue = cashPoint.getValue();
-			
-			for (int j = 0; j < series.size(); j++) {
-				if (j == cashIndex) {
-					continue;
-				}
-				
-				QPlotPoint portfolioPoint = series.get(j).getPoints().get(i);
-				
-				if (cashValue.abs().doubleValue() < QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
-					portfolioPoint.setValue(BigDecimal.ZERO);
-				}
-				else {
-					BigDecimal portfolioValue = portfolioPoint.getValue();
-					BigDecimal newValue = QuantumConstants.STD_GROWTH_NORM_INIT_PRINCIPAL
-								.multiply(portfolioValue)
-								.divide(cashValue, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
-					portfolioPoint.setValue(newValue);
-				}
-			}
-			
-			cashPoint.setValue(QuantumConstants.STD_GROWTH_NORM_INIT_PRINCIPAL);
-		}
+		portfolioSimulator
 		
-		return result;
 	}
 	
 
@@ -385,7 +358,7 @@ public class QPlotServiceImpl implements QPlotService {
 		
 		List<LocalDate> result = new ArrayList<LocalDate>();
 		for (QChart qc : chartChain) {
-			LocalDate date = qc.getDate();
+			LocalDate date = qc.getLocalDate();
 			result.add(date);
 		}
 		

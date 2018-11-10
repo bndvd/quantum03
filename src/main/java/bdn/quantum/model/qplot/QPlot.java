@@ -1,4 +1,4 @@
-package bdn.quantum.model.qchart;
+package bdn.quantum.model.qplot;
 
 import java.util.ArrayList;
 import java.util.List;

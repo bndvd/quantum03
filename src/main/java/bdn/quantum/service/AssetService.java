@@ -4,7 +4,6 @@ import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Security;
-import bdn.quantum.model.Transaction;
 
 public interface AssetService {
 

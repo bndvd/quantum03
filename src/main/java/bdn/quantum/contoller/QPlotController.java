@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
-import bdn.quantum.model.qchart.QPlot;
+import bdn.quantum.model.qplot.QPlot;
 import bdn.quantum.service.QPlotService;
 
 @RestController("plotController")

@@ -1,6 +1,6 @@
 package bdn.quantum.service;
 
-import bdn.quantum.model.qchart.QPlot;
+import bdn.quantum.model.qplot.QPlot;
 
 public interface QPlotService {
 
