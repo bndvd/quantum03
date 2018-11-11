@@ -7,7 +7,7 @@ public class QPlotSeries {
 
 	public static final Integer QCHART_SERIES_UNDEFINED = Integer.valueOf(0);
 	public static final Integer QCHART_SERIES_CASH = Integer.valueOf(1);
-	public static final Integer QCHART_SERIES_TOTAL_US_MARKET = Integer.valueOf(2);
+	public static final Integer QCHART_SERIES_BENCHMARK = Integer.valueOf(2);
 	public static final Integer QCHART_SERIES_USER_PORTFOLIO = Integer.valueOf(3);
 	
 	private Integer type = QCHART_SERIES_UNDEFINED;

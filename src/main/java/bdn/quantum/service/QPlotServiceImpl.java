@@ -74,7 +74,7 @@ public class QPlotServiceImpl implements QPlotService {
 					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
 				}
 				else if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
-					result = buildSimTargetChart(dateChain, benchmarkChartChain);
+					result = buildSimTargetChart(dateChain, benchmarkSymbol, benchmarkChartChain);
 				}
 			}
 			
@@ -99,15 +99,15 @@ public class QPlotServiceImpl implements QPlotService {
 		
 		QPlot result = new QPlot(QPlot.QCHART_STD_GROWTH);
 		
-		QPlotSeries cashSeries = buildCashChartSeries(dateChain, positionIter);
+		HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap = getTransactionListMapFromPositions(positionIter);
+		
+		QPlotSeries cashSeries = buildCashChartSeries(dateChain, symbolToTransactionListMap);
 		if (cashSeries == null) {
 			return null;
 		}
 		result.addSeries(cashSeries);
 		
-		HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap = getTransactionListMapFromPositions(positionIter);
-		
-		QPlotSeries benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_TOTAL_US_MARKET, dateChain, symbolToTransactionListMap, benchmarkChartChain);
+		QPlotSeries benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_BENCHMARK, dateChain, symbolToTransactionListMap, benchmarkChartChain);
 		if (benchmarkSeries == null) {
 			return null;
 		}
@@ -123,14 +123,15 @@ public class QPlotServiceImpl implements QPlotService {
 	}
 	
 	
-	private QPlotSeries buildCashChartSeries(Iterable<LocalDate> dateChain, Iterable<Position> positionIter) {
-		if (dateChain == null || positionIter == null) {
+	private QPlotSeries buildCashChartSeries(Iterable<LocalDate> dateChain,
+					HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap) {
+		if (dateChain == null || symbolToTransactionListMap == null) {
 			return null;
 		}
 		
 		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_CASH);
 		
-		List<AbstractTransaction> allTranList = getSortedTransactionsFromPositions(positionIter);
+		List<AbstractTransaction> allTranList = combineAndSortTransactions(symbolToTransactionListMap);
 		
 		BigDecimal portfolioCash = BigDecimal.ZERO;
 		int nextTranIndex = 0;
@@ -309,17 +310,40 @@ public class QPlotServiceImpl implements QPlotService {
 	
 	
 	// Simulated Target Portfolio Chart
-	private QPlot buildSimTargetChart(Iterable<LocalDate> dateChain, Iterable<QChart> benchmarkChartChain) {
-		return null;
-	}
-	
-	
-	private List<QPlotPoint> buildSimTargetPortfolioSeriesPoints() {
-		// read in target ratios
-		Iterable<Asset> assets = assetService.getAssets();
-		List<String> symbolList = new ArrayList<>();
+	private QPlot buildSimTargetChart(Iterable<LocalDate> dateChain, String benchmarkSymbol, Iterable<QChart> benchmarkChartChain) {
+		if (dateChain == null || benchmarkSymbol == null || benchmarkChartChain == null) {
+			return null;
+		}
 		
+		HashMap<String, List<AbstractTransaction>> symbolToTransactionsMap = null;
+		List<String> symbolList = new ArrayList<>();
 		HashMap<String, BigDecimal> symbolToTargetRatioMap = new HashMap<>();
+		
+		// SIMULATED BENCHMARK PORTFOLIO
+		symbolList.add(benchmarkSymbol);
+		symbolToTargetRatioMap.put(benchmarkSymbol, BigDecimal.ONE);
+		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap);
+		QPlotSeries benchmarkSeries = null;
+		if (symbolToTransactionsMap != null) {
+			benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_BENCHMARK, dateChain, symbolToTransactionsMap, benchmarkChartChain);
+		}
+		if (benchmarkSeries == null) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create benchmark series");
+			return null;
+		}
+		
+		// CASH SERIES
+		QPlotSeries cashSeries = buildCashChartSeries(dateChain, symbolToTransactionsMap);
+		if (cashSeries == null) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create cash series");
+			return null;
+		}
+		
+		// SIMULATED USER PORTFOLIO
+		Iterable<Asset> assets = assetService.getAssets();
+		symbolList.clear();
+		
+		symbolToTargetRatioMap.clear();
 		for (Asset a : assets) {
 			BigDecimal targetRatio = a.getTargetRatio();
 			// only consider non-zero target ratios
@@ -329,6 +353,28 @@ public class QPlotServiceImpl implements QPlotService {
 				symbolToTargetRatioMap.put(stockSymbol, targetRatio);
 			}
 		}
+		QPlotSeries userPortfolioSeries = null;
+		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap);
+		if (symbolToTransactionsMap != null) {
+			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_USER_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
+		}
+		if (userPortfolioSeries == null) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create user portfolio series");
+			return null;
+		}
+
+		QPlot result = new QPlot(QPlot.QCHART_SIM_TARGET);
+		result.addSeries(cashSeries);
+		result.addSeries(benchmarkSeries);
+		result.addSeries(userPortfolioSeries);
+		
+		return result;
+	}
+	
+	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(Iterable<LocalDate> dateChain, List<String> symbolList, HashMap<String, BigDecimal> symbolToTargetRatioMap) {
+		if (dateChain == null) {
+			return null;
+		}
 		
 		HashMap<String, Iterable<QChart>> symbolToChartChainMap = new HashMap<>();
 		for (String s : symbolList) {
@@ -336,46 +382,24 @@ public class QPlotServiceImpl implements QPlotService {
 			symbolToChartChainMap.put(s, chartChain);
 		}
 		
-		HashMap<String, List<AbstractTransaction>> symbolToTransactionsMap = null;
+		HashMap<String, List<AbstractTransaction>> result = null;
 		try {
-			symbolToTransactionsMap = portfolioSimulator.simulate(
-											QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INIT, 
-											QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR, 
-											QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR_FREQ,
-											symbolList,
-											symbolToChartChainMap,
-											symbolToTargetRatioMap);
+			result = portfolioSimulator.simulate(
+							QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INIT, 
+							QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR, 
+							QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR_FREQ,
+							symbolList,
+							symbolToChartChainMap,
+							symbolToTargetRatioMap);
 		}
 		catch (Exception exc) {
 			System.err.println(exc.getMessage());
-			symbolToTransactionsMap = null;
-		}
-		
-		List<QPlotPoint> result = null;
-		if (symbolToTransactionsMap != null) {
-			
+			result = null;
 		}
 		
 		return result;
 	}
 	
-
-	private List<AbstractTransaction> getSortedTransactionsFromPositions(Iterable<Position> positionIter) {
-		if (positionIter == null) {
-			return null;
-		}
-		
-		List<AbstractTransaction> result = new ArrayList<>();
-		for (Position p : positionIter) {
-			List<Transaction> tranList = p.getTransactions();
-			if (tranList != null) {
-				result.addAll(tranList);
-			}
-		}
-		result.sort(transactionComparator);
-		
-		return result;
-	}
 
 	private HashMap<String, List<AbstractTransaction>> getTransactionListMapFromPositions(Iterable<Position> positionIter) {
 		HashMap<String, List<AbstractTransaction>> result = null;
@@ -391,6 +415,25 @@ public class QPlotServiceImpl implements QPlotService {
 				result.put(symbol, atList);
 			}
 		}
+		
+		return result;
+	}
+
+	private List<AbstractTransaction> combineAndSortTransactions(HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap) {
+		if (symbolToTransactionListMap == null) {
+			return null;
+		}
+		
+		List<AbstractTransaction> result = new ArrayList<>();
+		
+		Set<String> symbolSet = symbolToTransactionListMap.keySet();
+		for (String s : symbolSet) {
+			List<AbstractTransaction> tranList = symbolToTransactionListMap.get(s);
+			if (tranList != null) {
+				result.addAll(tranList);
+			}
+		}
+		result.sort(transactionComparator);
 		
 		return result;
 	}

@@ -7,6 +7,7 @@ public class QPlot {
 
 	public static final Integer QCHART_STD_UNDEFINED = Integer.valueOf(0);
 	public static final Integer QCHART_STD_GROWTH = Integer.valueOf(1);
+	public static final Integer QCHART_SIM_TARGET = Integer.valueOf(2);
 	
 	private Integer type = QCHART_STD_UNDEFINED;
 	private List<QPlotSeries> seriesList = new ArrayList<>();

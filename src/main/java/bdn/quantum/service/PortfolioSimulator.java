@@ -8,12 +8,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.AbstractTransaction;
 import bdn.quantum.model.Transaction;
 import bdn.quantum.model.qplot.QChart;
+import bdn.quantum.model.util.TransactionComparator;
 import bdn.quantum.util.DateUtils;
 import bdn.quantum.util.PortfolioSimulationException;
 
@@ -22,6 +24,9 @@ public class PortfolioSimulator {
 
 	public static final Integer INCR_PRINCIPAL_FREQ_DAILY = Integer.valueOf(1);
 	
+	@Autowired
+	private TransactionComparator transactionComparator;
+
 	
 	public PortfolioSimulator() {
 	}
@@ -34,13 +39,17 @@ public class PortfolioSimulator {
 			HashMap<String, Iterable<QChart>> symbolToChartChainMap, HashMap<String, BigDecimal> symbolToTargetRatioMap)
 			throws PortfolioSimulationException {
 		
-		if (initPrincipal == null || incrPrincipal == null || symbolToTargetRatioMap == null ||
+		if (initPrincipal == null || incrPrincipal == null || incrFrequency == null || symbolList == null ||
+				symbolList.isEmpty() || symbolToTargetRatioMap == null ||
 				symbolToTargetRatioMap.isEmpty() || symbolToChartChainMap == null || symbolToChartChainMap.isEmpty() ||
 				symbolToTargetRatioMap.size() != symbolToChartChainMap.size()) {
-			throw new PortfolioSimulationException("Null parameters");
+			throw new PortfolioSimulationException("Null, empty, or non-matching parameters");
 		}
 		
-		String[] symbols = (String[]) symbolList.toArray();
+		String[] symbols = new String[symbolList.size()];
+		for (int i = 0; i < symbols.length; i++) {
+			symbols[i] = symbolList.get(i);
+		}
 		
 		// Convert TARGET RATIOS to FRACTIONS OF 1
 		BigDecimal sumTargetRatios = BigDecimal.ZERO;
@@ -130,6 +139,11 @@ public class PortfolioSimulator {
 						shareTallies[indexSecurityToBuy] = shareTallies[indexSecurityToBuy].add(sharesToBuy);
 					}
 				}
+			}
+			
+			// sort the transactions
+			for (int i = 0; i < numSecurities; i++) {
+				result.get(symbols[i]).sort(transactionComparator);
 			}
 		
 		}
