@@ -4,13 +4,13 @@ import java.util.Comparator;
 
 import org.springframework.stereotype.Service;
 
-import bdn.quantum.model.Transaction;
+import bdn.quantum.model.AbstractTransaction;
 
 @Service("transactionComparator")
-public class TransactionComparator implements Comparator<Transaction> {
+public class TransactionComparator implements Comparator<AbstractTransaction> {
 
 	@Override
-	public int compare(Transaction t1, Transaction t2) {
+	public int compare(AbstractTransaction t1, AbstractTransaction t2) {
 		if (t1 != null && t2!= null) {
 			if (t1.getTranDate().before(t2.getTranDate())) {
 				return -1;

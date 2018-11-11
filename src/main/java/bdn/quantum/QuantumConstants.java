@@ -2,6 +2,8 @@ package bdn.quantum;
 
 import java.math.BigDecimal;
 
+import bdn.quantum.service.PortfolioSimulator;
+
 public final class QuantumConstants {
 
 	public static final String REST_URL_BASE = "api/v1/";
@@ -52,8 +54,10 @@ public final class QuantumConstants {
 	public static final String PLOT_SIMULATED_TARGET = "simtarget";
 	public static final long PLOT_CACHE_LIFE_MILLIS = 300000;
 	public static final String PLOT_STD_BENCHMARK_SYMBOL = "VTI";
+	
 	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INIT = new BigDecimal(10000);
-	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INCR = new BigDecimal(100);
+	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INCR = new BigDecimal(20);
+	public static final Integer SIMULATED_TARGET_PRINCIPAL_INCR_FREQ = PortfolioSimulator.INCR_PRINCIPAL_FREQ_DAILY;
 	
 	
 }

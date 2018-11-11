@@ -6,7 +6,7 @@ import java.util.Date;
 //
 //Security is a rough representation of TranEntity
 //
-public class Transaction {
+public class Transaction implements AbstractTransaction {
 
 	private static final Date CURRENT_DATE = new Date();
 	
@@ -65,6 +65,7 @@ public class Transaction {
 		this.userId = userId;
 	}
 
+	@Override
 	public Date getTranDate() {
 		return tranDate;
 	}
@@ -81,6 +82,7 @@ public class Transaction {
 		return result;
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -89,6 +91,7 @@ public class Transaction {
 		this.type = type;
 	}
 
+	@Override
 	public BigDecimal getShares() {
 		return shares;
 	}
@@ -97,6 +100,7 @@ public class Transaction {
 		this.shares = shares;
 	}
 
+	@Override
 	public BigDecimal getPrice() {
 		return price;
 	}

@@ -1,7 +1,6 @@
 package bdn.quantum.model;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import bdn.quantum.QuantumConstants;
