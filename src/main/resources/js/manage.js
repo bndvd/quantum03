@@ -19,6 +19,8 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	// saved properties (settings)
 	$scope.propTaxRate;
 	$scope.propQPlotBenchmarkSymbol = null;
+	$scope.propQPlotSimTargetPrinicipalInit = null;
+	$scope.propQPlotSimTargetPrinicipalIncr = null;
 	
 	
 	$scope.refreshManageKeyvalMap = function() {
@@ -38,6 +40,14 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 					$scope.propQPlotBenchmarkSymbol = $scope.manageKeyvalMap["pr.qpbs"];
 					if ($scope.propQPlotBenchmarkSymbol == null) {
 						$scope.propQPlotBenchmarkSymbol = "VTI";
+					}
+					$scope.propQPlotSimTargetPrinicipalInit = $scope.manageKeyvalMap["pr.qpstpinit"];
+					if ($scope.propQPlotSimTargetPrinicipalInit == null) {
+						$scope.propQPlotSimTargetPrinicipalInit = 10000;
+					}
+					$scope.propQPlotSimTargetPrinicipalIncr = $scope.manageKeyvalMap["pr.qpstpincr"];
+					if ($scope.propQPlotSimTargetPrinicipalIncr == null) {
+						$scope.propQPlotSimTargetPrinicipalIncr = 20;
 					}
 				},
 				function errorCallback(response) {
@@ -221,7 +231,12 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 		var i;
 		for (i = 0; i < $scope.manageTargetRatiosByAsset.length; i++) {
 			var basketId = $scope.manageTargetRatiosByAsset[i].basketId;
+			
+			if (! isFinite($scope.manageTargetRatiosByAsset[i].ratio)) {
+				$scope.manageTargetRatiosByAsset[i].ratio = 0;
+			}
 			var basketRatio = $scope.manageTargetRatiosByAsset[i].ratio;
+			
 			var data = {
 				    key: "pr.tr."+basketId,
 				    value: basketRatio
@@ -252,12 +267,28 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	//
 	$scope.saveSettings = function() {
 		// save Tax Rate setting
-		if ($scope.propTaxRate == 0 || Number.isFinite($scope.propTaxRate)) {
-			saveSetting("pr.tax", $scope.propTaxRate);
+		if (! isFinite($scope.propTaxRate)) {
+			$scope.propTaxRate = 0;
 		}
-		if ($scope.propQPlotBenchmarkSymbol != null && $scope.propQPlotBenchmarkSymbol.trim() != "") {
-			saveSetting("pr.qpbs", $scope.propQPlotBenchmarkSymbol.trim().toUpperCase());
+		saveSetting("pr.tax", $scope.propTaxRate);
+		
+		// save Chart Benchmark symbol
+		if ($scope.propQPlotBenchmarkSymbol == null || $scope.propQPlotBenchmarkSymbol.trim() == "") {
+			$scope.propQPlotBenchmarkSymbol = "VTI";
 		}
+		saveSetting("pr.qpbs", $scope.propQPlotBenchmarkSymbol.trim().toUpperCase());
+		
+		// save Chart Sim Target Initial Principal setting
+		if (! isFinite($scope.propQPlotSimTargetPrinicipalInit)) {
+			$scope.propQPlotSimTargetPrinicipalInit = 0;
+		}
+		saveSetting("pr.qpstpinit", $scope.propQPlotSimTargetPrinicipalInit);
+		
+		// save Chart Sim Target Incremental Principal setting
+		if (! isFinite($scope.propQPlotSimTargetPrinicipalIncr)) {
+			$scope.propQPlotSimTargetPrinicipalIncr = 0;
+		}
+		saveSetting("pr.qpstpincr", $scope.propQPlotSimTargetPrinicipalIncr);
 	};
 	
 	

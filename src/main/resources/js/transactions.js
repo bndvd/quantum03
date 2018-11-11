@@ -158,9 +158,6 @@ app.controller("transactionsCtrl", function($scope, $http) {
 
 		
 		$scope.showTransactionAddDialog(false);
-		// OLD IMPLEMENTATION: refresh transaction view after sleeping for 1 sec to allow post to happen
-		// NEW IMPLEMENTATION: refresh in successCallback() and errorCallback()
-		//window.setTimeout($scope.reloadPosition, 1000);
 	};
 	
 	

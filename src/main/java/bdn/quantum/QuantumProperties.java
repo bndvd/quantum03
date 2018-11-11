@@ -9,6 +9,8 @@ public final class QuantumProperties {
 	// general properties
 	public static final String TAX_RATE = "tax";
 	public static final String QPLOT_BENCHMARK_SYMBOL = "qpbs";
+	public static final String QPLOT_SIM_TARGET_PRINCIPAL_INIT = "qpstpinit";
+	public static final String QPLOT_SIM_TARGET_PRINCIPAL_INCR = "qpstpincr";
 	
 	public static final String READ_FUND_PROXIES = "readFundProxies";
 	public static final String FUND_PROXY = "fp.";
