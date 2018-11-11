@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.KeyvalEntity;
-import bdn.quantum.model.Security;
 import bdn.quantum.service.KeyvalService;
 
 @RestController("keyvalController")
@@ -18,6 +17,9 @@ public class KeyvalController {
 	
 	@Autowired
 	KeyvalService keyvalService;
+	@Autowired
+	QPlotController qPlotController;
+
 
 	@RequestMapping(value = "/keyval", method = RequestMethod.GET)
 	public Iterable<KeyvalEntity> getKeyvals() {
@@ -40,6 +42,10 @@ public class KeyvalController {
 	public void deleteKeyval(@PathVariable(value="key") String key) {
 		System.out.println("KeyvalEntityController.deleteKeyval: key=" + key);
 		keyvalService.deleteKeyval(key);
+	}
+	
+	public void keyvalChange() {
+		qPlotController.plotDataChanged();
 	}
 	
 }

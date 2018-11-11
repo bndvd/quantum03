@@ -5,12 +5,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import bdn.quantum.contoller.KeyvalController;
 import bdn.quantum.model.KeyvalEntity;
 import bdn.quantum.repository.KeyvalRepository;
 
 @Service("keyvalService")
 public class KeyvalServiceImpl implements KeyvalService {
 
+	@Autowired
+	private KeyvalController keyvalController;
 	@Autowired
 	private KeyvalRepository keyvalRepository;
 	
@@ -28,6 +31,8 @@ public class KeyvalServiceImpl implements KeyvalService {
 		}
 
 		KeyvalEntity result = keyvalRepository.save(ke);
+		keyvalController.keyvalChange();
+		
 		return result;
 	}
 
@@ -58,6 +63,7 @@ public class KeyvalServiceImpl implements KeyvalService {
 	@Override
 	public void deleteKeyval(String key) {
 		keyvalRepository.deleteById(key);
+		keyvalController.keyvalChange();
 	}
 
 }

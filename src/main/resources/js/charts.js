@@ -20,11 +20,13 @@ app.controller("chartsCtrl", function($rootScope, $scope, $http) {
 	$scope.CHARTSERIES_PRINCIPAL_ID = 1;
 	$scope.CHARTSERIES_BENCHMARK_ID = 2;
 	$scope.CHARTSERIES_USERPORTFOLIO_ID = 3;
+	$scope.CHARTSERIES_SIMTARGETPORTFOLIO_ID = 4;
 	
 	$scope.chartSeriesIdToNameMap = {};
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_PRINCIPAL_ID] = "Cash";
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_BENCHMARK_ID] = "Benchmark";
 	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_USERPORTFOLIO_ID] = $rootScope.authSession.username;
+	$scope.chartSeriesIdToNameMap[$scope.CHARTSERIES_SIMTARGETPORTFOLIO_ID] = "Target Portfolio";
 
 	$scope.graphMsgStdGrowth = null;
 	$scope.graphMsgSimTarget = null;

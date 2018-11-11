@@ -356,7 +356,7 @@ public class QPlotServiceImpl implements QPlotService {
 		QPlotSeries userPortfolioSeries = null;
 		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap);
 		if (symbolToTransactionsMap != null) {
-			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_USER_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
+			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_SIM_TARGET_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
 		}
 		if (userPortfolioSeries == null) {
 			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create user portfolio series");

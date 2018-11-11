@@ -9,6 +9,7 @@ public class QPlotSeries {
 	public static final Integer QCHART_SERIES_CASH = Integer.valueOf(1);
 	public static final Integer QCHART_SERIES_BENCHMARK = Integer.valueOf(2);
 	public static final Integer QCHART_SERIES_USER_PORTFOLIO = Integer.valueOf(3);
+	public static final Integer QCHART_SERIES_SIM_TARGET_PORTFOLIO = Integer.valueOf(4);
 	
 	private Integer type = QCHART_SERIES_UNDEFINED;
 	private List<QPlotPoint> points = new ArrayList<>();
