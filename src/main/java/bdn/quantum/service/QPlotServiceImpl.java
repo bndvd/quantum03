@@ -410,7 +410,8 @@ public class QPlotServiceImpl implements QPlotService {
 	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(Iterable<LocalDate> dateChain,
 						List<String> symbolList, HashMap<String,BigDecimal> symbolToTargetRatioMap,
 						BigDecimal initPrincipal, BigDecimal incrPrincipal) {
-		if (dateChain == null) {
+		if (dateChain == null || symbolList == null || symbolToTargetRatioMap == null ||
+				initPrincipal == null || incrPrincipal == null) {
 			return null;
 		}
 		

@@ -175,7 +175,10 @@ public class PortfolioSimulator {
 			
 			BigDecimal maxNegativeDisparity = BigDecimal.ZERO;
 			for (int i = 0; i < currValues.length; i++) {
-				BigDecimal currRatio = currValues[i].divide(totalValue, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+				BigDecimal currRatio = BigDecimal.ZERO;
+				if (totalValue.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+					currRatio = currValues[i].divide(totalValue, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+				}
 				BigDecimal disparity = currRatio.subtract(targetRatios[i]);
 				if (disparity.compareTo(maxNegativeDisparity) < 0) {
 					maxNegativeDisparity = disparity;
