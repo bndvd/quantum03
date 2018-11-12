@@ -5,6 +5,9 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.MANAGE_PAGE_SETTINGS = 3;
 	$scope.MANAGE_PAGE_BACKUP = 4;
 	
+	$scope.MANAGE_EXPORT_CSV = 1;
+	$scope.MANAGE_EXPORT_JSON = 2;
+	
 	$scope.manageKeyvalMap;
 	$scope.managePageIndex = 0;
 	$scope.manageAssets;
@@ -330,9 +333,16 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 				function successCallback(response) {
 					var portfolioData = response.data;
 					if (portfolioData != null) {
-						portfolioData = $scope.preparePortfolioDataForExport(portfolioData);
+						var exportFileType = document.querySelector("input[name = backupFileType]:checked").value;
+						if (exportFileType != $scope.MANAGE_EXPORT_CSV && exportFileType != $scope.MANAGE_EXPORT_JSON) {
+							exportFileType = $scope.MANAGE_EXPORT_CSV;
+						}
 						
-						var portfolioDataText = JSON.stringify(portfolioData);
+						var portfolioDataText = $scope.preparePortfolioDataForExport(portfolioData, exportFileType);
+						if (portfolioDataText == null) {
+							window.alert("Error backing up data because data could not be prepared.");
+							return;
+						}
 
 						var currentDate = new Date();
 						var dateStr = "" + currentDate.getFullYear();
@@ -346,7 +356,13 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 							dateStr = dateStr + "0";
 						}
 						dateStr = dateStr + day;
-						var filename = "qexport_" + dateStr + ".json";
+						var filename = "qexport_" + dateStr;
+						if (exportFileType == $scope.MANAGE_EXPORT_CSV) {
+							filename = filename + ".csv";
+						}
+						else if (exportFileType == $scope.MANAGE_EXPORT_JSON) {
+							filename = filename + ".json";
+						}
 						
 						$scope.saveTextAsFile(portfolioDataText, filename);
 					}
@@ -362,15 +378,23 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	};
 	
 
-	$scope.saveTextAsFile = function(data, filename) {
+	$scope.saveTextAsFile = function(data, filename, fileType) {
 		if (data == null || filename == null) {
 			window.alert("Data backup: No data");
 			return;
 		}
+		
+		var mimeType = "text/plain";
+		if (fileType == $scope.MANAGE_EXPORT_CSV) {
+			mimeType = "text/csv";
+		}
+		else if (fileType == $scope.MANAGE_EXPORT_JSON) {
+			mimeType = "application/json";
+		}
 	
-	    var blob = new Blob([data], { type: "application/json" }),
+	    var blob = new Blob([data], { type: mimeType }),
 	    e = document.createEvent("MouseEvents"),
-	    a = document.createElement('a');
+	    a = document.createElement("a");
 	    // FOR IE:
 
 	    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -383,7 +407,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 
 	        a.download = filename;
 	        a.href = window.URL.createObjectURL(blob);
-	        a.dataset.downloadurl = ["application/json", a.download, a.href].join(":");
+	        a.dataset.downloadurl = [mimeType, a.download, a.href].join(":");
 	        e.initEvent("click", true, false, window,
 	        0, 0, 0, 0, 0, false, false, false, false, 0, null);
 	        a.dispatchEvent(e);
@@ -391,8 +415,23 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	};
 	
 	
-	$scope.preparePortfolioDataForExport = function(data) {
-		var result = {
+	$scope.preparePortfolioDataForExport = function(data, exportFileType) {
+		var result = null;
+		var jsonData = $scope.preparePortfolioDataJson(data);
+		
+		if (exportFileType == $scope.MANAGE_EXPORT_CSV) {
+			result = $scope.convertJsonDataToCsv(jsonData);
+		}
+		else if (exportFileType == $scope.MANAGE_EXPORT_JSON) {
+			result = JSON.stringify(jsonData);
+		}
+		
+		return result;
+	};
+	
+	
+	$scope.preparePortfolioDataJson = function(data) {
+		var jsonOutput = {
 			    version: data.version,
 			    lastDate: data.lastDate,
 			    basketEntities: data.basketEntities,
@@ -404,7 +443,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 		var i;
 		for (i = 0; i < data.transactions.length; i++) {
 			var t = data.transactions[i];
-			result.transactions.push({
+			jsonOutput.transactions.push({
 	            id: t.id,
 	            secId: t.secId,
 	            userId: t.userId,
@@ -413,6 +452,66 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	            shares: t.shares,
 	            price: t.price
 			});
+		}
+		
+		return jsonOutput;
+	};
+	
+	$scope.convertJsonDataToCsv = function(jsonData) {
+		if (jsonData == null) {
+			return null;
+		}
+		
+		var i, key, value;
+		// basket ID to asset name map
+		var basketIdToAssetMap = {};
+		for (i = 0; i < jsonData.basketEntities.length; i++) {
+			key = jsonData.basketEntities[i].id;
+			value = jsonData.basketEntities[i].name;
+			basketIdToAssetMap[key] = value;
+		}
+		
+		// security ID to basket ID map
+		var secIdToBasketIdMap = {};
+		for (i = 0; i < jsonData.securities.length; i++) {
+			key = jsonData.securities[i].id;
+			value = jsonData.securities[i].basketId;
+			secIdToBasketIdMap[key] = value;
+		}
+		
+		// security ID to security symbol map
+		var secIdToSymbolMap = {};
+		for (i = 0; i < jsonData.securities.length; i++) {
+			key = jsonData.securities[i].id;
+			value = jsonData.securities[i].symbol;
+			secIdToSymbolMap[key] = value;
+		}
+		
+		var result = "";
+
+		// header
+		result = result + "Transaction ID,";
+		result = result + "Basket ID,";
+		result = result + "Asset,";
+		result = result + "Security ID,";
+		result = result + "Security Symbol,";
+		result = result + "Transaction Date,";
+		result = result + "Transaction Type,";
+		result = result + "Shares,";
+		result = result + "Price\n";
+		
+		for (i = 0; i < jsonData.transactions.length; i++) {
+			var t = jsonData.transactions[i];
+
+			result = result + t.id + ",";
+			result = result + secIdToBasketIdMap[t.secId] + ",";
+			result = result + basketIdToAssetMap[secIdToBasketIdMap[t.secId]] + ",";
+			result = result + t.secId + ",";
+			result = result + secIdToSymbolMap[t.secId] + ",";
+			result = result + t.tranDate + ",";
+			result = result + t.type + ",";
+			result = result + t.shares + ",";
+			result = result + t.price + "\n";
 		}
 		
 		return result;

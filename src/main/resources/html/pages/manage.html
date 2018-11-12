@@ -129,7 +129,11 @@
 	<div ng-show="(managePageIndex == MANAGE_PAGE_BACKUP)" class="w3-container w3-display-container">
 		<h2 class="w3-left-align">Backup</h2>
 		
-		<div>
+		<div class="w3-margin">
+			<form name="backupFileTypeForm" class="w3-container">
+				<p><input class="w3-radio" type="radio" name="backupFileType" value="{{ MANAGE_EXPORT_CSV }}" checked> <label>CSV</label></p>
+				<p><input class="w3-radio" type="radio" name="backupFileType" value="{{ MANAGE_EXPORT_JSON }}"> <label>JSON</label></p>
+			</form>
 			<button ng-click="backupPortfolio()" class="w3-button w3-grey">Export Data to File...</button>
 		</div>
 	</div>
