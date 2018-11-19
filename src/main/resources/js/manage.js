@@ -1,5 +1,8 @@
 // Manage Controller
 app.controller("manageCtrl", function($rootScope, $scope, $http) {
+	$scope.TRUE_STR = "true";
+	$scope.FALSE_STR = "false";
+	
 	$scope.MANAGE_PAGE_SECURITIES = 1;
 	$scope.MANAGE_PAGE_RATIOS = 2;
 	$scope.MANAGE_PAGE_SETTINGS = 3;
@@ -24,6 +27,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.propQPlotBenchmarkSymbol = null;
 	$scope.propQPlotSimTargetPrinicipalInit = null;
 	$scope.propQPlotSimTargetPrinicipalIncr = null;
+	$scope.propQPlotSimTargetWholeShares = false;
 	
 	
 	$scope.refreshManageKeyvalMap = function() {
@@ -51,6 +55,13 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 					$scope.propQPlotSimTargetPrinicipalIncr = $scope.manageKeyvalMap["pr.qpstpincr"];
 					if ($scope.propQPlotSimTargetPrinicipalIncr == null) {
 						$scope.propQPlotSimTargetPrinicipalIncr = 20;
+					}
+					var propWholeSharesStr = $scope.manageKeyvalMap["pr.qpstpwh"];
+					if (propWholeSharesStr == $scope.TRUE_STR) {
+						$scope.propQPlotSimTargetWholeShares = true;
+					}
+					else {
+						$scope.propQPlotSimTargetWholeShares = false;
 					}
 				},
 				function errorCallback(response) {
@@ -292,6 +303,12 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 			$scope.propQPlotSimTargetPrinicipalIncr = 0;
 		}
 		saveSetting("pr.qpstpincr", $scope.propQPlotSimTargetPrinicipalIncr);
+		
+		var propWholeSharesStr = $scope.FALSE_STR;
+		if ($scope.propQPlotSimTargetWholeShares == true) {
+			propWholeSharesStr = $scope.TRUE_STR;
+		}
+		saveSetting("pr.qpstpwh", propWholeSharesStr);
 	};
 	
 	

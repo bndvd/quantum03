@@ -101,7 +101,7 @@ public class QPlotServiceImpl implements QPlotService {
 		
 		HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap = getTransactionListMapFromPositions(positionIter);
 		
-		QPlotSeries cashSeries = buildCashChartSeries(dateChain, symbolToTransactionListMap);
+		QPlotSeries cashSeries = buildCashChartSeriesFromTransactions(dateChain, symbolToTransactionListMap);
 		if (cashSeries == null) {
 			return null;
 		}
@@ -123,7 +123,7 @@ public class QPlotServiceImpl implements QPlotService {
 	}
 	
 	
-	private QPlotSeries buildCashChartSeries(Iterable<LocalDate> dateChain,
+	private QPlotSeries buildCashChartSeriesFromTransactions(Iterable<LocalDate> dateChain,
 					HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap) {
 		if (dateChain == null || symbolToTransactionListMap == null) {
 			return null;
@@ -175,6 +175,32 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 	
+	private QPlotSeries buildCashChartSeriesFromSimulatedPrincipals(Iterable<LocalDate> dateChain,
+			BigDecimal initPrincipal, BigDecimal incrPrincipal, Integer incrFrequency) {
+		
+		if (dateChain == null || initPrincipal == null || incrPrincipal == null || incrFrequency == null) {
+			return null;
+		}
+
+		QPlotSeries result = new QPlotSeries(QPlotSeries.QCHART_SERIES_CASH);
+
+		BigDecimal portfolioCash = initPrincipal;
+		int pointId = 0;
+
+		for (LocalDate ld : dateChain) {
+			
+			if (PortfolioSimulator.INCR_PRINCIPAL_FREQ_DAILY.equals(incrFrequency)) {
+				pointId++;
+				portfolioCash = portfolioCash.add(incrPrincipal);
+	
+				QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, portfolioCash);
+				result.addPoint(point);
+			}
+		}
+
+		return result;
+	}
+
 	private QPlotSeries buildChartSeries(Integer seriesType, Iterable<LocalDate> dateChain,
 			HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap, Iterable<QChart> benchmarkChartChain) {
 		if (seriesType == null || dateChain == null || symbolToTransactionListMap == null) {
@@ -354,11 +380,21 @@ public class QPlotServiceImpl implements QPlotService {
 			incrPrincipal = QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR;
 		}
 		
+		Integer incrFrequency = QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR_FREQ;
+		
+		boolean wholeShares = false;
+		key = new StringBuffer();
+		key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.QPLOT_SIM_TARGET_WHOLE_SHARES);
+		valueInProp = keyvalService.getKeyvalStr(key.toString());
+		if (valueInProp != null && valueInProp.trim().equals(QuantumProperties.STR_TRUE)) {
+			wholeShares = true;
+		}
+		
 		
 		// SIMULATED BENCHMARK PORTFOLIO
 		symbolList.add(benchmarkSymbol);
 		symbolToTargetRatioMap.put(benchmarkSymbol, BigDecimal.ONE);
-		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal);
+		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal, incrFrequency, wholeShares);
 		QPlotSeries benchmarkSeries = null;
 		if (symbolToTransactionsMap != null) {
 			benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_BENCHMARK, dateChain, symbolToTransactionsMap, benchmarkChartChain);
@@ -369,7 +405,7 @@ public class QPlotServiceImpl implements QPlotService {
 		}
 		
 		// CASH SERIES
-		QPlotSeries cashSeries = buildCashChartSeries(dateChain, symbolToTransactionsMap);
+		QPlotSeries cashSeries = buildCashChartSeriesFromSimulatedPrincipals(dateChain, initPrincipal, incrPrincipal, incrFrequency);
 		if (cashSeries == null) {
 			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create cash series");
 			return null;
@@ -390,7 +426,7 @@ public class QPlotServiceImpl implements QPlotService {
 			}
 		}
 		QPlotSeries userPortfolioSeries = null;
-		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal);
+		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal, incrFrequency, wholeShares);
 		if (symbolToTransactionsMap != null) {
 			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_SIM_TARGET_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
 		}
@@ -409,7 +445,7 @@ public class QPlotServiceImpl implements QPlotService {
 	
 	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(Iterable<LocalDate> dateChain,
 						List<String> symbolList, HashMap<String,BigDecimal> symbolToTargetRatioMap,
-						BigDecimal initPrincipal, BigDecimal incrPrincipal) {
+						BigDecimal initPrincipal, BigDecimal incrPrincipal, Integer incrFrequency, boolean wholeShares) {
 		if (dateChain == null || symbolList == null || symbolToTargetRatioMap == null ||
 				initPrincipal == null || incrPrincipal == null) {
 			return null;
@@ -425,8 +461,9 @@ public class QPlotServiceImpl implements QPlotService {
 		try {
 			result = portfolioSimulator.simulate(
 							initPrincipal, 
-							incrPrincipal, 
-							QuantumConstants.SIMULATED_TARGET_PRINCIPAL_INCR_FREQ,
+							incrPrincipal,
+							incrFrequency,
+							wholeShares,
 							symbolList,
 							symbolToChartChainMap,
 							symbolToTargetRatioMap);

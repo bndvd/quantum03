@@ -35,7 +35,7 @@ public class PortfolioSimulator {
 	// Returns a mapping of symbols to transaction lists, simulating a portfolio
 	//
 	public HashMap<String, List<AbstractTransaction>> simulate(BigDecimal initPrincipal, BigDecimal incrPrincipal,
-			Integer incrFrequency, List<String> symbolList,
+			Integer incrFrequency, boolean wholeShares, List<String> symbolList,
 			HashMap<String, Iterable<QChart>> symbolToChartChainMap, HashMap<String, BigDecimal> symbolToTargetRatioMap)
 			throws PortfolioSimulationException {
 		
@@ -97,6 +97,9 @@ public class PortfolioSimulator {
 			result.put(symbols[i], new ArrayList<AbstractTransaction>());
 			shareTallies[i] = BigDecimal.ZERO;
 		}
+		// wallet represents the money available to buy the next security, it keeps any unused cash from previous transactions
+		// (e.g., when only whole shares are bought)
+		BigDecimal wallet = BigDecimal.ZERO;
 		
 		try {
 			Integer id = Integer.valueOf(0);
@@ -111,9 +114,19 @@ public class PortfolioSimulator {
 					BigDecimal value = initPrincipal.multiply(targets[i]);
 					BigDecimal sharesToBuy = value.divide(sharePrice, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					
-					AbstractTransaction t = new Transaction(id, id, id, date, QuantumConstants.TRAN_TYPE_BUY, sharesToBuy, sharePrice);
-					result.get(symbols[i]).add(t);
-					shareTallies[i] = shareTallies[i].add(sharesToBuy);
+					if (wholeShares) {
+						// round down to nearest whole shares
+						BigDecimal wholeSharesToBuy = sharesToBuy.setScale(0, RoundingMode.DOWN);
+						BigDecimal valueOfFractionalShares = value.subtract(wholeSharesToBuy.multiply(sharePrice));
+						wallet = wallet.add(valueOfFractionalShares);
+						sharesToBuy = wholeSharesToBuy;
+					}
+					
+					if (sharesToBuy.doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+						AbstractTransaction t = new Transaction(id, id, id, date, QuantumConstants.TRAN_TYPE_BUY, sharesToBuy, sharePrice);
+						result.get(symbols[i]).add(t);
+						shareTallies[i] = shareTallies[i].add(sharesToBuy);
+					}
 				}
 			}
 			
@@ -125,18 +138,34 @@ public class PortfolioSimulator {
 					LocalDate ld = symbolToChartListMap.get(symbols[0]).get(j).getLocalDate();
 					
 					if (INCR_PRINCIPAL_FREQ_DAILY.equals(incrFrequency)) {
+						// add incremental principal to wallet
+						wallet = wallet.add(incrPrincipal);
+						
 						Date date = DateUtils.asDate(ld);
 						for (int i = 0; i < numSecurities; i++) {
 							sharePrices[i] = symbolToChartListMap.get(symbols[i]).get(j).getClose();
 						}
 						
 						int indexSecurityToBuy = getIndexOfMaxNegativeTargetRatioDisparity(targets, shareTallies, sharePrices);
-						BigDecimal sharesToBuy = incrPrincipal.divide(sharePrices[indexSecurityToBuy], 
+						BigDecimal sharesToBuy = wallet.divide(sharePrices[indexSecurityToBuy], 
 								QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 						
-						AbstractTransaction t = new Transaction(id, id, id, date, QuantumConstants.TRAN_TYPE_BUY, sharesToBuy, sharePrices[indexSecurityToBuy]);
-						result.get(symbols[indexSecurityToBuy]).add(t);
-						shareTallies[indexSecurityToBuy] = shareTallies[indexSecurityToBuy].add(sharesToBuy);
+						if (wholeShares) {
+							// round down to nearest whole shares
+							BigDecimal wholeSharesToBuy = sharesToBuy.setScale(0, RoundingMode.DOWN);
+							wallet = wallet.subtract(wholeSharesToBuy.multiply(sharePrices[indexSecurityToBuy]));
+							sharesToBuy = wholeSharesToBuy;
+						}
+						else {
+							wallet = BigDecimal.ZERO;
+						}
+						
+						// if bying non-zero shares, enter a transaction
+						if (sharesToBuy.doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+							AbstractTransaction t = new Transaction(id, id, id, date, QuantumConstants.TRAN_TYPE_BUY, sharesToBuy, sharePrices[indexSecurityToBuy]);
+							result.get(symbols[indexSecurityToBuy]).add(t);
+							shareTallies[indexSecurityToBuy] = shareTallies[indexSecurityToBuy].add(sharesToBuy);
+						}
 					}
 				}
 			}
