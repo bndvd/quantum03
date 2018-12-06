@@ -61,6 +61,7 @@
 			<th class="w3-right-align">Price</th>
 			<th class="w3-right-align">Shares</th>
 			<th class="w3-right-align">Value</th>
+			<th class="w3-right-align">Unrlzd Gain</th>
 		</tr>
 		<tr ng-repeat="p in positions">
 			<td class="w3-right-align"><b>{{ p.symbol }}</b></td>
@@ -68,6 +69,7 @@
 			<td class="w3-right-align">{{ p.lastPrice | currency : "$" : 2 }}</td>
 			<td class="w3-right-align">{{ p.shares | number : 3 }}</td>
 			<td class="w3-right-align">{{ p.lastValue | currency : "$" : 0 }}</td>
+			<td class="w3-right-align">{{ p.unrealizedGain | currency : "$" : 0 }}</td>
 		</tr>
 	</table>
 </div>
