@@ -15,8 +15,6 @@
 		<h2 class="w3-left-align">{{ securities[positionSelectedPageIndex].symbol }}</h2>
 		<span ng-show="positionSelectedPageIndex >= 1" class="w3-display-topright">
 			<button ng-click="showTransactionAddDialog(true)" class="w3-button w3-grey">+</button>
-			<button ng-click="showTransactionUpdateDialog(true)" class="w3-button w3-grey">...</button>
-			<button ng-click="showTransactionDeleteDialog(true)" class="w3-button w3-grey">&mdash;</button>
 		</span>
 	</div>
 
@@ -57,6 +55,7 @@
 				<th class="w3-right-align">Rlzd Gain</th>
 				<th class="w3-right-align">Unrlzd Gain</th>
 				<th class="w3-right-align">Total Gain</th>
+				<th class="w3-right-align">Action</th>
 			</tr>
 			<tr ng-repeat="t in positionSelected.transactions | orderBy : tranDate : true">
 				<td class="w3-left-align">{{ t.id }}</td>
@@ -70,6 +69,12 @@
 				<td class="w3-right-align">{{ t.realizedGain | currency }}</td>
 				<td class="w3-right-align">{{ t.unrealizedGain | currency }}</td>
 				<td class="w3-right-align">{{ (t.realizedGain + t.unrealizedGain) | currency }}</td>
+				<td class="w3-right-align">
+					<span>
+						<button ng-click="showTransactionUpdateDialog(true, t.id)" class="w3-button w3-grey">...</button>
+						<button ng-click="showTransactionDeleteDialog(true, t.id)" class="w3-button w3-grey">&mdash;</button>
+					</span>
+				</td>
 			</tr>
 		</table>
 	</div>
@@ -122,20 +127,22 @@
 	<div id="modalTranDelete" class="w3-modal">
 		<div class="w3-modal-content">
 			<header class="w3-container w3-black">
-				<span ng-click="showTransactionDeleteDialog(false)" class="w3-button w3-display-topright">&times;</span>
+				<span ng-click="showTransactionDeleteDialog(false, null)" class="w3-button w3-display-topright">&times;</span>
 				<h2>Delete Transaction ({{ securities[positionSelectedPageIndex].symbol }})</h2>
 			</header>
 			
 			<div class="w3-container w3-padding-32">
 				<form = name="deleteTransactionForm">
 					<div class="w3-margin">
-						<label>Transaction ID</label>
-						<select name="tranId" ng-model="transactionDeleteTran" ng-options="tr.id for tr in positionSelected.transactions | orderBy : tranDate : true" required></select>
+						<label>Transaction ID:  {{ transactionDeleteTran.id }}</label>
+						<!-- select name="tranId" ng-model="transactionDeleteTran"
+						ng-options="tr.id for tr in positionSelected.transactions | orderBy : tranDate : true"
+						required></select -->
 					</div>
 					
 					<div class="w3-row-padding">
 						<div class="w3-half">
-							<label>Date</label> <input ng-disabled=true name="tranDate" class="w3-input w3-border" type="text" value="{{ transactionDeleteTran.tranDate }}">
+							<label>Date</label> <input ng-disabled=true name="tranDate" class="w3-input w3-border" type="text" value="{{ transactionDeleteTran.tranDate | date:'yyyy-MM-dd' }}">
 						</div>
 						<div class="w3-half">
 							<label>Type</label> <input ng-disabled=true name="tranType" class="w3-input w3-border" type="text" value="{{ transactionDeleteTran.type }}">
@@ -154,9 +161,8 @@
 			
 			<footer class="w3-container w3-black">
 				<p class="w3-right-align">
-					<button ng-disabled="!(deleteTransactionForm.tranId.$valid)" 
-						ng-click="deleteTransaction()" class="w3-button w3-grey">Delete</button>
-					<button ng-click="showTransactionDeleteDialog(false)" class="w3-button w3-grey">Cancel</button>
+					<button ng-click="deleteTransaction()" class="w3-button w3-grey">Delete</button>
+					<button ng-click="showTransactionDeleteDialog(false, null)" class="w3-button w3-grey">Cancel</button>
 				</p>
 			</footer>
 		</div>
@@ -166,23 +172,23 @@
 	<div id="modalTranUpdate" class="w3-modal">
 		<div class="w3-modal-content">
 			<header class="w3-container w3-black">
-				<span ng-click="showTransactionUpdateDialog(false)" class="w3-button w3-display-topright">&times;</span>
+				<span ng-click="showTransactionUpdateDialog(false, null)" class="w3-button w3-display-topright">&times;</span>
 				<h2>Update Transaction ({{ securities[positionSelectedPageIndex].symbol }})</h2>
 			</header>
 			
 			<div class="w3-container w3-padding-32">
 				<form = name="updateTransactionForm">
 					<div class="w3-margin">
-						<label>Transaction ID</label>
-						<select name="tranId" ng-model="transactionUpdateTran"
+						<label>Transaction ID:  {{ transactionUpdateTran.id }}</label>
+						<!-- select name="tranId" ng-model="transactionUpdateTran"
 								ng-change="processTransactionUpdateTranSelection();updateTransactionForm.$setPristine();"
 								ng-options="tr.id for tr in positionSelected.transactions | orderBy : tranDate : true"
-								required></select>
+								required></select -->
 					</div>
 					
 					<div class="w3-row-padding">
 						<div class="w3-half">
-							<label>Date</label> <input ng-disabled=true name="tranDate" class="w3-input w3-border" type="text" value="{{ transactionUpdateTran.tranDate }}">
+							<label>Date</label> <input ng-disabled=true name="tranDate" class="w3-input w3-border" type="text" value="{{ transactionUpdateTran.tranDate | date:'yyyy-MM-dd' }}">
 						</div>
 						<div class="w3-half">
 							<label>Type</label> <input ng-disabled=true name="tranType" class="w3-input w3-border" type="text" value="{{ transactionUpdateTran.type }}">
@@ -201,9 +207,9 @@
 			
 			<footer class="w3-container w3-black">
 				<p class="w3-right-align">
-					<button ng-disabled="!(updateTransactionForm.tranId.$valid && updateTransactionForm.tranPrice.$valid && updateTransactionForm.tranPrice.$dirty)" 
+					<button ng-disabled="!( updateTransactionForm.tranPrice.$valid && updateTransactionForm.tranPrice.$dirty)" 
 						ng-click="updateTransaction()" class="w3-button w3-grey">Update</button>
-					<button ng-click="showTransactionUpdateDialog(false)" class="w3-button w3-grey">Cancel</button>
+					<button ng-click="showTransactionUpdateDialog(false, null)" class="w3-button w3-grey">Cancel</button>
 				</p>
 			</footer>
 		</div>

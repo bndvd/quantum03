@@ -118,9 +118,9 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	//
 	// Show Delete Transaction dialog
 	//
-	$scope.showTransactionDeleteDialog = function(show) {
+	$scope.showTransactionDeleteDialog = function(show, tranId) {
 		if (show) {
-			$scope.transactionDeleteTran = null;
+			$scope.transactionDeleteTran = $scope.findTransactionInSelectedPosition(tranId);
 			document.getElementById('modalTranDelete').style.display='block';
 		}
 		else {
@@ -132,10 +132,10 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	//
 	// Show Update Transaction dialog
 	//
-	$scope.showTransactionUpdateDialog = function(show) {
+	$scope.showTransactionUpdateDialog = function(show, tranId) {
 		if (show) {
-			$scope.transactionUpdateTran = null;
-			$scope.transactionUpdateNewPrice = null;
+			$scope.transactionUpdateTran = $scope.findTransactionInSelectedPosition(tranId);
+			$scope.processTransactionUpdateTranSelection();
 			document.getElementById('modalTranUpdate').style.display='block';
 		}
 		else {
@@ -147,6 +147,18 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	
 	$scope.processTransactionUpdateTranSelection = function() {
 		$scope.transactionUpdateNewPrice = $scope.transactionUpdateTran.price;
+	};
+	
+	$scope.findTransactionInSelectedPosition = function(tranId) {
+		if ($scope.positionSelected != null && $scope.positionSelected.transactions != null) {
+			var i;
+			for (i = 0; i < $scope.positionSelected.transactions.length; i++) {
+				if ($scope.positionSelected.transactions[i].id == tranId) {
+					return $scope.positionSelected.transactions[i];
+				}
+			}
+		}
+		return null;
 	};
 	
 	//
@@ -226,7 +238,7 @@ app.controller("transactionsCtrl", function($scope, $http) {
 		);
 		$scope.transactionDeleteTran = null;
 		
-		$scope.showTransactionDeleteDialog(false);
+		$scope.showTransactionDeleteDialog(false, null);
 	};
 	
 	//
@@ -264,7 +276,7 @@ app.controller("transactionsCtrl", function($scope, $http) {
 				}
 		);
 		
-		$scope.showTransactionUpdateDialog(false);
+		$scope.showTransactionUpdateDialog(false, null);
 	};
 		
 });
