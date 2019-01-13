@@ -1,7 +1,9 @@
 // Transaction Controller
 app.controller("transactionsCtrl", function($scope, $http) {
+	$scope.securities = [];
 	$scope.positionSelectedPageIndex = -1;
 	$scope.positionSelected = [];
+	$scope.allTransactions = [];
 	$scope.transactionAddTypeOptions = ["BUY", "SEL", "DIV", "SPL", "CNV"];
 	$scope.transactionAddDate = new Date();
 	$scope.transactionAddType = "";
@@ -11,12 +13,31 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	$scope.transactionUpdateTran = null;
 	$scope.transactionUpdateNewPrice = null;
 	
+	$scope.SEC_ID_ALL_TRANSACTIONS = -1;
+	$scope.secIdToSymbolMap = [];
+	
+	
 	$http({
 		  method: "GET",
 		  url: "api/v1/securities"
 		}).then(
 			function successCallback(response) {
-				$scope.securities = response.data;
+				if (response != null && response.data != null && response.data.length > 0) {
+					// add the "all transactions" page
+					$scope.securities.push({
+				        id: $scope.SEC_ID_ALL_TRANSACTIONS,
+				        symbol: "All Transactions"
+				    });
+					
+					var i;
+					for (i = 0; i < response.data.length; i++) {
+						$scope.securities.push(response.data[i]);
+						$scope.secIdToSymbolMap[response.data[i].id] = response.data[i].symbol;
+					}
+					
+					// load the "all transactions" page by default
+					$scope.loadPositionForPageIndex(0);
+				}
 			},
 			function errorCallback(response) {
 				window.alert("Error loading securities: "+response.status);
@@ -28,7 +49,30 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	//
 	$scope.loadPositionForPageIndex = function(pageIndex) {
 		$scope.positionSelectedPageIndex = pageIndex;
-		if (pageIndex >= 0 && pageIndex < $scope.securities.length) {
+		// All Transactions page
+		if (pageIndex == 0) {
+			$http({
+				  method: "GET",
+				  url: "api/v1/transactions"
+				}).then(
+					function successCallback(response) {
+						$scope.allTransactions = response.data;
+						// fill in the symbol, used in the "all transactions" page
+						if ($scope.allTransactions != null) {
+							var i;
+							for (i = 0; i < $scope.allTransactions.length; i++) {
+								$scope.allTransactions[i].symbol = $scope.secIdToSymbolMap[ $scope.allTransactions[i].secId ];
+							}
+						}
+					},
+					function errorCallback(response) {
+						window.alert("Error loading all transactions: "+response.status);
+					}
+			);
+
+		}
+		// Individual Securities
+		else if (pageIndex >= 1 && pageIndex < $scope.securities.length) {
 			var secId = $scope.securities[pageIndex].id;
 			$http({
 				  method: "GET",

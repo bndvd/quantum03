@@ -28,37 +28,31 @@ public class TransactionController {
 	
 	@RequestMapping(value = "/transactions", method = RequestMethod.GET)
 	public Iterable<Transaction> getTransactions() {
-		System.out.println("TransactionController.getTransactions");
 		return transactionService.getTransactions();
 	}
 	
 	@RequestMapping(value = "/transactions/{secId}", method = RequestMethod.GET)
 	public Iterable<Transaction> getTransactions(@PathVariable(value="secId") Integer secId) {
-		System.out.println("TransactionController.getTransactions: secId=" + secId);
 		return transactionService.getTransactionsForSecurity(secId);
 	}
 	
 	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.GET)
 	public Transaction getTransaction(@PathVariable(value="tranId") Integer tranId) {
-		System.out.println("TransactionController.getTransaction: tranId=" + tranId);
 		return transactionService.getTransaction(tranId);
 	}
 
 	@RequestMapping(value = "/transaction", method = RequestMethod.POST)
 	public Transaction createTransaction(@RequestBody Transaction transaction) {
-		System.out.println("TransactionController.createTransaction: transaction=" + transaction);
 		return transactionService.createTransaction(transaction);
 	}
 
 	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.PUT)
 	public Transaction updateTransaction(@PathVariable(value="tranId") Integer tranId, @RequestBody Transaction transaction) {
-		System.out.println("TransactionController.updateTransaction: tranId=" + tranId);
 		return transactionService.updateTransaction(tranId, transaction);
 	}
 
 	@RequestMapping(value = "/transaction/{tranId}", method = RequestMethod.DELETE)
 	public void deleteTransaction(@PathVariable(value="tranId") Integer tranId) {
-		System.out.println("TransactionController.deleteTransaction: tranId=" + tranId);
 		transactionService.deleteTransaction(tranId);
 	}
 

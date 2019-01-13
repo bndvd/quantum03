@@ -13,16 +13,38 @@
 	<div ng-show="positionSelectedPageIndex >= 0"
 		class="w3-container w3-display-container">
 		<h2 class="w3-left-align">{{ securities[positionSelectedPageIndex].symbol }}</h2>
-		<span class="w3-display-topright">
+		<span ng-show="positionSelectedPageIndex >= 1" class="w3-display-topright">
 			<button ng-click="showTransactionAddDialog(true)" class="w3-button w3-grey">+</button>
 			<button ng-click="showTransactionUpdateDialog(true)" class="w3-button w3-grey">...</button>
 			<button ng-click="showTransactionDeleteDialog(true)" class="w3-button w3-grey">&mdash;</button>
 		</span>
 	</div>
 
-	<!-- TRANSACTION TABLE -->
-	<div class="w3-container">
-		<table ng-show="positionSelectedPageIndex >= 0" class="w3-table w3-striped w3-small">
+	<!-- TRANSACTION TABLE - All Transactions Page -->
+	<div ng-show="positionSelectedPageIndex == 0" class="w3-container">
+		<table class="w3-table w3-striped w3-small">
+			<tr class="w3-black">
+				<th class="w3-left-align">ID</th>
+				<th class="w3-left-align">Security</th>
+				<th class="w3-left-align">Tran Date</th>
+				<th class="w3-center-align">Type</th>
+				<th class="w3-right-align">Tran Shares</th>
+				<th class="w3-right-align">Price</th>
+			</tr>
+			<tr ng-repeat="t in allTransactions | orderBy : tranDate : true">
+				<td class="w3-left-align">{{ t.id }}</td>
+				<td class="w3-left-align">{{ t.symbol }}</td>
+				<td class="w3-left-align">{{ t.tranDate | date:'yyyy-MM-dd' }}</td>
+				<td class="w3-center-align">{{ t.type }}</td>
+				<td class="w3-right-align">{{ t.shares }}</td>
+				<td class="w3-right-align">{{ t.price | currency : "$" : 4 }}</td>
+			</tr>
+		</table>
+	</div>
+	
+	<!-- TRANSACTION TABLE - Individual Securities -->
+	<div ng-show="positionSelectedPageIndex >= 1" class="w3-container">
+		<table class="w3-table w3-striped w3-small">
 			<tr class="w3-black">
 				<th class="w3-left-align">ID</th>
 				<th class="w3-left-align">Tran Date</th>
@@ -35,7 +57,6 @@
 				<th class="w3-right-align">Rlzd Gain</th>
 				<th class="w3-right-align">Unrlzd Gain</th>
 				<th class="w3-right-align">Total Gain</th>
-
 			</tr>
 			<tr ng-repeat="t in positionSelected.transactions | orderBy : tranDate : true">
 				<td class="w3-left-align">{{ t.id }}</td>
@@ -49,7 +70,6 @@
 				<td class="w3-right-align">{{ t.realizedGain | currency }}</td>
 				<td class="w3-right-align">{{ t.unrealizedGain | currency }}</td>
 				<td class="w3-right-align">{{ (t.realizedGain + t.unrealizedGain) | currency }}</td>
-
 			</tr>
 		</table>
 	</div>
