@@ -193,10 +193,8 @@ app.controller("navCtrl", function($rootScope, $scope, $http, $location) {
 	//
 	// Logout
 	//
-	$scope.logout = function() {
-		var data = {
-			    username: $rootScope.authSession
-		};
+	$rootScope.logout = function() {
+		var data = $rootScope.authSession;
 	
 		$http({
 		    method: "POST",
