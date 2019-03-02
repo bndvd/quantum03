@@ -40,6 +40,14 @@ public class QPlotPoint {
 		this.value = value;
 	}
 	
+	public void scale(BigDecimal scalar) {
+		BigDecimal v = getValue();
+		if (scalar == null || v == null) {
+			return;
+		}
+		setValue(v.multiply(scalar));
+	}
+	
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();

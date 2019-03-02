@@ -105,18 +105,36 @@ public class QPlotServiceImpl implements QPlotService {
 		if (cashSeries == null) {
 			return null;
 		}
-		result.addSeries(cashSeries);
 		
 		QPlotSeries benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_BENCHMARK, dateChain, symbolToTransactionListMap, benchmarkChartChain);
 		if (benchmarkSeries == null) {
 			return null;
 		}
-		result.addSeries(benchmarkSeries);
 		
 		QPlotSeries userPotfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_USER_PORTFOLIO, dateChain, symbolToTransactionListMap, null);
 		if (userPotfolioSeries == null) {
 			return null;
 		}
+		
+		// scale all series so that userPortfolioSeries end value matches actual portfolio end value
+		// this is to reduce the deltas between actual portfolio performance and simulated portfolio performance
+		Iterable<Asset> actualUserPortfolio = assetService.getAssets();
+		BigDecimal actualUserPortfolioLastValue = BigDecimal.ZERO;
+		for (Asset a : actualUserPortfolio) {
+			actualUserPortfolioLastValue = actualUserPortfolioLastValue.add(a.getLastValue());
+		}
+		
+		List<QPlotPoint> userPotfolioSeriesPoints = userPotfolioSeries.getPoints();
+		BigDecimal simulatedUserPortfolioLastValue = userPotfolioSeriesPoints.get(userPotfolioSeriesPoints.size()-1).getValue();
+		BigDecimal scalar = actualUserPortfolioLastValue.divide(simulatedUserPortfolioLastValue,
+				QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+		
+		cashSeries.scale(scalar);
+		benchmarkSeries.scale(scalar);
+		userPotfolioSeries.scale(scalar);
+
+		result.addSeries(cashSeries);
+		result.addSeries(benchmarkSeries);
 		result.addSeries(userPotfolioSeries);
 
 		return result;

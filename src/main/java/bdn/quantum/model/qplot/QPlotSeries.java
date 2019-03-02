@@ -1,5 +1,6 @@
 package bdn.quantum.model.qplot;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,15 @@ public class QPlotSeries {
 	
 	public void addPoint(QPlotPoint point) {
 		points.add(point);
+	}
+	
+	public void scale(BigDecimal scalar) {
+		if (scalar == null || points == null) {
+			return;
+		}
+		for (QPlotPoint p : points) {
+			p.scale(scalar);
+		}
 	}
 	
 	@Override
