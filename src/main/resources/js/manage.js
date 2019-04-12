@@ -24,6 +24,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	
 	// saved properties (settings)
 	$scope.propTaxRate;
+	$scope.propContribution;
 	$scope.propQPlotBenchmarkSymbol = null;
 	$scope.propQPlotSimTargetPrinicipalInit = null;
 	$scope.propQPlotSimTargetPrinicipalIncr = null;
@@ -44,6 +45,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 
 					// read in specific values from keyval map
 					$scope.propTaxRate = $scope.manageKeyvalMap["pr.tax"];
+					$scope.propContribution = $scope.manageKeyvalMap["pr.contr"];
 					$scope.propQPlotBenchmarkSymbol = $scope.manageKeyvalMap["pr.qpbs"];
 					if ($scope.propQPlotBenchmarkSymbol == null) {
 						$scope.propQPlotBenchmarkSymbol = "VTI";
@@ -285,6 +287,12 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 			$scope.propTaxRate = 0;
 		}
 		saveSetting("pr.tax", $scope.propTaxRate);
+		
+		// save Contribution setting
+		if (! isFinite($scope.propContribution)) {
+			$scope.propContribution = 0;
+		}
+		saveSetting("pr.contr", $scope.propContribution);
 		
 		// save Chart Benchmark symbol
 		if ($scope.propQPlotBenchmarkSymbol == null || $scope.propQPlotBenchmarkSymbol.trim() == "") {

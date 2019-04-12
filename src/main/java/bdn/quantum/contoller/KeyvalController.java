@@ -28,19 +28,19 @@ public class KeyvalController {
 	
 	@RequestMapping(value = "/keyval/{key}", method = RequestMethod.GET)
 	public KeyvalEntity getKeyval(@PathVariable(value="key") String key) {
-		System.out.println("KeyvalController.getKeyval: key=" + key);
+		//System.out.println("KeyvalController.getKeyval: key=" + key);
 		return keyvalService.getKeyval(key);
 	}
 
 	@RequestMapping(value = "/keyval", method = RequestMethod.POST)
 	public KeyvalEntity createKeyval(@RequestBody KeyvalEntity ke) {
-		System.out.println("KeyvalEntityController.createKeyval: key=" + ke.getKey());
+		//System.out.println("KeyvalEntityController.createKeyval: key=" + ke.getKey());
 		return keyvalService.setKeyval(ke);
 	}
 
 	@RequestMapping(value = "/keyval/{key}", method = RequestMethod.DELETE)
 	public void deleteKeyval(@PathVariable(value="key") String key) {
-		System.out.println("KeyvalEntityController.deleteKeyval: key=" + key);
+		//System.out.println("KeyvalEntityController.deleteKeyval: key=" + key);
 		keyvalService.deleteKeyval(key);
 	}
 	

@@ -5,6 +5,7 @@ app.controller("dashboardCtrl", function($scope, $http) {
 	$scope.assetsTotalLastValue = 0.0;
 	$scope.assetsTotalUnrealizedGain = 0.0;
 	$scope.assetsTotalRealizedGain = 0.0;
+	$scope.assetsTotalContribution = 0.0;
 	$scope.assetsTotalRealizedGainYtd = 0.0;
 	$scope.assetsTotalRealizedGainYtdTax = 0.0;
 	
@@ -21,6 +22,7 @@ app.controller("dashboardCtrl", function($scope, $http) {
 					$scope.assetsTotalLastValue += $scope.assets[i].lastValue;
 					$scope.assetsTotalUnrealizedGain += $scope.assets[i].unrealizedGain;
 					$scope.assetsTotalRealizedGain += $scope.assets[i].realizedGain;
+					$scope.assetsTotalContribution += $scope.assets[i].contribution;
 					$scope.assetsTotalRealizedGainYtd += $scope.assets[i].realizedGainYtd;
 					$scope.assetsTotalRealizedGainYtdTax += $scope.assets[i].realizedGainYtdTax;
 				}

@@ -225,6 +225,40 @@ public class AssetServiceImpl implements AssetService {
 					BigDecimal deltaValue = currentRatios[i].subtract(tr).multiply(valueSum);
 					assets.get(i).setRatioDeltaValue(deltaValue);
 				}
+				
+				// figure out contribution amounts for each asset
+				BigDecimal contributionAmount = null;
+				StringBuffer key = new StringBuffer();
+				key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.CONTRIBUTION);				
+				String contributionStr = keyvalService.getKeyvalStr(key.toString());
+				if (contributionStr != null) {
+					contributionAmount = new BigDecimal(contributionStr);
+				}
+				if (contributionAmount != null && contributionAmount.doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+					BigDecimal totalValueWithContribution = valueSum.add(contributionAmount);
+					BigDecimal[] targetVsCurrentDelta = new BigDecimal[assets.size()];
+					BigDecimal sumPositiveDeltas = BigDecimal.ZERO;
+					for (int i = 0; i < assets.size(); i++) {
+						targetVsCurrentDelta[i] = targetRatios[i].divide(targetRatioSum, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP)
+								.multiply(totalValueWithContribution).subtract(assets.get(i).getLastValue());
+						// contribution is only buying assets, so we're allocating the contribution amount across positive-delta assets
+						// zero out the negative deltas (since we're not selling assets)
+						if (targetVsCurrentDelta[i].doubleValue() < QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+							targetVsCurrentDelta[i] = BigDecimal.ZERO;
+						}
+						else {
+							sumPositiveDeltas = sumPositiveDeltas.add(targetVsCurrentDelta[i]);
+						}
+					}
+					// calculate the contribution amount for each asset
+					for (int i = 0; i < assets.size(); i++) {
+						BigDecimal assetContribution = contributionAmount.multiply(targetVsCurrentDelta[i]).divide(sumPositiveDeltas,
+								QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+						if (assetContribution.doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+							assets.get(i).setContribution(assetContribution);
+						}
+					}
+				}
 			}
 		}
 		catch (Exception exc) {

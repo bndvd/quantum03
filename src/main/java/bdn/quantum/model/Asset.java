@@ -23,6 +23,7 @@ public class Asset {
 	private BigDecimal targetRatio = BigDecimal.ZERO;
 	private BigDecimal currentRatio = BigDecimal.ZERO;
 	private BigDecimal ratioDeltaValue = BigDecimal.ZERO;
+	private BigDecimal contribution = BigDecimal.ZERO;
 
 	
 	public Asset() {
@@ -124,6 +125,14 @@ public class Asset {
 
 	public void setRatioDeltaValue(BigDecimal ratioDeltaValue) {
 		this.ratioDeltaValue = ratioDeltaValue;
+	}
+
+	public BigDecimal getContribution() {
+		return contribution;
+	}
+
+	public void setContribution(BigDecimal contribution) {
+		this.contribution = contribution;
 	}
 
 	public BigDecimal getRealizedGainYtd() {
