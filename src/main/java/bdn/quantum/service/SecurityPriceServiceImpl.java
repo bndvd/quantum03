@@ -14,6 +14,9 @@ import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.qplot.QChart;
 import pl.zankowski.iextrading4j.api.stocks.Chart;
 import pl.zankowski.iextrading4j.api.stocks.ChartRange;
+import pl.zankowski.iextrading4j.client.IEXCloudClient;
+import pl.zankowski.iextrading4j.client.IEXCloudTokenBuilder;
+import pl.zankowski.iextrading4j.client.IEXTradingApiVersion;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
 import pl.zankowski.iextrading4j.client.rest.request.stocks.ChartRequestBuilder;
 import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
@@ -21,7 +24,10 @@ import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
 @Service("securityPriceService")
 public class SecurityPriceServiceImpl implements SecurityPriceService {
 	
-	private final IEXTradingClient iexTradingClient = IEXTradingClient.create();
+	private final IEXCloudClient iexTradingClient = IEXTradingClient.create(IEXTradingApiVersion.IEX_CLOUD_V1,
+            new IEXCloudTokenBuilder()
+            .withPublishableToken("pk_c8308194ad424e918882f9487b5a6f3b")
+            .build());
 	private Map<String, StockQuoteMemento> lastStockPriceCache = new HashMap<String, StockQuoteMemento>();
 	
 	@Autowired
