@@ -14,7 +14,6 @@ import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.Position;
 import bdn.quantum.model.Security;
-import bdn.quantum.model.SecurityEntity;
 import bdn.quantum.service.AssetService;
 import bdn.quantum.util.ServiceError;
 

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bdn.quantum.QuantumConstants;
+import bdn.quantum.QuantumProperties;
 import bdn.quantum.model.qplot.QChart;
 import pl.zankowski.iextrading4j.api.stocks.Chart;
 import pl.zankowski.iextrading4j.api.stocks.ChartRange;
@@ -24,16 +25,37 @@ import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
 @Service("securityPriceService")
 public class SecurityPriceServiceImpl implements SecurityPriceService {
 	
-	private final IEXCloudClient iexTradingClient = IEXTradingClient.create(IEXTradingApiVersion.IEX_CLOUD_V1,
-            new IEXCloudTokenBuilder()
-            .withPublishableToken("pk_c8308194ad424e918882f9487b5a6f3b")
-            .build());
+	private IEXCloudClient iexTradingClient = null;
 	private Map<String, StockQuoteMemento> lastStockPriceCache = new HashMap<String, StockQuoteMemento>();
 	
 	@Autowired
 	private FundResolverService fundResolverService;
+	@Autowired
+	private KeyvalService keyvalService;
 	
 	
+	private IEXCloudClient getIEXCloudClient() {
+		if (iexTradingClient == null && keyvalService != null) {
+			StringBuffer key = new StringBuffer();
+			key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.IEX_TOKEN);
+			String iexToken = keyvalService.getKeyvalStr(key.toString());
+			
+			if (iexToken != null && ! iexToken.trim().equals("")) {
+//				iexTradingClient = IEXTradingClient.create(IEXTradingApiVersion.IEX_CLOUD_V1,
+				iexTradingClient = IEXTradingClient.create(IEXTradingApiVersion.IEX_CLOUD_V1_SANDBOX,
+			            new IEXCloudTokenBuilder()
+			            .withPublishableToken(iexToken)
+			            .build());
+			}
+		}
+		return iexTradingClient;
+	}
+	
+	@Override
+	public void configChanged() {
+		iexTradingClient = null;
+	}
+
 	@Override
 	public BigDecimal getLastStockPrice(String symbol) {
 		BigDecimal result = getQuoteFromCache(symbol);
@@ -46,7 +68,12 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 			}
 			
 			try {
-				result = iexTradingClient.executeRequest(new PriceRequestBuilder()
+				IEXCloudClient iexClient = getIEXCloudClient();
+				if (iexClient == null) {
+					throw new Exception("IEX Cloud Client not initialized. Make sure IEX publishable token is configured.");
+				}
+				
+				result = iexClient.executeRequest(new PriceRequestBuilder()
 				        .withSymbol(querySymbol)
 				        .build());
 			}
@@ -81,7 +108,12 @@ public class SecurityPriceServiceImpl implements SecurityPriceService {
 		}
 		
 		try {
-			List<Chart> chartList = iexTradingClient.executeRequest(new ChartRequestBuilder()
+			IEXCloudClient iexClient = getIEXCloudClient();
+			if (iexClient == null) {
+				throw new Exception("IEX Cloud Client not initialized. Make sure IEX publishable token is configured.");
+			}
+			
+			List<Chart> chartList = iexClient.executeRequest(new ChartRequestBuilder()
 					.withChartRange(ChartRange.FIVE_YEARS)
 					.withSymbol(querySymbol)
 					.build());

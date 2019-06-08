@@ -11,6 +11,7 @@ public final class QuantumProperties {
 	public static final String CONTRIBUTION = "contr";
 	
 	// general properties
+	public static final String IEX_TOKEN = "iextoken";
 	public static final String TAX_RATE = "tax";
 	public static final String QPLOT_BENCHMARK_SYMBOL = "qpbs";
 	public static final String QPLOT_SIM_TARGET_PRINCIPAL_INIT = "qpstpinit";

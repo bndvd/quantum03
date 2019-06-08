@@ -21,8 +21,7 @@ public class QPlotController {
 	public QPlot getPlot(@PathVariable(value="chartName") String chartName) {
 		return qPlotService.getPlot(chartName);
 	}
-	
-	
+
 	public void plotDataChanged() {
 		qPlotService.clear();
 	}

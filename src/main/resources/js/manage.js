@@ -23,6 +23,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.manageNewSecurityBasketId = null;
 	
 	// saved properties (settings)
+	$scope.propIexToken;
 	$scope.propTaxRate;
 	$scope.propContribution;
 	$scope.propQPlotBenchmarkSymbol = null;
@@ -44,6 +45,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 					}
 
 					// read in specific values from keyval map
+					$scope.propIexToken = $scope.manageKeyvalMap["pr.iextoken"];
 					$scope.propTaxRate = $scope.manageKeyvalMap["pr.tax"];
 					$scope.propContribution = $scope.manageKeyvalMap["pr.contr"];
 					$scope.propQPlotBenchmarkSymbol = $scope.manageKeyvalMap["pr.qpbs"];
@@ -282,6 +284,12 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	// Save Settings
 	//
 	$scope.saveSettings = function() {
+		// save IEX Token setting
+		if ($scope.propIexToken == null || $scope.propIexToken.trim() == "") {
+			$scope.propIexToken = null;
+		}
+		saveSetting("pr.iextoken", $scope.propIexToken);
+		
 		// save Tax Rate setting
 		if (! isFinite($scope.propTaxRate)) {
 			$scope.propTaxRate = 0;
@@ -321,30 +329,52 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	
 	
 	var saveSetting = function(key, value) {
-		if (key == null || value == null) {
+		if (key == null) {
 			return;
 		}
 		
-		var data = {
-			    key: key,
-			    value: value
-		};
-		$http({
-		    method: "POST",
-		    url: "api/v1/keyval",
-		    data: data,
-		    headers: {"Content-Type": "application/json"}
-		}).then(
-				// Success response
-				function successCallback(response) {
-					$scope.refreshManageKeyvalMap();
-				},
-				// Error response
-				function errorCallback(response) {
-					window.alert("Error saving property: "+response.status+"; "+response.statusText);
-					$scope.refreshManageKeyvalMap();
-				}
-		);		
+		if (value == null) {
+			var data = {
+			};
+			$http({
+			    method: "DELETE",
+			    url: "api/v1/keyval/"+key,
+			    data: data,
+			    headers: {"Content-Type": "application/json"}
+			}).then(
+					// Success response
+					function successCallback(response) {
+						$scope.refreshManageKeyvalMap();
+					},
+					// Error response
+					function errorCallback(response) {
+						window.alert("Error saving property: "+response.status+"; "+response.statusText);
+						$scope.refreshManageKeyvalMap();
+					}
+			);
+		}
+		else {
+			var data = {
+				    key: key,
+				    value: value
+			};
+			$http({
+			    method: "POST",
+			    url: "api/v1/keyval",
+			    data: data,
+			    headers: {"Content-Type": "application/json"}
+			}).then(
+					// Success response
+					function successCallback(response) {
+						$scope.refreshManageKeyvalMap();
+					},
+					// Error response
+					function errorCallback(response) {
+						window.alert("Error saving property: "+response.status+"; "+response.statusText);
+						$scope.refreshManageKeyvalMap();
+					}
+			);
+		}
 	};
 	
 	//
