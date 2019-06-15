@@ -62,11 +62,6 @@
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>pl.zankowski</groupId>
-			<artifactId>iextrading4j-all</artifactId>
-			<version>3.0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.activation</groupId>
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>

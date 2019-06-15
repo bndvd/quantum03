@@ -32,7 +32,7 @@ public class QPlotServiceImpl implements QPlotService {
 	@Autowired
 	private AssetService assetService;
 	@Autowired
-	private SecurityPriceService securityPriceService;
+	private MarketDataService marketDataService;
 	@Autowired
 	private KeyvalService keyvalService;
 	@Autowired
@@ -65,7 +65,13 @@ public class QPlotServiceImpl implements QPlotService {
 		result = getQPlotFromCache(plotName, benchmarkSymbol);
 		
 		if (result == null) {
-			Iterable<QChart> benchmarkChartChain = securityPriceService.getMaxChartChain(benchmarkSymbol);
+			LocalDate startDate = null;
+			// for simulated portfolio, we'll do only last 10 years (to ensure all security plots are of equal length)
+			if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
+				startDate = LocalDate.now().minusMonths(QuantumConstants.SIMULATED_TARGET_WINDOW_MONTHS);
+			}
+			
+			Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
 			Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
 						
 			if (benchmarkChartChain != null && dateChain != null) {
@@ -252,7 +258,7 @@ public class QPlotServiceImpl implements QPlotService {
 				// get the chart chain for that security once
 				Iterable<QChart> secChartChain = singlePortfolioSecChartChain;
 				if (secChartChain == null) {
-					secChartChain = securityPriceService.getMaxChartChain(s);
+					secChartChain = marketDataService.getChartChain(s);
 				}
 				
 				if (secChartChain != null) {
@@ -469,9 +475,10 @@ public class QPlotServiceImpl implements QPlotService {
 			return null;
 		}
 		
+		LocalDate startDate = dateChain.iterator().next();
 		HashMap<String, Iterable<QChart>> symbolToChartChainMap = new HashMap<>();
 		for (String s : symbolList) {
-			Iterable<QChart> chartChain = securityPriceService.getMaxChartChain(s);
+			Iterable<QChart> chartChain = marketDataService.getChartChain(s, startDate);
 			symbolToChartChainMap.put(s, chartChain);
 		}
 		

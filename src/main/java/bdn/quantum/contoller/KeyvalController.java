@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import bdn.quantum.QuantumConstants;
 import bdn.quantum.model.KeyvalEntity;
 import bdn.quantum.service.KeyvalService;
-import bdn.quantum.service.SecurityPriceService;
+import bdn.quantum.service.MarketDataService;
 
 @RestController("keyvalController")
 @RequestMapping(QuantumConstants.REST_URL_BASE)
@@ -21,7 +21,7 @@ public class KeyvalController {
 	@Autowired
 	private QPlotController qPlotController;
 	@Autowired
-	private SecurityPriceService securityPriceService;
+	private MarketDataService marketDataService;
 	
 
 	@RequestMapping(value = "/keyval", method = RequestMethod.GET)
@@ -49,7 +49,7 @@ public class KeyvalController {
 	
 	public void keyvalChange() {
 		qPlotController.plotDataChanged();
-		securityPriceService.configChanged();
+		marketDataService.configChanged();
 	}
 	
 }
