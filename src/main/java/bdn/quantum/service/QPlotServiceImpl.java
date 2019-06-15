@@ -494,7 +494,7 @@ public class QPlotServiceImpl implements QPlotService {
 							symbolToTargetRatioMap);
 		}
 		catch (Exception exc) {
-			System.err.println(exc.getMessage());
+			System.err.println("QPlotServiceImpl.buildSimulatedPortfolio - Exception: " + exc.getMessage());
 			result = null;
 		}
 		

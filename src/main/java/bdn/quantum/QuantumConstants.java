@@ -62,7 +62,7 @@ public final class QuantumConstants {
 	public static final double THRESHOLD_DECIMAL_EQUALING_ZERO = 0.000000001;
 	
 	// Stock quote constants
-	public static final long QUOTE_CACHE_LIFE_MILLIS = 600000;
+	public static final long IEX_DATA_CACHE_LIFE_MILLIS = 600000;
 	
 	// User session life in milliseconds
 	public static final long USER_SESSION_LIFE_MILLIS = 600000;

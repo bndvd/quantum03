@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,7 +129,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 	
 	// Read from local database the stored history. If non-existent, populate it
 	// If missing recent data, populate
-	private List<MarketQuote> loadQuoteChain(String symbol) {
+	private synchronized List<MarketQuote> loadQuoteChain(String symbol) {
 		List<MarketQuote> result = null;
 		
 		loadTradeDayCache();
@@ -145,7 +146,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 		
 		if (tradeDayMapCache != null && mqeListInRepository != null) {
 			String firstMqeDate = null;
-			Set<String> tradeDateSet = tradeDayMapCache.keySet();
+			Set<String> tradeDateSet = new HashSet<String>(tradeDayMapCache.keySet());
 			for (MarketQuoteEntity mqe : mqeListInRepository) {
 				String dateInRepository = mqe.getMktDate();
 				tradeDateSet.remove(dateInRepository);
