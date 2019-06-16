@@ -23,6 +23,7 @@ import bdn.quantum.model.qplot.QPlot;
 import bdn.quantum.model.qplot.QPlotPoint;
 import bdn.quantum.model.qplot.QPlotSeries;
 import bdn.quantum.model.util.AssetSymbolManager;
+import bdn.quantum.model.util.ModelUtils;
 import bdn.quantum.model.util.TransactionComparator;
 import bdn.quantum.util.DateUtils;
 
@@ -65,21 +66,35 @@ public class QPlotServiceImpl implements QPlotService {
 		result = getQPlotFromCache(plotName, benchmarkSymbol);
 		
 		if (result == null) {
-			LocalDate startDate = null;
-			// for simulated portfolio, we'll do only last 10 years (to ensure all security plots are of equal length)
-			if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
-				startDate = LocalDate.now().minusMonths(QuantumConstants.SIMULATED_TARGET_WINDOW_MONTHS);
-			}
 			
-			Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
-			Iterable<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
-						
-			if (benchmarkChartChain != null && dateChain != null) {
-				if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
-					Iterable<Position> positionIter = assetService.getPositions(true);
-					result = buildStdGrowthChart(dateChain, positionIter, benchmarkChartChain);
+			if (QuantumConstants.PLOT_STD_GROWTH.equals(plotName)) {
+				// for Std Growth plot, we'll start with the date of the earliest transaction
+				LocalDate startDate = null;
+				List<Date> tranDateList = new ArrayList<>();
+				List<Position> positionList = assetService.getPositions(true);
+				for (Position p : positionList) {
+					if (p != null && p.getTransactions() != null && p.getTransactions().size() > 0) {
+						tranDateList.add(p.getTransactions().get(0).getTranDate());
+					}
 				}
-				else if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
+				Date earliestTranDate = ModelUtils.getEarliestDate(tranDateList);
+				startDate = ModelUtils.stringToLocalDate(ModelUtils.dateToString(earliestTranDate));
+				
+				Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
+				List<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
+				
+				if (benchmarkChartChain != null && dateChain != null) {
+					result = buildStdGrowthChart(dateChain, positionList, benchmarkChartChain);
+				}
+			}
+			else if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
+				// for simulated portfolio, we'll do only last 10 years (to ensure all security plots are of equal length)
+				LocalDate startDate = LocalDate.now().minusMonths(QuantumConstants.SIMULATED_TARGET_WINDOW_MONTHS);
+				
+				Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
+				List<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
+				
+				if (benchmarkChartChain != null && dateChain != null) {
 					result = buildSimTargetChart(dateChain, benchmarkSymbol, benchmarkChartChain);
 				}
 			}
@@ -97,7 +112,7 @@ public class QPlotServiceImpl implements QPlotService {
 		qPlotCache.clear();
 	}
 
-	private QPlot buildStdGrowthChart(Iterable<LocalDate> dateChain, Iterable<Position> positionIter,
+	private QPlot buildStdGrowthChart(List<LocalDate> dateChain, Iterable<Position> positionIter,
 						Iterable<QChart> benchmarkChartChain) {
 		if (dateChain == null || positionIter == null || benchmarkChartChain == null) {
 			return null;
@@ -147,7 +162,7 @@ public class QPlotServiceImpl implements QPlotService {
 	}
 	
 	
-	private QPlotSeries buildCashChartSeriesFromTransactions(Iterable<LocalDate> dateChain,
+	private QPlotSeries buildCashChartSeriesFromTransactions(List<LocalDate> dateChain,
 					HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap) {
 		if (dateChain == null || symbolToTransactionListMap == null) {
 			return null;
@@ -199,7 +214,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 	
-	private QPlotSeries buildCashChartSeriesFromSimulatedPrincipals(Iterable<LocalDate> dateChain,
+	private QPlotSeries buildCashChartSeriesFromSimulatedPrincipals(List<LocalDate> dateChain,
 			BigDecimal initPrincipal, BigDecimal incrPrincipal, Integer incrFrequency) {
 		
 		if (dateChain == null || initPrincipal == null || incrPrincipal == null || incrFrequency == null) {
@@ -225,7 +240,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 
-	private QPlotSeries buildChartSeries(Integer seriesType, Iterable<LocalDate> dateChain,
+	private QPlotSeries buildChartSeries(Integer seriesType, List<LocalDate> dateChain,
 			HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap, Iterable<QChart> benchmarkChartChain) {
 		if (seriesType == null || dateChain == null || symbolToTransactionListMap == null) {
 			return null;
@@ -239,7 +254,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 
-	private List<QPlotPoint> buildPortfolioSeriesPoints(Iterable<LocalDate> dateChain,
+	private List<QPlotPoint> buildPortfolioSeriesPoints(List<LocalDate> dateChain,
 			HashMap<String, List<AbstractTransaction>> symbolToTransactionListMap, Iterable<QChart> singlePortfolioSecChartChain) {
 		if (dateChain == null || symbolToTransactionListMap == null) {
 			return null;
@@ -258,7 +273,7 @@ public class QPlotServiceImpl implements QPlotService {
 				// get the chart chain for that security once
 				Iterable<QChart> secChartChain = singlePortfolioSecChartChain;
 				if (secChartChain == null) {
-					secChartChain = marketDataService.getChartChain(s);
+					secChartChain = marketDataService.getChartChain(s, dateChain.get(0));
 				}
 				
 				if (secChartChain != null) {
@@ -294,7 +309,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 
-	private List<QPlotPoint> buildSecuritySeriesPoints(Iterable<LocalDate> dateChain, List<AbstractTransaction> secTranList,
+	private List<QPlotPoint> buildSecuritySeriesPoints(List<LocalDate> dateChain, List<AbstractTransaction> secTranList,
 			Iterable<QChart> secChartChain) {
 		if (dateChain == null || secTranList == null || secChartChain == null) {
 			return null;
@@ -360,7 +375,7 @@ public class QPlotServiceImpl implements QPlotService {
 	
 	
 	// Simulated Target Portfolio Chart
-	private QPlot buildSimTargetChart(Iterable<LocalDate> dateChain, String benchmarkSymbol, Iterable<QChart> benchmarkChartChain) {
+	private QPlot buildSimTargetChart(List<LocalDate> dateChain, String benchmarkSymbol, Iterable<QChart> benchmarkChartChain) {
 		if (dateChain == null || benchmarkSymbol == null || benchmarkChartChain == null) {
 			return null;
 		}
@@ -467,7 +482,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 	
-	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(Iterable<LocalDate> dateChain,
+	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(List<LocalDate> dateChain,
 						List<String> symbolList, HashMap<String,BigDecimal> symbolToTargetRatioMap,
 						BigDecimal initPrincipal, BigDecimal incrPrincipal, Integer incrFrequency, boolean wholeShares) {
 		if (dateChain == null || symbolList == null || symbolToTargetRatioMap == null ||
@@ -539,7 +554,7 @@ public class QPlotServiceImpl implements QPlotService {
 		return result;
 	}
 
-	private Iterable<LocalDate> buildDateChain(Iterable<QChart> chartChain) {
+	private List<LocalDate> buildDateChain(Iterable<QChart> chartChain) {
 		if (chartChain == null) {
 			return null;
 		}

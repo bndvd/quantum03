@@ -26,7 +26,6 @@ import bdn.quantum.model.iex.IEXChart;
 import bdn.quantum.model.iex.IEXChartFull;
 import bdn.quantum.model.iex.IEXTradeDay;
 import bdn.quantum.model.qplot.QChart;
-import bdn.quantum.model.util.MarketQuoteComparator;
 import bdn.quantum.model.util.ModelUtils;
 import bdn.quantum.repository.MarketQuoteRepository;
 import bdn.quantum.repository.MarketStatusRepository;
@@ -43,8 +42,6 @@ public class MarketDataServiceImpl implements MarketDataService {
 	private IEXCloudService iexCloudService;
 	@Autowired
 	private MarketQuoteRepository marketQuoteRepository;
-	@Autowired
-	private MarketQuoteComparator marketQuoteComparator;
 	@Autowired
 	private MarketStatusRepository marketStatusRepository;
 	
@@ -98,21 +95,15 @@ public class MarketDataServiceImpl implements MarketDataService {
 		}
 		
 		try {
-			List<MarketQuote> quoteList = loadQuoteChain(querySymbol);
+			String startDateStr = null;
+			if (startDate != null) {
+				startDateStr = ModelUtils.localDateToString(startDate);
+			}
+			List<MarketQuote> quoteList = loadQuoteChain(querySymbol, startDateStr);
 			
-			if (quoteList != null) {
-				String startDateStr = null;
-				if (startDate != null) {
-					startDateStr = ModelUtils.localDateToString(startDate);
-				}
-				
+			if (quoteList != null) {		
 				qChartList = new ArrayList<>();
 				for (MarketQuote c : quoteList) {
-					// if a start date is specified and this is chart is earlier than start date, do not add to result
-					if (startDateStr!= null && c.getMktDate().compareTo(startDateStr) < 0) {
-						continue;
-					}
-					
 					QChart qc = new QChart(symbol, c, fundResolverService);
 					qChartList.add(qc);
 				}
@@ -129,17 +120,33 @@ public class MarketDataServiceImpl implements MarketDataService {
 	
 	// Read from local database the stored history. If non-existent, populate it
 	// If missing recent data, populate
-	private synchronized List<MarketQuote> loadQuoteChain(String symbol) {
+	private synchronized List<MarketQuote> loadQuoteChain(String symbol, String startDate) {
 		List<MarketQuote> result = null;
+		String dayBeforeStartDate = null;
+		if (startDate != null) {
+			try {
+				dayBeforeStartDate = ModelUtils.localDateToString(ModelUtils.stringToLocalDate(startDate).minusDays(1));
+			}
+			catch (Exception exc) {
+				exc.printStackTrace();
+				dayBeforeStartDate = null;
+			}
+		}
 		
 		loadTradeDayCache();
 		
 		// read quote history from database
-		Iterable<MarketQuoteEntity> mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
+		Iterable<MarketQuoteEntity> mqeListInRepository = null;
+		if (dayBeforeStartDate == null) {
+			mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
+		}
+		else {
+			mqeListInRepository = marketQuoteRepository.findBySymbolAndMktDateIsGreaterThanOrderByMktDateAsc(symbol, dayBeforeStartDate);
+		}
 		
 		// if no history in database, populate it
 		if (mqeListInRepository == null || ! mqeListInRepository.iterator().hasNext()) {
-			loadInitialQuoteChainIntoRepository(symbol);
+			loadMaxQuoteChainIntoRepository(symbol);
 			// re-query
 			mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
 		}
@@ -163,6 +170,11 @@ public class MarketDataServiceImpl implements MarketDataService {
 				if (nextDate.compareTo(firstMqeDate) < 0) {
 					continue;
 				}
+				// if start date is specified, ignore all dates prior to the start date (maxQuoteChainIntoRepository load should have loaded
+				// the full past history; any errors / missing data there should not be retried every time
+				if (startDate != null && nextDate.compareTo(startDate) < 0) {
+					continue;
+				}
 				
 				Boolean isTradingDay = tradeDayMapCache.get(nextDate);
 				if (isTradingDay) {
@@ -179,7 +191,12 @@ public class MarketDataServiceImpl implements MarketDataService {
 			}
 			if (newDataAdded) {
 				// re-query
-				mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
+				if (dayBeforeStartDate == null) {
+					mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
+				}
+				else {
+					mqeListInRepository = marketQuoteRepository.findBySymbolAndMktDateIsGreaterThanOrderByMktDateAsc(symbol, dayBeforeStartDate);
+				}
 			}
 		}
 		// sort by date
@@ -187,7 +204,6 @@ public class MarketDataServiceImpl implements MarketDataService {
 		for (MarketQuoteEntity mqe : mqeListInRepository) {
 			result.add(new MarketQuote(mqe));
 		}
-		result.sort(marketQuoteComparator);
 		
 		return result;
 	}
@@ -263,7 +279,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 		}
 	}
 
-	private void loadInitialQuoteChainIntoRepository(String symbol) {
+	private void loadMaxQuoteChainIntoRepository(String symbol) {
 		Iterable<IEXChart> iexChartIter = iexCloudService.getMaxChart(symbol);
 		
 		if (iexChartIter != null) {

@@ -1,5 +1,7 @@
 package bdn.quantum.service;
 
+import java.util.List;
+
 import bdn.quantum.model.Asset;
 import bdn.quantum.model.BasketEntity;
 import bdn.quantum.model.Position;
@@ -18,8 +20,8 @@ public interface AssetService {
 	public Iterable<Asset> getAssets();
 	public Asset createAsset(Asset asset);
 	public Position getPosition(Integer secId);
-	public Iterable<Position> getPositions();
-	public Iterable<Position> getPositions(Integer basketId);
-	public Iterable<Position> getPositions(boolean includeTransactions);
+	public List<Position> getPositions();
+	public List<Position> getPositions(Integer basketId);
+	public List<Position> getPositions(boolean includeTransactions);
 
 }

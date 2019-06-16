@@ -47,6 +47,14 @@ public class ModelUtils {
 		return result;
 	}
 	
+	public static String dateToString(Date d) {
+		String result = null;
+		if (d != null) {
+			result = CHART_DATE_DF.format(d);
+		}
+		return result;
+	}
+
 	public static String getMostRecentDateStr(Iterable<String> dateStrIter) {
 		String result = null;
 		
@@ -82,4 +90,17 @@ public class ModelUtils {
 		return result;
 	}
 
+	public static Date getEarliestDate(List<Date> dateList) {
+		Date result = null;
+		if (dateList != null && dateList.size() > 0) {
+			result = dateList.get(0);
+			for (int i = 1; i < dateList.size(); i++) {
+				Date nextDate = dateList.get(i);
+				if (nextDate.before(result)) {
+					result = nextDate; 
+				}
+			}
+		}
+		return result;
+	}
 }

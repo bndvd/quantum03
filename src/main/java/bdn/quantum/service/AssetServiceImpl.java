@@ -401,12 +401,12 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public Iterable<Position> getPositions() {
+	public List<Position> getPositions() {
 		return getPositions(false);
 	}
 	
 	@Override
-	public Iterable<Position> getPositions(boolean includeTransactions) {
+	public List<Position> getPositions(boolean includeTransactions) {
 		List<Position> result = new ArrayList<>();
 
 		Iterable<SecurityEntity> securities = securityRepository.findAll();
@@ -423,7 +423,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public Iterable<Position> getPositions(Integer basketId) {
+	public List<Position> getPositions(Integer basketId) {
 		List<Position> result = new ArrayList<>();
 
 		Iterable<SecurityEntity> securities = securityRepository.findByBasketId(basketId);
