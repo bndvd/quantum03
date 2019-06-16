@@ -33,7 +33,7 @@ public class QChart {
 	}
 	
 	public BigDecimal getClose() {
-		BigDecimal result = quote.getClose();
+		BigDecimal result = quote.getQuote();
 		if (proxySymbol != null) {
 			result = fundResolverService.convertProxyToFundValue(symbol, result);
 		}

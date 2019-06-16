@@ -6,21 +6,21 @@ public class MarketQuote {
 
 	private String symbol;
 	private String mktDate;
-	// adjusted close price
-	private BigDecimal close;
+	// for historical data, this is adjusted close price
+	private BigDecimal quote;
 
 	
-	public MarketQuote(String symbol, String mktDate, BigDecimal close) {
+	public MarketQuote(String symbol, String mktDate, BigDecimal quote) {
 		this.symbol = symbol;
 		this.mktDate = mktDate;
-		this.close = close;
+		this.quote = quote;
 	}
 
 
 	public MarketQuote(MarketQuoteEntity mqe) {
 		this.symbol = mqe.getSymbol();
 		this.mktDate = mqe.getMktDate();
-		this.close = mqe.getClose();
+		this.quote = mqe.getClose();
 	}
 
 
@@ -44,13 +44,13 @@ public class MarketQuote {
 	}
 
 
-	public BigDecimal getClose() {
-		return close;
+	public BigDecimal getQuote() {
+		return quote;
 	}
 
 
-	public void setClose(BigDecimal close) {
-		this.close = close;
+	public void setQuote(BigDecimal quote) {
+		this.quote = quote;
 	}
 
 	

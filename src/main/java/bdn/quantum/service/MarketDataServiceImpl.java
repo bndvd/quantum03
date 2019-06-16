@@ -151,6 +151,11 @@ public class MarketDataServiceImpl implements MarketDataService {
 			mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
 		}
 		
+		// sometimes getChart does not return today's data; when this happens we'll use getPrice to get the latest price
+		// for today, however, will not store it in the repository.
+		MarketQuote todaysQuote = null;
+		String todaysDateStr = ModelUtils.localDateToString(LocalDate.now());
+		
 		if (tradeDayMapCache != null && mqeListInRepository != null) {
 			String firstMqeDate = null;
 			Set<String> tradeDateSet = new HashSet<String>(tradeDayMapCache.keySet());
@@ -187,6 +192,11 @@ public class MarketDataServiceImpl implements MarketDataService {
 						marketQuoteRepository.save(mqe);
 						newDataAdded = true;
 					}
+					// if we were unable to get today's quote, use getPrice to get a quote we can use temporarily
+					else if (nextDate.equals(todaysDateStr)) {
+						BigDecimal todaysLastPrice = getLastPrice(symbol);
+						todaysQuote = new MarketQuote(symbol, todaysDateStr, todaysLastPrice);
+					}
 				}
 			}
 			if (newDataAdded) {
@@ -203,6 +213,10 @@ public class MarketDataServiceImpl implements MarketDataService {
 		result = new ArrayList<>();
 		for (MarketQuoteEntity mqe : mqeListInRepository) {
 			result.add(new MarketQuote(mqe));
+		}
+		// if today's data was missing, and we have temporary data, add it
+		if (todaysQuote != null) {
+			result.add(todaysQuote);
 		}
 		
 		return result;
