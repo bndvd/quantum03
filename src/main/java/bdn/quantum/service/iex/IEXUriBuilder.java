@@ -5,7 +5,8 @@ import java.util.Set;
 
 public class IEXUriBuilder {
 
-	private static final String URI_BASE = IEXConstants.IEX_CLOUD_V1_SANDBOX;
+	private static final String URI_BASE_PROD = IEXConstants.IEX_CLOUD_V1;
+	private static final String URI_BASE_TEST = IEXConstants.IEX_CLOUD_V1_SANDBOX;
 	
 	
 	public IEXUriBuilder() {
@@ -22,7 +23,9 @@ public class IEXUriBuilder {
 		}
 		
 		StringBuffer result = new StringBuffer();
-		result.append(URI_BASE);
+		
+		String uriBase = URI_BASE_PROD;
+		result.append(uriBase);
 		
 		String endpoint = IEXConstants.REQ_ENDPOINT[reqId];
 		
