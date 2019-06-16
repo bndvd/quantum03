@@ -1,6 +1,6 @@
 package bdn.quantum.service;
 
-import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -232,10 +232,10 @@ public class MarketDataServiceImpl implements MarketDataService {
 			if (mseListInRepository == null || ! mseListInRepository.iterator().hasNext()) {
 				try {
 					Resource resource = new ClassPathResource("data/mkt-hist-trading-dates.json");
-					File file = resource.getFile();
+					InputStream is = resource.getInputStream();
 					
 					ObjectMapper objMapper = new ObjectMapper();
-					List<MarketStatus> msList = objMapper.readValue(file, new TypeReference<List<MarketStatus>>(){});
+					List<MarketStatus> msList = objMapper.readValue(is, new TypeReference<List<MarketStatus>>(){});
 					
 					List<MarketStatusEntity> mseList = new ArrayList<>();
 					for (MarketStatus ms : msList) {
