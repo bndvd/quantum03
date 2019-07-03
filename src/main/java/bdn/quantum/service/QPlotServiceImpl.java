@@ -137,6 +137,7 @@ public class QPlotServiceImpl implements QPlotService {
 			return null;
 		}
 		
+		
 		// scale all series so that userPortfolioSeries end value matches actual portfolio end value
 		// this is to reduce the deltas between actual portfolio performance and simulated portfolio performance
 		Iterable<Asset> actualUserPortfolio = assetService.getAssets();
@@ -153,6 +154,7 @@ public class QPlotServiceImpl implements QPlotService {
 		cashSeries.scale(scalar);
 		benchmarkSeries.scale(scalar);
 		userPotfolioSeries.scale(scalar);
+		
 
 		result.addSeries(cashSeries);
 		result.addSeries(benchmarkSeries);

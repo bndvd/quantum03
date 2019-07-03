@@ -151,8 +151,9 @@ public class MarketDataServiceImpl implements MarketDataService {
 			mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
 		}
 		
-		// sometimes getChart does not return today's data; when this happens we'll use getPrice to get the latest price
-		// for today, however, will not store it in the repository.
+		// Under certain conditions (it appears this happens before 7 pm CST) getChart does not return today's data and today
+		// is not considered a trade day; when this happens we'll use getPrice to get the latest price for today
+		// however, will not store it in the repository.
 		MarketQuote todaysQuote = null;
 		String todaysDateStr = ModelUtils.localDateToString(LocalDate.now());
 		
@@ -197,6 +198,11 @@ public class MarketDataServiceImpl implements MarketDataService {
 						BigDecimal todaysLastPrice = getLastPrice(symbol);
 						todaysQuote = new MarketQuote(symbol, todaysDateStr, todaysLastPrice);
 					}
+				}
+				// if today is not considered a trade day (yet), use getPrice to get a quote we can use temporarily
+				else if (nextDate.equals(todaysDateStr)) {
+					BigDecimal todaysLastPrice = getLastPrice(symbol);
+					todaysQuote = new MarketQuote(symbol, todaysDateStr, todaysLastPrice);
 				}
 			}
 			if (newDataAdded) {
@@ -257,8 +263,14 @@ public class MarketDataServiceImpl implements MarketDataService {
 			}
 			
 			// load initial trade day data into cache
+			String todayStr = ModelUtils.localDateToString(LocalDate.now());
 			tradeDayMapCache = new HashMap<>();
 			for (MarketStatusEntity mse : mseListInRepository) {
+				// skip adding today's date, since the previous for today may have been inaccurate
+				// (e.g., it appears IEX does not acknowledge today as trade day until after 7 pm CST)
+				if (mse.getMktDate().equals(todayStr)) {
+					continue;
+				}
 				tradeDayMapCache.put(mse.getMktDate(), mse.getOpenStatus());
 			}
 		}
