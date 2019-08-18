@@ -16,7 +16,7 @@ public class IEXConstants {
 	public static final int REQ_TRADEDAYS = 3;
 	
 	public static final String[] REQ_ENDPOINT = {
-		"/stock/{symbol}/price",
+		"/stock/{symbol}/quote/latestPrice",
 		"/stock/{symbol}/chart/date/{date}",
 		"/stock/{symbol}/chart/max",
 		"/ref-data/us/dates/trade/last/{days}"

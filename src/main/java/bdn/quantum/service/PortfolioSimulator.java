@@ -80,14 +80,22 @@ public class PortfolioSimulator {
 			symbolToChartListMap.put(symbols[i], l);
 		}
 		// make sure all chart lists are of equal lengths
+		boolean listsUnequalLengths = false;
+		StringBuffer listLengths = new StringBuffer();
 		int chartListLength = symbolToChartListMap.get(symbols[0]).size();
 		if (chartListLength < 1) {
 			throw new PortfolioSimulationException("Zero chart list length");
 		}
+		listLengths.append(symbols[0]).append(":").append(chartListLength);
 		for (int i = 1; i < symbols.length; i++) {
-			if (chartListLength != symbolToChartListMap.get(symbols[i]).size()) {
-				throw new PortfolioSimulationException("Chart lists of unequal lengths");
+			int thisChartLength = symbolToChartListMap.get(symbols[i]).size();
+			if (chartListLength != thisChartLength) {
+				listsUnequalLengths = true;
 			}
+			listLengths.append(" ").append(symbols[i]).append(":").append(thisChartLength);
+		}
+		if (listsUnequalLengths) {
+			throw new PortfolioSimulationException("Chart lists of unequal lengths - " + listLengths.toString());
 		}
 		
 		int numSecurities = symbols.length;

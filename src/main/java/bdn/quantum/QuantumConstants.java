@@ -75,7 +75,7 @@ public final class QuantumConstants {
 	
 	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INIT = new BigDecimal(10000);
 	public static final BigDecimal SIMULATED_TARGET_PRINCIPAL_INCR = new BigDecimal(20);
-	public static final long SIMULATED_TARGET_WINDOW_MONTHS = 60;
+	public static final long SIMULATED_TARGET_WINDOW_MONTHS = 84;
 	public static final Integer SIMULATED_TARGET_PRINCIPAL_INCR_FREQ = PortfolioSimulator.INCR_PRINCIPAL_FREQ_DAILY;
 	
 	

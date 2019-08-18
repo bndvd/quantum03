@@ -190,7 +190,14 @@ public class MarketDataServiceImpl implements MarketDataService {
 						MarketQuoteEntity mqe = new MarketQuoteEntity(null, symbol, cf.getDate(), cf.getuClose(), cf.getuOpen(),
 								cf.getuHigh(), cf.getuLow(), cf.getuVolume(), cf.getClose(), cf.getOpen(), cf.getHigh(),
 								cf.getLow(), cf.getVolume());
-						marketQuoteRepository.save(mqe);
+						// before saving make sure we don't already have it saved (should not happen, but a precaution)
+						// if already saved, update
+						if (! marketQuoteRepository.existsBySymbolAndMktDate(symbol, cf.getDate())) {
+							marketQuoteRepository.save(mqe);
+						}
+						else {
+							System.err.println("MarketDataServiceImpl.loadQuoteChain - Refused to save quote already in db - "+symbol+":"+cf.getDate());
+						}
 						newDataAdded = true;
 					}
 					// if we were unable to get today's quote, use getPrice to get a quote we can use temporarily
@@ -215,10 +222,17 @@ public class MarketDataServiceImpl implements MarketDataService {
 				}
 			}
 		}
-		// sort by date
+		// build data into array and ensure there are no duplicates (again, should not happen, but a precaution)
+		String lastDateAdded = null;
 		result = new ArrayList<>();
 		for (MarketQuoteEntity mqe : mqeListInRepository) {
+			String nextDate = mqe.getMktDate();
+			if (lastDateAdded != null && lastDateAdded.equals(nextDate)) {
+				System.err.println("MarketDataServiceImpl.loadQuoteChain - Found duplicate date entry & skipping add - "+mqe.getSymbol()+":"+nextDate);
+				continue;
+			}
 			result.add(new MarketQuote(mqe));
+			lastDateAdded = nextDate;
 		}
 		// if today's data was missing, and we have temporary data, add it
 		if (todaysQuote != null) {

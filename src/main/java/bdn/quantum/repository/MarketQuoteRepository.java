@@ -9,5 +9,6 @@ public interface MarketQuoteRepository extends CrudRepository<MarketQuoteEntity,
 	Iterable<MarketQuoteEntity> findBySymbolOrderByMktDateAsc(String symbol);
 	Iterable<MarketQuoteEntity> findBySymbolAndMktDateIsGreaterThanOrderByMktDateAsc(String symbol, String mktDate);
 	Iterable<MarketQuoteEntity> findBySymbolAndMktDate(String symbol, String mktDate);
+	Boolean existsBySymbolAndMktDate(String symbol, String mktDate);
 	
 }
