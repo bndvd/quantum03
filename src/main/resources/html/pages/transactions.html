@@ -49,6 +49,7 @@
 				<th class="w3-center-align">Type</th>
 				<th class="w3-right-align">Tran Shares</th>
 				<th class="w3-right-align">Price</th>
+				<th class="w3-right-align">Tran Value</th>
 				<th class="w3-right-align">Tot Shares</th>
 				<th class="w3-right-align">Principal</th>
 				<th class="w3-right-align">Value</th>
@@ -63,6 +64,7 @@
 				<td class="w3-center-align">{{ t.type }}</td>
 				<td class="w3-right-align">{{ t.shares }}</td>
 				<td class="w3-right-align">{{ t.price | currency : "$" : 4 }}</td>
+				<td class="w3-right-align">{{ t.tranValue | currency }}</td>
 				<td class="w3-right-align">{{ t.totalShares }}</td>
 				<td class="w3-right-align">{{ t.principal | currency }}</td>
 				<td class="w3-right-align">{{ t.value | currency }}</td>

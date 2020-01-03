@@ -17,6 +17,7 @@ public class Transaction implements AbstractTransaction {
 	private String type;
 	private BigDecimal shares;
 	private BigDecimal price;
+	private BigDecimal tranValue = BigDecimal.ZERO;
 	private BigDecimal totalShares = BigDecimal.ZERO;
 	private BigDecimal principal = BigDecimal.ZERO;
 	private BigDecimal value = BigDecimal.ZERO;
@@ -107,6 +108,14 @@ public class Transaction implements AbstractTransaction {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public BigDecimal getTranValue() {
+		return tranValue;
+	}
+
+	public void setTranValue(BigDecimal tranValue) {
+		this.tranValue = tranValue;
 	}
 
 	public BigDecimal getTotalShares() {

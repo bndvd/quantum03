@@ -290,7 +290,7 @@ public class AssetServiceImpl implements AssetService {
 	private Position getPosition(Integer secId, boolean includeTransactions) {
 		Security s = getSecurity(secId);
 		Position result = Position.EMPTY_POSITION;
-
+	
 		if (s != null) {
 			BigDecimal taxRate = BigDecimal.ZERO;
 			String taxRateStr = keyvalService.getKeyvalStr(QuantumProperties.PROP_PREFIX + QuantumProperties.TAX_RATE);
@@ -311,24 +311,31 @@ public class AssetServiceImpl implements AssetService {
 			BigDecimal shares = BigDecimal.ZERO;
 			BigDecimal realizedGain = BigDecimal.ZERO;
 			BigDecimal realizedGainYtd = BigDecimal.ZERO;
-
+	
 			Iterable<Transaction> tranIter = transactionService.getTransactionsForSecurity(secId);
 			List<Transaction> transactions = new ArrayList<>();
 			tranIter.forEach(transactions::add);
 			transactions.sort(transactionComparator);
 			for (Transaction t : transactions) {
-				if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
-					tPrice = t.getPrice();
+				BigDecimal tValue = BigDecimal.ZERO;
+				if (t.getPrice() == null || t.getShares() == null) {
+					System.err.println("AssetServiceImpl::getPosition - ERROR: encountered transaction with null price or shares. Skipping calculations...");
+					continue;
+				}
+				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
 					BigDecimal tShares = t.getShares();
 					BigDecimal principalAdd = t.getPrice().multiply(tShares);
 					principal = principal.add(principalAdd);
 					totalPrincipal = totalPrincipal.add(principalAdd);
 					shares = shares.add(tShares);
+					
+					tValue = t.getPrice().multiply(t.getShares());
+					// tPrice will be used for future dividend transactions as well as this transaction
+					tPrice = t.getPrice();
 				}
 				// using Average Cost Basis for computing cost/profit and deducting from
 				// principal
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
-					tPrice = t.getPrice();
 					BigDecimal averageCostPerShare = principal.divide(shares,
 							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
@@ -338,9 +345,12 @@ public class AssetServiceImpl implements AssetService {
 					if (t.isInCurrentYear()) {
 						realizedGainYtd = realizedGainYtd.add(transactionProfit);
 					}
-
+	
 					principal = principal.subtract(costOfSharesSold);
 					shares = shares.subtract(t.getShares());
+					
+					tValue = t.getPrice().multiply(t.getShares());
+					tPrice = t.getPrice();
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
 					// do not update tPrice - since we want to use tPrice from previous transaction
@@ -351,16 +361,19 @@ public class AssetServiceImpl implements AssetService {
 					if (t.isInCurrentYear()) {
 						realizedGainYtd = realizedGainYtd.add(dividend);
 					}
+					
+					tValue = dividend;
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SPLIT)) {
-					tPrice = t.getPrice();
 					shares = shares.multiply(t.getShares());
+					tPrice = t.getPrice();
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_CONVERSION)) {
-					tPrice = t.getPrice();
 					shares = t.getShares();
+					tPrice = t.getPrice();
 				}
 				// update total shares/value/realizedGain as of this transaction in Transaction
+				t.setTranValue(tValue);
 				BigDecimal value = tPrice.multiply(shares);
 				t.setTotalShares(shares);
 				t.setPrincipal(principal);
@@ -368,7 +381,7 @@ public class AssetServiceImpl implements AssetService {
 				t.setRealizedGain(realizedGain);
 				t.setUnrealizedGain(value.subtract(principal));
 			}
-
+	
 			BigDecimal lastStockPrice = BigDecimal.ZERO;
 			try {
 				lastStockPrice = marketDataService.getLastPrice(symbol);
@@ -385,7 +398,7 @@ public class AssetServiceImpl implements AssetService {
 			
 			BigDecimal lastValue = lastStockPrice.multiply(shares);
 			BigDecimal unrealizedGain = lastValue.subtract(principal);
-
+	
 			BigDecimal realizedGainYtdTax = realizedGainYtd.multiply(taxRate);
 			
 			List<Transaction> transactionList = null;
@@ -396,7 +409,7 @@ public class AssetServiceImpl implements AssetService {
 			result = new Position(secId, symbol, principal, totalPrincipal, shares, realizedGain, realizedGainYtd,
 					realizedGainYtdTax, unrealizedGain, lastStockPrice, lastValue, transactionList);
 		}
-
+	
 		return result;
 	}
 

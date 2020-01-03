@@ -45,7 +45,7 @@ app.controller("transactionsCtrl", function($scope, $http) {
 	);
 	
 	//
-	// Load the transactions for a given Position
+	// Load the transactions for all Positions or a given Position
 	//
 	$scope.loadPositionForPageIndex = function(pageIndex) {
 		$scope.positionSelectedPageIndex = pageIndex;
