@@ -9,7 +9,6 @@ public interface MarketDataService {
 
 	public void configChanged();
 	public BigDecimal getLastPrice(String symbol);
-	public Iterable<QChart> getChartChain(String symbol);
 	public Iterable<QChart> getChartChain(String symbol, LocalDate startDate);
 	
 }

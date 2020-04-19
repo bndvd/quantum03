@@ -80,11 +80,6 @@ public class MarketDataServiceImpl implements MarketDataService {
 	}
 	
 	@Override
-	public Iterable<QChart> getChartChain(String symbol) {
-		return getChartChain(symbol, null);
-	}
-	
-	@Override
 	public Iterable<QChart> getChartChain(String symbol, LocalDate startDate) {
 		List<QChart> qChartList = null;
 		
@@ -136,7 +131,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 		loadTradeDayCache();
 		
 		// read quote history from database
-		Iterable<MarketQuoteEntity> mqeListInRepository = null;
+		List<MarketQuoteEntity> mqeListInRepository = null;
 		if (dayBeforeStartDate == null) {
 			mqeListInRepository = marketQuoteRepository.findBySymbolOrderByMktDateAsc(symbol);
 		}
@@ -230,6 +225,11 @@ public class MarketDataServiceImpl implements MarketDataService {
 				todaysQuote = new MarketQuote(symbol, todaysDateStr, todaysLastPrice);
 			}
 		}
+		
+		// adjust the close values for a recent stock split, which would not be reflected in historic values 
+		// in the repository
+		adjustMarketQuoteChainForSplits(mqeListInRepository);
+		
 		// build data into array and ensure there are no duplicates (again, should not happen, but a precaution)
 		String lastDateAdded = null;
 		result = new ArrayList<>();
@@ -347,6 +347,12 @@ public class MarketDataServiceImpl implements MarketDataService {
 			
 			marketQuoteRepository.saveAll(mqeList);
 		}
+	}
+	
+	private void adjustMarketQuoteChainForSplits(List<MarketQuoteEntity> mqeList) {
+		// To be implemented when there is a stock split
+		// there is currently no good way to identify the split event 
+		return;
 	}
 	
 }

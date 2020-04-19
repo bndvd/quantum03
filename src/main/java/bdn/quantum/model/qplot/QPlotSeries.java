@@ -1,8 +1,11 @@
 package bdn.quantum.model.qplot;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+
+import bdn.quantum.QuantumConstants;
 
 public class QPlotSeries {
 
@@ -43,12 +46,21 @@ public class QPlotSeries {
 		points.add(point);
 	}
 	
-	public void scale(BigDecimal scalar) {
+	public void applyProgressiveScale(BigDecimal scalar) {
 		if (scalar == null || points == null) {
 			return;
 		}
-		for (QPlotPoint p : points) {
-			p.scale(scalar);
+		
+		int numPoints = points.size();
+		BigDecimal pointSpaces = new BigDecimal(numPoints -1 );
+		BigDecimal scalarAdjustmentValue = scalar.subtract(BigDecimal.ONE);
+		
+		for (int i = 1; i < numPoints; i++) {
+			BigDecimal pointPositionRatio = new BigDecimal(i).divide(pointSpaces, 
+									QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
+			BigDecimal progressiveScalar = scalarAdjustmentValue.multiply(pointPositionRatio).add(BigDecimal.ONE);
+			QPlotPoint p = points.get(i);
+			p.scale(progressiveScalar);
 		}
 	}
 	

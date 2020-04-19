@@ -151,9 +151,9 @@ public class QPlotServiceImpl implements QPlotService {
 		BigDecimal scalar = actualUserPortfolioLastValue.divide(simulatedUserPortfolioLastValue,
 				QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 		
-		cashSeries.scale(scalar);
-		benchmarkSeries.scale(scalar);
-		userPotfolioSeries.scale(scalar);
+		// scale only security series, not the cash series (since it's exact)
+		benchmarkSeries.applyProgressiveScale(scalar);
+		userPotfolioSeries.applyProgressiveScale(scalar);
 		
 
 		result.addSeries(cashSeries);

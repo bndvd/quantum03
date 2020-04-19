@@ -42,6 +42,8 @@ public class MarketQuoteEntity {
 
 	@Column(name = QuantumConstants.MKTQUOTE_CLOSE)
 	private BigDecimal close;
+	// calculated adjusted close based on possible recent stock splits
+	private BigDecimal adjustedClose = null;
 
 	@Column(name = QuantumConstants.MKTQUOTE_OPEN)
 	private BigDecimal open;
@@ -136,9 +138,20 @@ public class MarketQuoteEntity {
 	public BigDecimal getClose() {
 		return close;
 	}
+	
+	public BigDecimal getAdjustedClose() {
+		if (adjustedClose == null) {
+			return getClose();
+		}
+		return adjustedClose;
+	}
 
 	public void setClose(BigDecimal close) {
 		this.close = close;
+	}
+	
+	public void setAdjustedClose(BigDecimal adjustedClose) {
+		this.adjustedClose = adjustedClose;
 	}
 
 	public BigDecimal getOpen() {

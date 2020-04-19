@@ -20,7 +20,7 @@ public class MarketQuote {
 	public MarketQuote(MarketQuoteEntity mqe) {
 		this.symbol = mqe.getSymbol();
 		this.mktDate = mqe.getMktDate();
-		this.quote = mqe.getClose();
+		this.quote = mqe.getAdjustedClose();
 	}
 
 
