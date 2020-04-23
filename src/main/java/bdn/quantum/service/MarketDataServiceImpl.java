@@ -317,7 +317,9 @@ public class MarketDataServiceImpl implements MarketDataService {
 			}
 			
 			// set open status to true for all days returned by IEX service
-			Iterable<IEXTradeDay> tdIter = iexCloudService.getTradeDays(newDatesList.size());
+			// Note: we fetch the # of days equal to the size of the new dates list plus 1, since
+			// we removed today from the list, but we need to count today in the # of days to go back
+			Iterable<IEXTradeDay> tdIter = iexCloudService.getTradeDays(newDatesList.size()+1);
 			for (IEXTradeDay td : tdIter) {
 				String dateOpen = td.getDate();
 				MarketStatusEntity mse = dateStrToMSE.get(dateOpen);
