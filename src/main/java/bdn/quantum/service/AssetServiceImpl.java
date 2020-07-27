@@ -317,6 +317,7 @@ public class AssetServiceImpl implements AssetService {
 			tranIter.forEach(transactions::add);
 			transactions.sort(transactionComparator);
 			for (Transaction t : transactions) {
+				BigDecimal tPrincipalDelta = BigDecimal.ZERO;
 				BigDecimal tValue = BigDecimal.ZERO;
 				if (t.getPrice() == null || t.getShares() == null) {
 					System.err.println("AssetServiceImpl::getPosition - ERROR: encountered transaction with null price or shares. Skipping calculations...");
@@ -324,9 +325,9 @@ public class AssetServiceImpl implements AssetService {
 				}
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
 					BigDecimal tShares = t.getShares();
-					BigDecimal principalAdd = t.getPrice().multiply(tShares);
-					principal = principal.add(principalAdd);
-					totalPrincipal = totalPrincipal.add(principalAdd);
+					tPrincipalDelta = t.getPrice().multiply(tShares);
+					principal = principal.add(tPrincipalDelta);
+					totalPrincipal = totalPrincipal.add(tPrincipalDelta);
 					shares = shares.add(tShares);
 					
 					tValue = t.getPrice().multiply(t.getShares());
@@ -338,15 +339,16 @@ public class AssetServiceImpl implements AssetService {
 				else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
 					BigDecimal averageCostPerShare = principal.divide(shares,
 							QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
-					BigDecimal costOfSharesSold = t.getShares().multiply(averageCostPerShare);
-					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).subtract(costOfSharesSold);
+					// subtract from zero to make the delta negative in case of a SELL
+					tPrincipalDelta = BigDecimal.ZERO.subtract(t.getShares().multiply(averageCostPerShare));
+					BigDecimal transactionProfit = (t.getPrice().multiply(t.getShares())).add(tPrincipalDelta);
 					realizedGain = realizedGain.add(transactionProfit);
 					// if transaction is in this year, add to realized gain YTD
 					if (t.isInCurrentYear()) {
 						realizedGainYtd = realizedGainYtd.add(transactionProfit);
 					}
 	
-					principal = principal.subtract(costOfSharesSold);
+					principal = principal.add(tPrincipalDelta);
 					shares = shares.subtract(t.getShares());
 					
 					tValue = t.getPrice().multiply(t.getShares());
@@ -377,6 +379,7 @@ public class AssetServiceImpl implements AssetService {
 				BigDecimal value = tPrice.multiply(shares);
 				t.setTotalShares(shares);
 				t.setPrincipal(principal);
+				t.setPrincipalDelta(tPrincipalDelta);
 				t.setValue(value);
 				t.setRealizedGain(realizedGain);
 				t.setUnrealizedGain(value.subtract(principal));

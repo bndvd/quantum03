@@ -188,12 +188,13 @@ public class QPlotServiceImpl implements QPlotService {
 				
 				while (nextTranLocalDate.isBefore(ld) || nextTranLocalDate.isEqual(ld)) {
 					
-					// adjust cash value by value bought or sold
+					// adjust cash value by value bought / sold / received as dividend
 					if (t.getType().equals(QuantumConstants.TRAN_TYPE_BUY)) {
 						BigDecimal tranValue = t.getShares().multiply(t.getPrice());
 						cashDelta = cashDelta.add(tranValue);
 					}
-					else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL)) {
+					else if (t.getType().equals(QuantumConstants.TRAN_TYPE_SELL) || 
+									t.getType().equals(QuantumConstants.TRAN_TYPE_DIVIDEND)) {
 						BigDecimal tranValue = t.getShares().multiply(t.getPrice());
 						cashDelta = cashDelta.subtract(tranValue);
 					}
@@ -211,6 +212,14 @@ public class QPlotServiceImpl implements QPlotService {
 			
 			QPlotPoint point = new QPlotPoint(Integer.valueOf(pointId), ld, portfolioCash);
 			result.addPoint(point);
+		}
+		
+		// normalize all negative cash values to zero for usability simplicity
+		List<QPlotPoint> points = result.getPoints();
+		for (QPlotPoint p : points) {
+			if (p != null && p.getValue().compareTo(BigDecimal.ZERO) < 0) {
+				p.setValue(BigDecimal.ZERO);
+			}
 		}
 		
 		return result;

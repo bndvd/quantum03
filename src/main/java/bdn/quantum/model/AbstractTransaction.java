@@ -9,5 +9,6 @@ public interface AbstractTransaction {
 	public String getType();
 	public BigDecimal getShares();
 	public BigDecimal getPrice();
+	public BigDecimal getPrincipalDelta();
 
 }

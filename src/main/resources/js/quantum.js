@@ -28,6 +28,10 @@ app.config(function($routeProvider, $httpProvider) {
         templateUrl : "pages/manage.html",
         controller : "manageCtrl"
     })
+    .when("/help", {
+        templateUrl : "pages/help.html",
+        controller : "helpCtrl"
+    })
     .otherwise("/");
     
     $httpProvider.defaults.headers.common["X-Requested-With"] = 'XMLHttpRequest';

@@ -20,6 +20,7 @@ public class Transaction implements AbstractTransaction {
 	private BigDecimal tranValue = BigDecimal.ZERO;
 	private BigDecimal totalShares = BigDecimal.ZERO;
 	private BigDecimal principal = BigDecimal.ZERO;
+	private BigDecimal principalDelta = BigDecimal.ZERO;
 	private BigDecimal value = BigDecimal.ZERO;
 	private BigDecimal realizedGain = BigDecimal.ZERO;
 	private BigDecimal unrealizedGain = BigDecimal.ZERO;
@@ -150,14 +151,23 @@ public class Transaction implements AbstractTransaction {
 		this.unrealizedGain = unrealizedGain;
 	}
 
-	public BigDecimal getPrincipal() {
-		return principal;
-	}
-
 	public void setPrincipal(BigDecimal principal) {
 		this.principal = principal;
 	}
 	
+	public BigDecimal getPrincipal() {
+		return principal;
+	}
+
+	public void setPrincipalDelta(BigDecimal principalDelta) {
+		this.principalDelta = principalDelta;
+	}
+	
+	@Override
+	public BigDecimal getPrincipalDelta() {
+		return principalDelta;
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
