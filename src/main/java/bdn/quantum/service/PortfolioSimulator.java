@@ -36,13 +36,12 @@ public class PortfolioSimulator {
 	//
 	public HashMap<String, List<AbstractTransaction>> simulate(BigDecimal initPrincipal, BigDecimal incrPrincipal,
 			Integer incrFrequency, boolean wholeShares, List<String> symbolList,
-			HashMap<String, Iterable<QChart>> symbolToChartChainMap, HashMap<String, BigDecimal> symbolToTargetRatioMap)
+			HashMap<String, List<QChart>> symbolToChartChainMap, HashMap<String, BigDecimal> symbolToTargetRatioMap)
 			throws PortfolioSimulationException {
 		
 		if (initPrincipal == null || incrPrincipal == null || incrFrequency == null || symbolList == null ||
 				symbolList.isEmpty() || symbolToTargetRatioMap == null ||
-				symbolToTargetRatioMap.isEmpty() || symbolToChartChainMap == null || symbolToChartChainMap.isEmpty() ||
-				symbolToTargetRatioMap.size() != symbolToChartChainMap.size()) {
+				symbolToTargetRatioMap.isEmpty() || symbolToChartChainMap == null || symbolToChartChainMap.isEmpty()) {
 			throw new PortfolioSimulationException("Null, empty, or non-matching parameters");
 		}
 		
@@ -70,25 +69,16 @@ public class PortfolioSimulator {
 			targets[i] = nextTR.divide(sumTargetRatios, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 		}
 		
-		// Put Chart iterables into lists
-		HashMap<String, List<QChart>> symbolToChartListMap = new HashMap<>();
-		for (int i = 0; i < symbols.length; i++) {
-			List<QChart> l = new ArrayList<>();
-			for (QChart c : symbolToChartChainMap.get(symbols[i])) {
-				l.add(c);
-			}
-			symbolToChartListMap.put(symbols[i], l);
-		}
 		// make sure all chart lists are of equal lengths
 		boolean listsUnequalLengths = false;
 		StringBuffer listLengths = new StringBuffer();
-		int chartListLength = symbolToChartListMap.get(symbols[0]).size();
+		int chartListLength = symbolToChartChainMap.get(symbols[0]).size();
 		if (chartListLength < 1) {
 			throw new PortfolioSimulationException("Zero chart list length");
 		}
 		listLengths.append(symbols[0]).append(":").append(chartListLength);
 		for (int i = 1; i < symbols.length; i++) {
-			int thisChartLength = symbolToChartListMap.get(symbols[i]).size();
+			int thisChartLength = symbolToChartChainMap.get(symbols[i]).size();
 			if (chartListLength != thisChartLength) {
 				listsUnequalLengths = true;
 			}
@@ -114,11 +104,11 @@ public class PortfolioSimulator {
 			
 			// Add transactions for initial principal, if non-zero
 			if (! BigDecimal.ZERO.equals(initPrincipal)) {
-				LocalDate ld = symbolToChartListMap.get(symbols[0]).get(0).getLocalDate();
+				LocalDate ld = symbolToChartChainMap.get(symbols[0]).get(0).getLocalDate();
 				Date date = DateUtils.asDate(ld);
 				
 				for (int i = 0; i < numSecurities; i++) {
-					BigDecimal sharePrice = symbolToChartListMap.get(symbols[i]).get(0).getClose();
+					BigDecimal sharePrice = symbolToChartChainMap.get(symbols[i]).get(0).getClose();
 					BigDecimal value = initPrincipal.multiply(targets[i]);
 					BigDecimal sharesToBuy = value.divide(sharePrice, QuantumConstants.NUM_DECIMAL_PLACES_PRECISION, RoundingMode.HALF_UP);
 					
@@ -143,7 +133,7 @@ public class PortfolioSimulator {
 						
 				// Add transactions for incremental principal
 				for (int j = 0; j < chartListLength; j++) {
-					LocalDate ld = symbolToChartListMap.get(symbols[0]).get(j).getLocalDate();
+					LocalDate ld = symbolToChartChainMap.get(symbols[0]).get(j).getLocalDate();
 					
 					if (INCR_PRINCIPAL_FREQ_DAILY.equals(incrFrequency)) {
 						// add incremental principal to wallet
@@ -151,7 +141,7 @@ public class PortfolioSimulator {
 						
 						Date date = DateUtils.asDate(ld);
 						for (int i = 0; i < numSecurities; i++) {
-							sharePrices[i] = symbolToChartListMap.get(symbols[i]).get(j).getClose();
+							sharePrices[i] = symbolToChartChainMap.get(symbols[i]).get(j).getClose();
 						}
 						
 						int indexSecurityToBuy = getIndexOfMaxNegativeTargetRatioDisparity(targets, shareTallies, sharePrices);

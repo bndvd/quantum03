@@ -25,7 +25,7 @@ public class Position {
 	private BigDecimal unrealizedGain;
 	private BigDecimal lastPrice;
 	private BigDecimal lastValue;
-	private List<Transaction> transactions;
+	private List<Transaction> transactions;  // sorted from oldest to newest
 
 	public Position() {
 	}
@@ -109,6 +109,7 @@ public class Position {
 		return transactions;
 	}
 
+	// Must be sorted from oldest to newest
 	public void setTransactions(List<Transaction> transactions) {
 		this.transactions = transactions;
 	}

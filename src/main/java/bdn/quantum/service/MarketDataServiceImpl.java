@@ -80,7 +80,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 	}
 	
 	@Override
-	public Iterable<QChart> getChartChain(String symbol, LocalDate startDate) {
+	public List<QChart> getChartChain(String symbol, LocalDate startDate) {
 		List<QChart> qChartList = null;
 		
 		String querySymbol = symbol;

@@ -29,6 +29,7 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 	$scope.propQPlotBenchmarkSymbol = null;
 	$scope.propQPlotSimTargetPrinicipalInit = null;
 	$scope.propQPlotSimTargetPrinicipalIncr = null;
+	$scope.propQPlotSimTargetMonths = null;
 	$scope.propQPlotSimTargetWholeShares = false;
 	
 	
@@ -59,6 +60,10 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 					$scope.propQPlotSimTargetPrinicipalIncr = $scope.manageKeyvalMap["pr.qpstpincr"];
 					if ($scope.propQPlotSimTargetPrinicipalIncr == null) {
 						$scope.propQPlotSimTargetPrinicipalIncr = 20;
+					}
+					$scope.propQPlotSimTargetMonths = $scope.manageKeyvalMap["pr.qpstmos"];
+					if ($scope.propQPlotSimTargetMonths == null) {
+						$scope.propQPlotSimTargetMonths = 0;
 					}
 					var propWholeSharesStr = $scope.manageKeyvalMap["pr.qpstpwh"];
 					if (propWholeSharesStr == $scope.TRUE_STR) {
@@ -319,6 +324,12 @@ app.controller("manageCtrl", function($rootScope, $scope, $http) {
 			$scope.propQPlotSimTargetPrinicipalIncr = 0;
 		}
 		saveSetting("pr.qpstpincr", $scope.propQPlotSimTargetPrinicipalIncr);
+		
+		// save Chart Sim Target Months setting
+		if (! isFinite($scope.propQPlotSimTargetMonths)) {
+			$scope.propQPlotSimTargetMonths = 0;
+		}
+		saveSetting("pr.qpstmos", $scope.propQPlotSimTargetMonths);
 		
 		var propWholeSharesStr = $scope.FALSE_STR;
 		if ($scope.propQPlotSimTargetWholeShares == true) {

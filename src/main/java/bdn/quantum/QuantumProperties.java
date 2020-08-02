@@ -16,6 +16,7 @@ public final class QuantumProperties {
 	public static final String QPLOT_BENCHMARK_SYMBOL = "qpbs";
 	public static final String QPLOT_SIM_TARGET_PRINCIPAL_INIT = "qpstpinit";
 	public static final String QPLOT_SIM_TARGET_PRINCIPAL_INCR = "qpstpincr";
+	public static final String QPLOT_SIM_TARGET_MONTHS = "qpstmos";
 	public static final String QPLOT_SIM_TARGET_WHOLE_SHARES = "qpstpwh";
 	
 	public static final String READ_FUND_PROXIES = "readFundProxies";

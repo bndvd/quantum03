@@ -13,6 +13,9 @@ import java.util.stream.Stream;
 
 public class ModelUtils {
 
+	public static final int CALC_EARLIEST_DATE = 1;
+	public static final int CALC_LATEST_DATE = 2;
+	
 	private static final DateTimeFormatter CHART_LOCALDATE_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private static final DateFormat CHART_DATE_DF = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -90,14 +93,23 @@ public class ModelUtils {
 		return result;
 	}
 
-	public static Date getEarliestDate(List<Date> dateList) {
+	public static Date getCalculatedDate(List<Date> dateList, int calcType) {
 		Date result = null;
 		if (dateList != null && dateList.size() > 0) {
 			result = dateList.get(0);
 			for (int i = 1; i < dateList.size(); i++) {
 				Date nextDate = dateList.get(i);
-				if (nextDate.before(result)) {
-					result = nextDate; 
+				switch (calcType) {
+				case CALC_EARLIEST_DATE:
+					if (nextDate.before(result)) {
+						result = nextDate; 
+					}
+					break;
+				case CALC_LATEST_DATE:
+					if (nextDate.after(result)) {
+						result = nextDate; 
+					}
+					break;
 				}
 			}
 		}

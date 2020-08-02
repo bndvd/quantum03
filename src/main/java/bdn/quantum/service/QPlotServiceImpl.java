@@ -77,26 +77,13 @@ public class QPlotServiceImpl implements QPlotService {
 						tranDateList.add(p.getTransactions().get(0).getTranDate());
 					}
 				}
-				Date earliestTranDate = ModelUtils.getEarliestDate(tranDateList);
+				Date earliestTranDate = ModelUtils.getCalculatedDate(tranDateList, ModelUtils.CALC_EARLIEST_DATE);
 				startDate = ModelUtils.stringToLocalDate(ModelUtils.dateToString(earliestTranDate));
 				
-				Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
-				List<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
-				
-				if (benchmarkChartChain != null && dateChain != null) {
-					result = buildStdGrowthChart(dateChain, positionList, benchmarkChartChain);
-				}
+				result = buildStdGrowthChart(positionList, benchmarkSymbol, startDate);
 			}
 			else if (QuantumConstants.PLOT_SIMULATED_TARGET.equals(plotName)) {
-				// for simulated portfolio, we'll do only last 10 years (to ensure all security plots are of equal length)
-				LocalDate startDate = LocalDate.now().minusMonths(QuantumConstants.SIMULATED_TARGET_WINDOW_MONTHS);
-				
-				Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
-				List<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
-				
-				if (benchmarkChartChain != null && dateChain != null) {
-					result = buildSimTargetChart(dateChain, benchmarkSymbol, benchmarkChartChain);
-				}
+				result = buildSimTargetChart(benchmarkSymbol);
 			}
 			
 			if (result != null) {
@@ -112,9 +99,18 @@ public class QPlotServiceImpl implements QPlotService {
 		qPlotCache.clear();
 	}
 
-	private QPlot buildStdGrowthChart(List<LocalDate> dateChain, Iterable<Position> positionIter,
-						Iterable<QChart> benchmarkChartChain) {
-		if (dateChain == null || positionIter == null || benchmarkChartChain == null) {
+	private QPlot buildStdGrowthChart(Iterable<Position> positionIter, String benchmarkSymbol, LocalDate startDate) {
+		if (positionIter == null || benchmarkSymbol == null || startDate == null) {
+			return null;
+		}
+		
+		Iterable<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, startDate);
+		if (benchmarkChartChain == null) {
+			return null;
+		}
+
+		List<LocalDate> dateChain = buildDateChain(benchmarkChartChain);
+		if (dateChain == null) {
 			return null;
 		}
 		
@@ -386,14 +382,10 @@ public class QPlotServiceImpl implements QPlotService {
 	
 	
 	// Simulated Target Portfolio Chart
-	private QPlot buildSimTargetChart(List<LocalDate> dateChain, String benchmarkSymbol, Iterable<QChart> benchmarkChartChain) {
-		if (dateChain == null || benchmarkSymbol == null || benchmarkChartChain == null) {
+	private QPlot buildSimTargetChart(String benchmarkSymbol) {
+		if (benchmarkSymbol == null) {
 			return null;
 		}
-		
-		HashMap<String, List<AbstractTransaction>> symbolToTransactionsMap = null;
-		List<String> symbolList = new ArrayList<>();
-		HashMap<String, BigDecimal> symbolToTargetRatioMap = new HashMap<>();
 		
 		// Read in initial and incremental principal values from settings; if not saved, fall back on defaults
 		BigDecimal initPrincipal = null;
@@ -440,13 +432,130 @@ public class QPlotServiceImpl implements QPlotService {
 			wholeShares = true;
 		}
 		
+		// Read setting for preferred # months for the simulated portfolio (if 0, calculate our own window)
+		int simTargetWindowMonths = 0;
+		key = new StringBuffer();
+		key.append(QuantumProperties.PROP_PREFIX).append(QuantumProperties.QPLOT_SIM_TARGET_MONTHS);
+		valueInProp = keyvalService.getKeyvalStr(key.toString());
+		if (valueInProp != null && ! valueInProp.trim().equals("")) {
+			try {
+				simTargetWindowMonths = Integer.parseInt(valueInProp.trim());
+				if (simTargetWindowMonths < 0) {
+					simTargetWindowMonths = 0;
+				}
+			}
+			catch (Exception exc) {
+				System.err.println(exc.getMessage());
+				simTargetWindowMonths = 0;
+			}
+		}
+		LocalDate configuredStartDate = null;
+		if (simTargetWindowMonths > 0) {
+			configuredStartDate = LocalDate.now().minusMonths(simTargetWindowMonths);
+		}
 		
+		
+		HashMap<String, List<QChart>> symbolToChartChainMap = new HashMap<>();
+		List<String> symbolList = new ArrayList<>();
+		HashMap<String, BigDecimal> symbolToTargetRatioMap = new HashMap<>();
+		List<Date> firstChartChainDates = new ArrayList<>();
+		
+		// Determine the start date of the 3 series by taking the latest beginning date of all securities involved
+		// To do so, obtain the chart chains of all the securities involved, including the benchmark
+		Iterable<Asset> assets = assetService.getAssets();
+		for (Asset a : assets) {
+			BigDecimal targetRatio = a.getTargetRatio();
+			// only consider non-zero target ratios
+			if (targetRatio != null && targetRatio.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
+				String stockSymbol = assetSymbolManager.getSymbolForAsset(a.getBasketId());
+				symbolToTargetRatioMap.put(stockSymbol, targetRatio);
+				
+				List<QChart> securityChartChain = marketDataService.getChartChain(stockSymbol, configuredStartDate);
+
+				if (securityChartChain != null && securityChartChain.get(0) != null) {
+					symbolList.add(stockSymbol);
+					symbolToChartChainMap.put(stockSymbol, securityChartChain);
+					firstChartChainDates.add(securityChartChain.get(0).getDate());
+				}
+			}
+		}
+		// if the benchmark chart chain was not loaded as part of the target securities, load it
+		if (symbolToChartChainMap.get(benchmarkSymbol) == null) {
+			List<QChart> benchmarkChartChain = marketDataService.getChartChain(benchmarkSymbol, configuredStartDate);
+			if (benchmarkChartChain != null && benchmarkChartChain.get(0) != null) {
+				symbolToChartChainMap.put(benchmarkSymbol, benchmarkChartChain);
+				firstChartChainDates.add(benchmarkChartChain.get(0).getDate());
+			}
+			else {
+				System.err.println("QPlotServiceImpl.buildSimTargetChart - Empty chart chain data for benchmark symbol: "+benchmarkSymbol);
+				return null;
+			}
+		}
+		// now determine the latest first date across all the chart chains
+		Date latestFirstDate = ModelUtils.getCalculatedDate(firstChartChainDates, ModelUtils.CALC_LATEST_DATE);
+		// clean up any QCharts in the chains before latestFirstDate, so all the chains start on the same date
+		// Note: this may be a later date than the configuredStartDate (since the latter can be earlier than available chart chain data)
+		for (String symbol : symbolToChartChainMap.keySet()) {
+			List<QChart> qc = symbolToChartChainMap.get(symbol);
+			while (!qc.isEmpty() && qc.get(0).getDate().before(latestFirstDate)) {
+				qc.remove(0);
+			}
+		}
+		
+		// use the benchmark chain to build the date chain, since it's the only security guaranteed to have been populated
+		List<LocalDate> dateChain = buildDateChain(symbolToChartChainMap.get(benchmarkSymbol));
+		
+		HashMap<String, List<AbstractTransaction>> symbolToTransactionsMap = null;
+		
+		// SIMULATED USER PORTFOLIO
+		QPlotSeries userPortfolioSeries = null;
+		
+		try {
+			symbolToTransactionsMap = portfolioSimulator.simulate(
+					initPrincipal, 
+					incrPrincipal,
+					incrFrequency,
+					wholeShares,
+					symbolList,
+					symbolToChartChainMap,
+					symbolToTargetRatioMap);
+		}
+		catch (Exception exc) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Exception in building simulated user portfolio: " + exc.getMessage());
+			symbolToTransactionsMap = null;
+		}		
+		
+		if (symbolToTransactionsMap != null) {
+			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_SIM_TARGET_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
+		}
+		if (userPortfolioSeries == null) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create user portfolio series. Will proceed with benchmark series only.");
+		}
+
 		// SIMULATED BENCHMARK PORTFOLIO
+		symbolList.clear();
 		symbolList.add(benchmarkSymbol);
+		symbolToTargetRatioMap.clear();
 		symbolToTargetRatioMap.put(benchmarkSymbol, BigDecimal.ONE);
-		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal, incrFrequency, wholeShares);
+		
+		try {
+			symbolToTransactionsMap = portfolioSimulator.simulate(
+					initPrincipal, 
+					incrPrincipal,
+					incrFrequency,
+					wholeShares,
+					symbolList,
+					symbolToChartChainMap,
+					symbolToTargetRatioMap);
+		}
+		catch (Exception exc) {
+			System.err.println("QPlotServiceImpl.buildSimTargetChart - Exception in building simulated benchmark portfolio: " + exc.getMessage());
+			symbolToTransactionsMap = null;
+		}		
+		
 		QPlotSeries benchmarkSeries = null;
 		if (symbolToTransactionsMap != null) {
+			List<QChart> benchmarkChartChain = symbolToChartChainMap.get(benchmarkSymbol);
 			benchmarkSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_BENCHMARK, dateChain, symbolToTransactionsMap, benchmarkChartChain);
 		}
 		if (benchmarkSeries == null) {
@@ -461,73 +570,16 @@ public class QPlotServiceImpl implements QPlotService {
 			return null;
 		}
 		
-		// SIMULATED USER PORTFOLIO
-		Iterable<Asset> assets = assetService.getAssets();
-		symbolList.clear();
-		
-		symbolToTargetRatioMap.clear();
-		for (Asset a : assets) {
-			BigDecimal targetRatio = a.getTargetRatio();
-			// only consider non-zero target ratios
-			if (targetRatio != null && targetRatio.abs().doubleValue() >= QuantumConstants.THRESHOLD_DECIMAL_EQUALING_ZERO) {
-				String stockSymbol = assetSymbolManager.getSymbolForAsset(a.getBasketId());
-				symbolList.add(stockSymbol);
-				symbolToTargetRatioMap.put(stockSymbol, targetRatio);
-			}
-		}
-		QPlotSeries userPortfolioSeries = null;
-		symbolToTransactionsMap = buildSimulatedPortfolio(dateChain, symbolList, symbolToTargetRatioMap, initPrincipal, incrPrincipal, incrFrequency, wholeShares);
-		if (symbolToTransactionsMap != null) {
-			userPortfolioSeries = buildChartSeries(QPlotSeries.QCHART_SERIES_SIM_TARGET_PORTFOLIO, dateChain, symbolToTransactionsMap, null);
-		}
-		if (userPortfolioSeries == null) {
-			System.err.println("QPlotServiceImpl.buildSimTargetChart - Failed to create user portfolio series");
-			return null;
-		}
-
 		QPlot result = new QPlot(QPlot.QCHART_SIM_TARGET);
 		result.addSeries(cashSeries);
 		result.addSeries(benchmarkSeries);
-		result.addSeries(userPortfolioSeries);
-		
-		return result;
-	}
-	
-	private HashMap<String, List<AbstractTransaction>> buildSimulatedPortfolio(List<LocalDate> dateChain,
-						List<String> symbolList, HashMap<String,BigDecimal> symbolToTargetRatioMap,
-						BigDecimal initPrincipal, BigDecimal incrPrincipal, Integer incrFrequency, boolean wholeShares) {
-		if (dateChain == null || symbolList == null || symbolToTargetRatioMap == null ||
-				initPrincipal == null || incrPrincipal == null) {
-			return null;
-		}
-		
-		LocalDate startDate = dateChain.iterator().next();
-		HashMap<String, Iterable<QChart>> symbolToChartChainMap = new HashMap<>();
-		for (String s : symbolList) {
-			Iterable<QChart> chartChain = marketDataService.getChartChain(s, startDate);
-			symbolToChartChainMap.put(s, chartChain);
-		}
-		
-		HashMap<String, List<AbstractTransaction>> result = null;
-		try {
-			result = portfolioSimulator.simulate(
-							initPrincipal, 
-							incrPrincipal,
-							incrFrequency,
-							wholeShares,
-							symbolList,
-							symbolToChartChainMap,
-							symbolToTargetRatioMap);
-		}
-		catch (Exception exc) {
-			System.err.println("QPlotServiceImpl.buildSimulatedPortfolio - Exception: " + exc.getMessage());
-			result = null;
+		if (userPortfolioSeries != null) {
+			result.addSeries(userPortfolioSeries);
 		}
 		
 		return result;
 	}
 	
-
 	private HashMap<String, List<AbstractTransaction>> getTransactionListMapFromPositions(Iterable<Position> positionIter) {
 		HashMap<String, List<AbstractTransaction>> result = null;
 		
